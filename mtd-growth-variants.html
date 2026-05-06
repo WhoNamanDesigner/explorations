@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disc. MTD — MoM Growth Display Variants</title>
+  <style>
+    /* ─── Reset & base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 40px 32px;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 40px; }
+
+    /* ─── Section label ─────────────────────────────── */
+    .section {
+      margin-bottom: 48px;
+    }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1.5px solid #e0e0e0;
+      padding-bottom: 8px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .section-desc {
+      font-size: 12px;
+      color: #888;
+    }
+    .badge-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #e8eaf6;
+      color: #3949ab;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Table wrapper ─────────────────────────────── */
+    .table-wrap {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: #f9fafb;
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: 1px solid #e8e8e8;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    .buyer-link { color: #1976d2; font-weight: 500; text-decoration: none; }
+    .status-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #e6f4ea;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+    .btn-view {
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .main-amount {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a2e;
+    }
+
+    /* ─────────────────────────────────────────────────
+       VARIANT STYLES
+    ───────────────────────────────────────────────── */
+
+    /* V0 — Baseline (current design) */
+    .v0-mom { font-size: 11px; margin-top: 2px; font-weight: 500; }
+    .v0-mom.up   { color: #2e7d32; }
+    .v0-mom.down { color: #c62828; }
+
+    /* V1 — Pill / Badge */
+    .v1-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .v1-pill.up   { background: #e6f4ea; color: #2e7d32; }
+    .v1-pill.down { background: #fde8e8; color: #c62828; }
+    .v1-pill svg  { width: 10px; height: 10px; }
+
+    /* V2 — Inline delta bar */
+    .v2-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 5px;
+    }
+    .v2-bar-track {
+      width: 60px;
+      height: 4px;
+      background: #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .v2-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    .v2-bar-fill.up   { background: #2e7d32; }
+    .v2-bar-fill.down { background: #c62828; }
+    .v2-label { font-size: 11px; font-weight: 600; }
+    .v2-label.up   { color: #2e7d32; }
+    .v2-label.down { color: #c62828; }
+
+    /* V3 — Coloured cell row stripe */
+    .v3-cell-up   { background: #f0faf1 !important; }
+    .v3-cell-down { background: #fff5f5 !important; }
+    .v3-mom { font-size: 11px; font-weight: 600; margin-top: 2px; }
+    .v3-mom.up   { color: #1b5e20; }
+    .v3-mom.down { color: #b71c1c; }
+    .v3-icon { font-size: 14px; }
+
+    /* V4 — Stacked icon + large % emphasis */
+    .v4-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .v4-pct-line {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .v4-pct {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .v4-pct.up   { color: #2e7d32; }
+    .v4-pct.down { color: #c62828; }
+    .v4-label {
+      font-size: 10px;
+      color: #888;
+      font-weight: 500;
+    }
+    .v4-arrow {
+      font-size: 16px;
+      line-height: 1;
+    }
+    .v4-arrow.up   { color: #2e7d32; }
+    .v4-arrow.down { color: #c62828; }
+
+    /* V5 — Sparkline-style mini chart */
+    .v5-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .v5-spark {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 18px;
+    }
+    .v5-bar-unit {
+      width: 5px;
+      border-radius: 2px 2px 0 0;
+    }
+    .v5-bar-unit.up   { background: #a5d6a7; }
+    .v5-bar-unit.down { background: #ef9a9a; }
+    .v5-bar-unit.active.up   { background: #2e7d32; }
+    .v5-bar-unit.active.down { background: #c62828; }
+    .v5-label { font-size: 11px; font-weight: 600; }
+    .v5-label.up   { color: #2e7d32; }
+    .v5-label.down { color: #c62828; }
+
+    /* V6 — Tooltip-style popover (hover to reveal) */
+    .v6-wrap { position: relative; display: inline-block; cursor: default; }
+    .v6-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+      border: 1px solid transparent;
+      transition: background 0.15s;
+    }
+    .v6-indicator.up   { background: #e6f4ea; color: #2e7d32; border-color: #c8e6c9; }
+    .v6-indicator.down { background: #fde8e8; color: #c62828; border-color: #ffcdd2; }
+    .v6-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+      z-index: 10;
+    }
+    .v6-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1a1a2e;
+    }
+    .v6-wrap:hover .v6-tooltip { opacity: 1; }
+
+    /* V7 — Dual-column layout: value | delta card */
+    .v7-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .v7-delta-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px;
+      border-radius: 6px;
+      min-width: 52px;
+    }
+    .v7-delta-card.up   { background: #e6f4ea; }
+    .v7-delta-card.down { background: #fde8e8; }
+    .v7-delta-pct {
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .v7-delta-pct.up   { color: #2e7d32; }
+    .v7-delta-pct.down { color: #c62828; }
+    .v7-delta-sub {
+      font-size: 9px;
+      color: #888;
+      font-weight: 500;
+      margin-top: 1px;
+    }
+
+    /* Annotation notes */
+    .annotation {
+      font-size: 11px;
+      color: #999;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #fffde7;
+      border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+  </style>
+</head>
+<body>
+
+  <h1>Disc. MTD — MoM Growth: Display Variants</h1>
+  <p class="subtitle">All variants keep the table structure intact. Only the "Disc. MTD (Cr.)" cell treatment changes.</p>
+
+  <!-- ══════════════════════════════════════════════
+       V0 — BASELINE (current Figma design)
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 0 — Baseline (current)</span>
+      <span class="badge-tag">EXISTING</span>
+      <span class="section-desc">Small coloured text below the amount. Easy to miss; intent is implicit.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v0-mom up">+18.4% MoM</div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v0-mom down">-18.4% MoM</div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Problem:</strong> Small secondary text blends into the data noise. +/- sign is the only directional cue; no pre-attentive visual signal.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V1 — PILL / BADGE
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 1 — Pill Badge</span>
+      <span class="badge-tag">RECOMMENDED</span>
+      <span class="section-desc">Color-coded capsule with directional arrow. Industry-standard pattern (Stripe, Linear, Notion).</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div>
+                <span class="v1-pill up">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  +18.4% MoM
+                </span>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div>
+                <span class="v1-pill down">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -18.4% MoM
+                </span>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Why it works:</strong> Pre-attentive color + shape (pill) + icon (arrow). Three redundant signals make the direction scannable in under 200ms. Zero cognitive load.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V2 — DELTA BAR
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 2 — Delta Progress Bar</span>
+      <span class="badge-tag">ANALYTICAL</span>
+      <span class="section-desc">Mini bar encodes magnitude visually. Useful when comparing growth across rows.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v2-bar-wrap">
+                <div class="v2-bar-track">
+                  <div class="v2-bar-fill up" style="width:60px;"></div>
+                </div>
+                <span class="v2-label up">+18.4%</span>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v2-bar-wrap">
+                <div class="v2-bar-track">
+                  <div class="v2-bar-fill down" style="width:38px;"></div>
+                </div>
+                <span class="v2-label down">-18.4%</span>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Why it works:</strong> The bar encodes magnitude — you can compare 18.4% vs 5% at a glance without reading numbers. Best when the table has many rows with varying growth rates.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V3 — ROW STRIPE COLOR
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 3 — Cell Background Tint</span>
+      <span class="badge-tag">CONTEXTUAL</span>
+      <span class="section-desc">Light green/red cell background extends the signal across the whole MTD cell area.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td class="v3-cell-up">
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v3-mom up">▲ +18.4% MoM</div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td class="v3-cell-down">
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v3-mom down">▼ -18.4% MoM</div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Why it works:</strong> Cell tint creates a "heat map" feel — peripheral vision catches the colour field without needing to focus on the text. Works well in financial dashboards (Bloomberg, Zerodha Kite).</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V4 — BIG % EMPHASIS
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 4 — Prominent % as Secondary KPI</span>
+      <span class="badge-tag">HIGH IMPACT</span>
+      <span class="section-desc">MoM % is elevated to be visually equal weight as the amount. "Two-line KPI" pattern.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <div class="v4-wrap">
+                <span class="main-amount">₹ 10,25,990.00</span>
+                <div class="v4-pct-line">
+                  <span class="v4-arrow up">↑</span>
+                  <span class="v4-pct up">+18.4%</span>
+                  <span class="v4-label">vs last month</span>
+                </div>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <div class="v4-wrap">
+                <span class="main-amount">₹ 10,25,990.00</span>
+                <div class="v4-pct-line">
+                  <span class="v4-arrow down">↓</span>
+                  <span class="v4-pct down">-18.4%</span>
+                  <span class="v4-label">vs last month</span>
+                </div>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Why it works:</strong> The ↑/↓ Unicode arrow at 16px + bold % is unmissable. "vs last month" removes ambiguity about what the comparison period is. Best when growth insight is primary business intent of this column.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V5 — MINI SPARKLINE BARS
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 5 — Mini Trend Sparkline</span>
+      <span class="badge-tag">TREND</span>
+      <span class="section-desc">5-bar mini chart shows momentum over past months. Current month highlighted.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <div class="v5-wrap">
+                <span class="main-amount">₹ 10,25,990.00</span>
+                <div class="v5-spark">
+                  <div class="v5-bar-unit up" style="height:6px;"></div>
+                  <div class="v5-bar-unit up" style="height:10px;"></div>
+                  <div class="v5-bar-unit up" style="height:8px;"></div>
+                  <div class="v5-bar-unit up" style="height:12px;"></div>
+                  <div class="v5-bar-unit active up" style="height:18px;"></div>
+                  <span class="v5-label up" style="margin-left:4px;">+18.4%</span>
+                </div>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <div class="v5-wrap">
+                <span class="main-amount">₹ 10,25,990.00</span>
+                <div class="v5-spark">
+                  <div class="v5-bar-unit down" style="height:14px;"></div>
+                  <div class="v5-bar-unit down" style="height:12px;"></div>
+                  <div class="v5-bar-unit down" style="height:10px;"></div>
+                  <div class="v5-bar-unit down" style="height:8px;"></div>
+                  <div class="v5-bar-unit active down" style="height:5px;"></div>
+                  <span class="v5-label down" style="margin-left:4px;">-18.4%</span>
+                </div>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Why it works:</strong> Shows trajectory, not just a snapshot. A single +18.4% is ambiguous — is it recovering after a crash or accelerating? The spark answers that. Higher cognitive load; best for power-user dashboards.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V6 — HOVER TOOLTIP DISCLOSURE
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 6 — Hover-reveal Tooltip</span>
+      <span class="badge-tag">MINIMAL</span>
+      <span class="section-desc">A small tinted tag anchors the eye; full context appears on hover. Keeps the table clean.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v6-wrap">
+                <span class="v6-indicator up">↑ +18.4%
+                  <div class="v6-tooltip">+18.4% MoM — Jul vs Jun 2025<br>Prev: ₹ 8,66,600.00</div>
+                </span>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <span class="main-amount">₹ 10,25,990.00</span>
+              <div class="v6-wrap">
+                <span class="v6-indicator down">↓ -18.4%
+                  <div class="v6-tooltip">-18.4% MoM — Jul vs Jun 2025<br>Prev: ₹ 12,57,000.00</div>
+                </span>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Why it works:</strong> Table stays clean and scannable. Hover reveals rich context (comparison period, previous value). Best when space is constrained or the table is information-dense. Requires hover — not touch-friendly.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V7 — DELTA CARD BESIDE VALUE
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 7 — Side Delta Card</span>
+      <span class="badge-tag">PREMIUM</span>
+      <span class="section-desc">Value + a compact coloured card side-by-side. Highest visual separation between amount and growth signal.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Suppliers Network</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>↓ Disc. MTD (Cr.)</th>
+            <th>↓ Disc. YTD (Cr.)</th>
+            <th>Checker Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <div class="v7-wrap">
+                <span class="main-amount">₹ 10,25,990.00</span>
+                <div class="v7-delta-card up">
+                  <span class="v7-delta-pct up">↑ 18.4%</span>
+                  <span class="v7-delta-sub">MoM</span>
+                </div>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>5</td>
+            <td>₹ 10,25,990.00</td>
+            <td>₹ 8,00,400.00</td>
+            <td>July 31st, 2026</td>
+            <td>
+              <div class="v7-wrap">
+                <span class="main-amount">₹ 10,25,990.00</span>
+                <div class="v7-delta-card down">
+                  <span class="v7-delta-pct down">↓ 18.4%</span>
+                  <span class="v7-delta-sub">MoM</span>
+                </div>
+              </div>
+            </td>
+            <td>₹ 8,00,400.00</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation"><strong>Why it works:</strong> The card visually separates the "what" (amount) from the "so what" (growth). Works great in wider tables. The MoM label inside the card removes the need for the "MoM" suffix in the main text.</div>
+  </div>
+
+</body>
+</html>
