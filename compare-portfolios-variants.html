@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buyer Management — Portfolio Comparison Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 40px 32px;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 48px; }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #1a1a2e;
+      margin-bottom: 32px;
+    }
+    .tab-group {
+      margin-bottom: 64px;
+    }
+
+    /* ─── Section label ─────────────────────────────── */
+    .section { margin-bottom: 48px; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1.5px solid #e0e0e0;
+      padding-bottom: 8px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+    .section-desc { font-size: 12px; color: #888; }
+    .badge-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #e8eaf6;
+      color: #3949ab;
+      letter-spacing: 0.5px;
+    }
+    .badge-tag.green { background: #e6f4ea; color: #2e7d32; }
+    .badge-tag.amber { background: #fff8e1; color: #f57f17; }
+
+    /* ─── Table wrapper ─────────────────────────────── */
+    .table-wrap {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #f9fafb;
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: 1px solid #e8e8e8;
+      white-space: nowrap;
+    }
+    thead th.highlight-col {
+      background: #eef2ff;
+      color: #3949ab;
+    }
+    thead th.sub-header {
+      background: #f0f4ff;
+      font-size: 10px;
+      color: #3949ab;
+      border-bottom: 1px solid #c5cae9;
+      padding: 6px 16px;
+    }
+    thead tr.group-row th {
+      border-bottom: none;
+      padding-bottom: 4px;
+    }
+    tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody td.highlight-col { background: #f5f7ff; }
+
+    .buyer-link {
+      color: #1976d2;
+      font-weight: 500;
+      text-decoration: none;
+      display: block;
+    }
+    .buyer-default {
+      font-size: 11px;
+      color: #c62828;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 2px;
+    }
+    .status-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #e6f4ea;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+    .btn-view {
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-add {
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .main-amount { font-size: 13px; font-weight: 500; color: #1a1a2e; }
+    .muted { color: #888; font-size: 12px; }
+
+    /* ─── MoM pill (reused from mtd-growth-variants) ── */
+    .mom-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .mom-pill.up   { background: #e6f4ea; color: #2e7d32; }
+    .mom-pill.down { background: #fde8e8; color: #c62828; }
+    .mom-pill svg  { width: 10px; height: 10px; }
+
+    /* ─── Platform financing amount tiers (Active Buyers) */
+    .plat-amt { font-size: 13px; font-weight: 500; }
+    .plat-amt.high   { color: #1a237e; }
+    .plat-amt.medium { color: #455a64; }
+    .plat-amt.low    { color: #b0bec5; }
+    .plat-label { font-size: 10px; color: #aaa; margin-top: 1px; }
+
+    /* ─── Risk chip ─────────────────────────────────── */
+    .risk-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: default;
+      position: relative;
+    }
+    .risk-chip.red    { background: #fde8e8; color: #b71c1c; border: 1px solid #ffcdd2; }
+    .risk-chip.amber  { background: #fff8e1; color: #e65100; border: 1px solid #ffe082; }
+    .risk-chip.green  { background: #e6f4ea; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .risk-chip .risk-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .risk-chip.red   .risk-dot { background: #c62828; }
+    .risk-chip.amber .risk-dot { background: #e65100; }
+    .risk-chip.green .risk-dot { background: #2e7d32; }
+    .risk-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+      z-index: 10;
+      font-weight: 400;
+    }
+    .risk-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1a1a2e;
+    }
+    .risk-chip:hover .risk-tooltip { opacity: 1; }
+
+    /* ─── V1: Stacked Mine + Platform ──────────────── */
+    .v1-platform-line {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .v1-platform-line span { color: #3949ab; font-weight: 600; }
+
+    /* ─── V2: Share progress bar ────────────────────── */
+    .v2-bar-wrap { margin-top: 5px; }
+    .v2-bar-track {
+      width: 100%;
+      max-width: 100px;
+      height: 4px;
+      background: #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .v2-bar-fill { height: 100%; border-radius: 4px; background: #3949ab; }
+    .v2-bar-label { font-size: 10px; color: #888; margin-top: 3px; }
+    .v2-bar-label strong { color: #3949ab; }
+
+    /* ─── V4: Hover tooltip ─────────────────────────── */
+    .v4-wrap { position: relative; display: inline-block; cursor: default; }
+    .v4-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 0;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 11px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+      z-index: 10;
+      line-height: 1.6;
+    }
+    .v4-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 16px;
+      border: 5px solid transparent;
+      border-top-color: #1a1a2e;
+    }
+    .v4-wrap:hover .v4-tooltip { opacity: 1; }
+    .v4-tooltip .plat-highlight { color: #90caf9; font-weight: 600; }
+
+    /* ─── V5: Inline share ratio badge ─────────────── */
+    .v5-ratio-badge {
+      display: inline-block;
+      font-size: 10px;
+      color: #5c6bc0;
+      background: #e8eaf6;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    /* ─── Annotation ────────────────────────────────── */
+    .annotation {
+      font-size: 11px;
+      color: #999;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #fffde7;
+      border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+    /* ─── Divider between tab sections ─────────────── */
+    .tab-divider {
+      border: none;
+      border-top: 2px dashed #ddd;
+      margin: 56px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Buyer Management — Portfolio Comparison: Visual Variants</h1>
+  <p class="subtitle">Exploring how to surface platform-level financing data across Active Buyers and My Buyers tabs.</p>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 1 — ACTIVE BUYERS (All platform buyers)
+       Goal: help financier evaluate & onboard new buyers
+  ═══════════════════════════════════════════════════════ -->
+  <div class="tab-group">
+    <h2>Tab 1 — Active Buyers &nbsp;·&nbsp; Adding Platform Financing Columns</h2>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Baseline + 2 New Columns</span>
+        <span class="badge-tag green">RECOMMENDED</span>
+        <span class="section-desc">Two new columns added before Settings: "Plat. Financed (All Time)" and "Plat. Financed (YTD)". Amount ink intensity signals volume tier — high is bold navy, medium is grey, zero is very faint.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Buyer</th>
+              <th>Industry</th>
+              <th>Credit Rating</th>
+              <th>Suppliers Network</th>
+              <th class="highlight-col">↓ Plat. Financed (All Time)</th>
+              <th class="highlight-col">↓ Plat. Financed (YTD)</th>
+              <th>Settings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- High volume buyer -->
+            <tr>
+              <td><a class="buyer-link" href="#">Tata Motors Limited</a></td>
+              <td>Automotive</td>
+              <td>AAA</td>
+              <td style="color:#1976d2;font-weight:600;">12</td>
+              <td class="highlight-col">
+                <span class="plat-amt high">₹ 4,82,00,000</span>
+                <div class="plat-label">since inception</div>
+              </td>
+              <td class="highlight-col">
+                <span class="plat-amt high">₹ 1,20,50,000</span>
+                <div class="plat-label">Apr – May 2026</div>
+              </td>
+              <td><button class="btn-add">Add</button></td>
+            </tr>
+            <!-- Medium volume buyer -->
+            <tr>
+              <td><a class="buyer-link" href="#">Performance Testing Buyer2223</a></td>
+              <td>FMCG</td>
+              <td>A+</td>
+              <td style="color:#1976d2;font-weight:600;">5</td>
+              <td class="highlight-col">
+                <span class="plat-amt medium">₹ 48,50,000</span>
+                <div class="plat-label">since inception</div>
+              </td>
+              <td class="highlight-col">
+                <span class="plat-amt medium">₹ 12,30,000</span>
+                <div class="plat-label">Apr – May 2026</div>
+              </td>
+              <td><button class="btn-add">Add</button></td>
+            </tr>
+            <!-- New / low volume buyer -->
+            <tr>
+              <td><a class="buyer-link" href="#">Performance Testing Buyer329</a></td>
+              <td>–</td>
+              <td>–</td>
+              <td style="color:#1976d2;font-weight:600;">1</td>
+              <td class="highlight-col">
+                <span class="plat-amt low">₹ 2,10,000</span>
+                <div class="plat-label">since inception</div>
+              </td>
+              <td class="highlight-col">
+                <span class="plat-amt low">₹ 0</span>
+                <div class="plat-label">Apr – May 2026</div>
+              </td>
+              <td><button class="btn-add">Add</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="annotation">
+        <strong>Why it works:</strong> Simple column addition keeps the table familiar. The ink-intensity tier (dark navy → grey → faint) lets a financier scan for high-activity buyers at a glance without reading every number. The platform context directly answers: "Is this buyer already doing serious business here?"
+      </div>
+    </div>
+  </div>
+
+
+  <hr class="tab-divider" />
+
+
+  <!-- ══════════════════════════════════════════════════════
+       TAB 2 — MY BUYERS
+       Goal: monitor active buyers, spot under-engagement, double down
+  ═══════════════════════════════════════════════════════ -->
+  <div class="tab-group">
+    <h2>Tab 2 — My Buyers &nbsp;·&nbsp; 5 Variants for Platform Comparison</h2>
+    <p class="subtitle" style="margin-bottom:32px;">All variants add a <strong>Risk</strong> column (Past Defaults + Outside TREDS Settlement %). The 5 variants differ only in <em>how platform-level MTD/YTD context is shown</em> alongside your own Disc. MTD / Disc. YTD.</p>
+
+
+    <!-- ──────────────────────────────────────────────────
+         VARIANT 1 — Stacked Mine + Platform in same cell
+    ─────────────────────────────────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Variant 1 — Stacked "Mine · Platform" in same cell</span>
+        <span class="badge-tag">COMPACT</span>
+        <span class="section-desc">Platform total shown as a subdued second line inside the same Disc. MTD / YTD cell. No extra columns.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Buyer</th>
+              <th>Suppliers</th>
+              <th>Exposure Limit</th>
+              <th>Utilisation</th>
+              <th>↓ Limit Expiry</th>
+              <th>↓ Disc. MTD</th>
+              <th>↓ Disc. YTD</th>
+              <th class="highlight-col">Risk</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Good buyer, growing -->
+            <tr>
+              <td><a class="buyer-link" href="#">K C India Limited</a></td>
+              <td>5</td>
+              <td>₹ 10,25,990</td>
+              <td>₹ 8,00,400</td>
+              <td>Jul 31, 2026</td>
+              <td>
+                <span class="main-amount">₹ 10,25,990</span>
+                <div class="v1-platform-line">Plat: <span>₹ 48,50,000</span></div>
+                <span class="mom-pill up">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  +18.4% MoM
+                </span>
+              </td>
+              <td>
+                <span class="main-amount">₹ 80,04,000</span>
+                <div class="v1-platform-line">Plat: <span>₹ 3,20,00,000</span></div>
+              </td>
+              <td class="highlight-col">
+                <span class="risk-chip green">
+                  <span class="risk-dot"></span> Clean
+                  <div class="risk-tooltip">No past defaults on record.</div>
+                </span>
+              </td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <!-- Declining buyer -->
+            <tr>
+              <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+              <td>8</td>
+              <td>₹ 25,00,000</td>
+              <td>₹ 18,50,000</td>
+              <td>Mar 15, 2026</td>
+              <td>
+                <span class="main-amount">₹ 3,20,000</span>
+                <div class="v1-platform-line">Plat: <span>₹ 62,00,000</span></div>
+                <span class="mom-pill down">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -18.4% MoM
+                </span>
+              </td>
+              <td>
+                <span class="main-amount">₹ 28,00,000</span>
+                <div class="v1-platform-line">Plat: <span>₹ 4,80,00,000</span></div>
+              </td>
+              <td class="highlight-col">
+                <span class="risk-chip amber">
+                  <span class="risk-dot"></span> 1 def · 40% ext.
+                  <div class="risk-tooltip">1 past default. 40% settled outside TREDS.</div>
+                </span>
+              </td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <!-- Defaulted buyer -->
+            <tr>
+              <td>
+                <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+                <span class="buyer-default">⊘ Under Default</span>
+              </td>
+              <td>3</td>
+              <td>₹ 15,00,000</td>
+              <td>₹ 14,80,000</td>
+              <td>Jan 10, 2026</td>
+              <td>
+                <span class="main-amount">₹ 1,00,000</span>
+                <div class="v1-platform-line">Plat: <span>₹ 38,00,000</span></div>
+                <span class="mom-pill down">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -62.0% MoM
+                </span>
+              </td>
+              <td>
+                <span class="main-amount">₹ 9,00,000</span>
+                <div class="v1-platform-line">Plat: <span>₹ 2,90,00,000</span></div>
+              </td>
+              <td class="highlight-col">
+                <span class="risk-chip red">
+                  <span class="risk-dot"></span> 2 def · 80% ext.
+                  <div class="risk-tooltip">2 past defaults. 80% settled outside TREDS.</div>
+                </span>
+              </td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="annotation"><strong>Tradeoff:</strong> Zero new columns — table stays at its current width. Platform figures are available but require reading two lines per cell. Works best when screen width is constrained. Row height increases slightly.</div>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────────────
+         VARIANT 2 — My Share Progress Bar
+    ─────────────────────────────────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Variant 2 — My Share Progress Bar</span>
+        <span class="badge-tag amber">DECISION-FOCUSED</span>
+        <span class="section-desc">A thin bar encodes what % of the buyer's platform MTD you are financing. "Am I doing enough?" is answered visually, not numerically.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Buyer</th>
+              <th>Suppliers</th>
+              <th>Exposure Limit</th>
+              <th>Utilisation</th>
+              <th>↓ Limit Expiry</th>
+              <th>↓ Disc. MTD</th>
+              <th>↓ Disc. YTD</th>
+              <th class="highlight-col">Risk</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="buyer-link" href="#">K C India Limited</a></td>
+              <td>5</td>
+              <td>₹ 10,25,990</td>
+              <td>₹ 8,00,400</td>
+              <td>Jul 31, 2026</td>
+              <td>
+                <span class="main-amount">₹ 10,25,990</span>
+                <span class="mom-pill up">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  +18.4% MoM
+                </span>
+                <div class="v2-bar-wrap">
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width:21%;"></div></div>
+                  <div class="v2-bar-label"><strong>21%</strong> of ₹48.5L plat.</div>
+                </div>
+              </td>
+              <td>
+                <span class="main-amount">₹ 80,04,000</span>
+                <div class="v2-bar-wrap">
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width:25%;"></div></div>
+                  <div class="v2-bar-label"><strong>25%</strong> of ₹3.2Cr plat.</div>
+                </div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip green"><span class="risk-dot"></span> Clean<div class="risk-tooltip">No past defaults on record.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+              <td>8</td>
+              <td>₹ 25,00,000</td>
+              <td>₹ 18,50,000</td>
+              <td>Mar 15, 2026</td>
+              <td>
+                <span class="main-amount">₹ 3,20,000</span>
+                <span class="mom-pill down">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -18.4% MoM
+                </span>
+                <div class="v2-bar-wrap">
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width:5%;background:#c62828;"></div></div>
+                  <div class="v2-bar-label"><strong style="color:#c62828;">5%</strong> of ₹62L plat.</div>
+                </div>
+              </td>
+              <td>
+                <span class="main-amount">₹ 28,00,000</span>
+                <div class="v2-bar-wrap">
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width:6%;background:#c62828;"></div></div>
+                  <div class="v2-bar-label"><strong style="color:#c62828;">6%</strong> of ₹4.8Cr plat.</div>
+                </div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip amber"><span class="risk-dot"></span> 1 def · 40% ext.<div class="risk-tooltip">1 past default. 40% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td>
+                <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+                <span class="buyer-default">⊘ Under Default</span>
+              </td>
+              <td>3</td>
+              <td>₹ 15,00,000</td>
+              <td>₹ 14,80,000</td>
+              <td>Jan 10, 2026</td>
+              <td>
+                <span class="main-amount">₹ 1,00,000</span>
+                <span class="mom-pill down">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -62.0% MoM
+                </span>
+                <div class="v2-bar-wrap">
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width:3%;background:#c62828;"></div></div>
+                  <div class="v2-bar-label"><strong style="color:#c62828;">3%</strong> of ₹38L plat.</div>
+                </div>
+              </td>
+              <td>
+                <span class="main-amount">₹ 9,00,000</span>
+                <div class="v2-bar-wrap">
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width:3%;background:#c62828;"></div></div>
+                  <div class="v2-bar-label"><strong style="color:#c62828;">3%</strong> of ₹2.9Cr plat.</div>
+                </div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip red"><span class="risk-dot"></span> 2 def · 80% ext.<div class="risk-tooltip">2 past defaults. 80% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="annotation"><strong>Why it works:</strong> The bar answers the strategic question — "Of all the business this buyer does on TREDS, how much am I capturing?" A 5% bar in a sea of 21% bars immediately signals opportunity. Bar color flips red when share drops month-on-month.</div>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────────────
+         VARIANT 3 — Grouped column headers (sub-columns)
+    ─────────────────────────────────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Variant 3 — Grouped Column Headers (Mine | Platform)</span>
+        <span class="badge-tag">ANALYTICAL</span>
+        <span class="section-desc">Disc. MTD and Disc. YTD each split into two sub-columns: Mine and Platform. Numbers sit side-by-side for easy comparison. Best for wide screens.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr class="group-row">
+              <th rowspan="2">Buyer</th>
+              <th rowspan="2">Suppliers</th>
+              <th rowspan="2">Exposure Limit</th>
+              <th rowspan="2">Utilisation</th>
+              <th rowspan="2">↓ Limit Expiry</th>
+              <th colspan="2" class="highlight-col" style="text-align:center;border-bottom:1px solid #c5cae9;">↓ Disc. MTD</th>
+              <th colspan="2" class="highlight-col" style="text-align:center;border-bottom:1px solid #c5cae9;">↓ Disc. YTD</th>
+              <th rowspan="2" class="highlight-col">Risk</th>
+              <th rowspan="2">Status</th>
+              <th rowspan="2"></th>
+            </tr>
+            <tr>
+              <th class="sub-header">Mine</th>
+              <th class="sub-header">Platform</th>
+              <th class="sub-header">Mine</th>
+              <th class="sub-header">Platform</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="buyer-link" href="#">K C India Limited</a></td>
+              <td>5</td>
+              <td>₹ 10,25,990</td>
+              <td>₹ 8,00,400</td>
+              <td>Jul 31, 2026</td>
+              <td class="highlight-col">
+                <span class="main-amount">₹ 10,25,990</span>
+                <span class="mom-pill up" style="margin-top:4px;">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  +18.4%
+                </span>
+              </td>
+              <td class="highlight-col"><span class="muted">₹ 48,50,000</span></td>
+              <td class="highlight-col"><span class="main-amount">₹ 80,04,000</span></td>
+              <td class="highlight-col"><span class="muted">₹ 3,20,00,000</span></td>
+              <td class="highlight-col"><span class="risk-chip green"><span class="risk-dot"></span> Clean<div class="risk-tooltip">No past defaults on record.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+              <td>8</td>
+              <td>₹ 25,00,000</td>
+              <td>₹ 18,50,000</td>
+              <td>Mar 15, 2026</td>
+              <td class="highlight-col">
+                <span class="main-amount">₹ 3,20,000</span>
+                <span class="mom-pill down" style="margin-top:4px;">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -18.4%
+                </span>
+              </td>
+              <td class="highlight-col"><span class="muted">₹ 62,00,000</span></td>
+              <td class="highlight-col"><span class="main-amount">₹ 28,00,000</span></td>
+              <td class="highlight-col"><span class="muted">₹ 4,80,00,000</span></td>
+              <td class="highlight-col"><span class="risk-chip amber"><span class="risk-dot"></span> 1 def · 40% ext.<div class="risk-tooltip">1 past default. 40% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td>
+                <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+                <span class="buyer-default">⊘ Under Default</span>
+              </td>
+              <td>3</td>
+              <td>₹ 15,00,000</td>
+              <td>₹ 14,80,000</td>
+              <td>Jan 10, 2026</td>
+              <td class="highlight-col">
+                <span class="main-amount">₹ 1,00,000</span>
+                <span class="mom-pill down" style="margin-top:4px;">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -62.0%
+                </span>
+              </td>
+              <td class="highlight-col"><span class="muted">₹ 38,00,000</span></td>
+              <td class="highlight-col"><span class="main-amount">₹ 9,00,000</span></td>
+              <td class="highlight-col"><span class="muted">₹ 2,90,00,000</span></td>
+              <td class="highlight-col"><span class="risk-chip red"><span class="risk-dot"></span> 2 def · 80% ext.<div class="risk-tooltip">2 past defaults. 80% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="annotation"><strong>Tradeoff:</strong> Clearest side-by-side comparison — no mental juggling. Platform figures are muted grey so the financier's own numbers stay primary. Table gets wider; works best on large monitor. Two-row header is slightly complex but reads naturally once understood.</div>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────────────
+         VARIANT 4 — Hover tooltip reveals platform context
+    ─────────────────────────────────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Variant 4 — Hover Tooltip Reveals Platform Context</span>
+        <span class="badge-tag">MINIMAL</span>
+        <span class="section-desc">Table looks identical to today. Hover over Disc. MTD or YTD to reveal platform total and your share. Zero visual clutter at rest.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Buyer</th>
+              <th>Suppliers</th>
+              <th>Exposure Limit</th>
+              <th>Utilisation</th>
+              <th>↓ Limit Expiry</th>
+              <th>↓ Disc. MTD ⓘ</th>
+              <th>↓ Disc. YTD ⓘ</th>
+              <th class="highlight-col">Risk</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="buyer-link" href="#">K C India Limited</a></td>
+              <td>5</td>
+              <td>₹ 10,25,990</td>
+              <td>₹ 8,00,400</td>
+              <td>Jul 31, 2026</td>
+              <td>
+                <div class="v4-wrap">
+                  <span class="main-amount">₹ 10,25,990</span>
+                  <span class="mom-pill up" style="margin-top:4px;">
+                    <svg viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    +18.4% MoM
+                  </span>
+                  <div class="v4-tooltip">
+                    Platform MTD: <span class="plat-highlight">₹ 48,50,000</span><br>
+                    Your share: <span class="plat-highlight">21%</span> of platform
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="v4-wrap">
+                  <span class="main-amount">₹ 80,04,000</span>
+                  <div class="v4-tooltip">
+                    Platform YTD: <span class="plat-highlight">₹ 3,20,00,000</span><br>
+                    Your share: <span class="plat-highlight">25%</span> of platform
+                  </div>
+                </div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip green"><span class="risk-dot"></span> Clean<div class="risk-tooltip">No past defaults on record.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+              <td>8</td>
+              <td>₹ 25,00,000</td>
+              <td>₹ 18,50,000</td>
+              <td>Mar 15, 2026</td>
+              <td>
+                <div class="v4-wrap">
+                  <span class="main-amount">₹ 3,20,000</span>
+                  <span class="mom-pill down" style="margin-top:4px;">
+                    <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    -18.4% MoM
+                  </span>
+                  <div class="v4-tooltip">
+                    Platform MTD: <span class="plat-highlight">₹ 62,00,000</span><br>
+                    Your share: <span class="plat-highlight">5%</span> of platform
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="v4-wrap">
+                  <span class="main-amount">₹ 28,00,000</span>
+                  <div class="v4-tooltip">
+                    Platform YTD: <span class="plat-highlight">₹ 4,80,00,000</span><br>
+                    Your share: <span class="plat-highlight">6%</span> of platform
+                  </div>
+                </div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip amber"><span class="risk-dot"></span> 1 def · 40% ext.<div class="risk-tooltip">1 past default. 40% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td>
+                <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+                <span class="buyer-default">⊘ Under Default</span>
+              </td>
+              <td>3</td>
+              <td>₹ 15,00,000</td>
+              <td>₹ 14,80,000</td>
+              <td>Jan 10, 2026</td>
+              <td>
+                <div class="v4-wrap">
+                  <span class="main-amount">₹ 1,00,000</span>
+                  <span class="mom-pill down" style="margin-top:4px;">
+                    <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    -62.0% MoM
+                  </span>
+                  <div class="v4-tooltip">
+                    Platform MTD: <span class="plat-highlight">₹ 38,00,000</span><br>
+                    Your share: <span class="plat-highlight">3%</span> of platform
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="v4-wrap">
+                  <span class="main-amount">₹ 9,00,000</span>
+                  <div class="v4-tooltip">
+                    Platform YTD: <span class="plat-highlight">₹ 2,90,00,000</span><br>
+                    Your share: <span class="plat-highlight">3%</span> of platform
+                  </div>
+                </div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip red"><span class="risk-dot"></span> 2 def · 80% ext.<div class="risk-tooltip">2 past defaults. 80% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="annotation"><strong>Tradeoff:</strong> Leanest option — no layout change at all. Column header ⓘ signals there is more on hover. Downside: platform data is hidden by default, so a financier who doesn't hover will never see it. Not touch-friendly. Best when table density is the top concern.</div>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────────────
+         VARIANT 5 — Inline share ratio badge
+    ─────────────────────────────────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Variant 5 — Inline Share Ratio Badge</span>
+        <span class="badge-tag green">BALANCED</span>
+        <span class="section-desc">A small tinted badge shows "21% of plat." permanently visible below the amount. Compact, always visible, no hover needed.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Buyer</th>
+              <th>Suppliers</th>
+              <th>Exposure Limit</th>
+              <th>Utilisation</th>
+              <th>↓ Limit Expiry</th>
+              <th>↓ Disc. MTD</th>
+              <th>↓ Disc. YTD</th>
+              <th class="highlight-col">Risk</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="buyer-link" href="#">K C India Limited</a></td>
+              <td>5</td>
+              <td>₹ 10,25,990</td>
+              <td>₹ 8,00,400</td>
+              <td>Jul 31, 2026</td>
+              <td>
+                <span class="main-amount">₹ 10,25,990</span>
+                <span class="mom-pill up" style="margin-top:4px;">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  +18.4% MoM
+                </span>
+                <div><span class="v5-ratio-badge">21% of plat. MTD</span></div>
+              </td>
+              <td>
+                <span class="main-amount">₹ 80,04,000</span>
+                <div><span class="v5-ratio-badge">25% of plat. YTD</span></div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip green"><span class="risk-dot"></span> Clean<div class="risk-tooltip">No past defaults on record.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+              <td>8</td>
+              <td>₹ 25,00,000</td>
+              <td>₹ 18,50,000</td>
+              <td>Mar 15, 2026</td>
+              <td>
+                <span class="main-amount">₹ 3,20,000</span>
+                <span class="mom-pill down" style="margin-top:4px;">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -18.4% MoM
+                </span>
+                <div><span class="v5-ratio-badge" style="color:#c62828;background:#fde8e8;">5% of plat. MTD</span></div>
+              </td>
+              <td>
+                <span class="main-amount">₹ 28,00,000</span>
+                <div><span class="v5-ratio-badge" style="color:#c62828;background:#fde8e8;">6% of plat. YTD</span></div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip amber"><span class="risk-dot"></span> 1 def · 40% ext.<div class="risk-tooltip">1 past default. 40% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+            <tr>
+              <td>
+                <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+                <span class="buyer-default">⊘ Under Default</span>
+              </td>
+              <td>3</td>
+              <td>₹ 15,00,000</td>
+              <td>₹ 14,80,000</td>
+              <td>Jan 10, 2026</td>
+              <td>
+                <span class="main-amount">₹ 1,00,000</span>
+                <span class="mom-pill down" style="margin-top:4px;">
+                  <svg viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  -62.0% MoM
+                </span>
+                <div><span class="v5-ratio-badge" style="color:#c62828;background:#fde8e8;">3% of plat. MTD</span></div>
+              </td>
+              <td>
+                <span class="main-amount">₹ 9,00,000</span>
+                <div><span class="v5-ratio-badge" style="color:#c62828;background:#fde8e8;">3% of plat. YTD</span></div>
+              </td>
+              <td class="highlight-col"><span class="risk-chip red"><span class="risk-dot"></span> 2 def · 80% ext.<div class="risk-tooltip">2 past defaults. 80% settled outside TREDS.</div></span></td>
+              <td><span class="status-chip">Approved</span></td>
+              <td><button class="btn-view">VIEW</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="annotation"><strong>Why it works:</strong> Always visible, no hover required, works on touch. The badge flips color — blue when share is healthy, red when low — so a financier can scan for underperforming buyer relationships at a glance. Simpler than V2 (no bar), more explicit than V4 (no hover). Good middle ground.</div>
+    </div>
+
+  </div><!-- end tab-group -->
+
+</body>
+</html>
