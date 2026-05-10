@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buyer Management — Widget Reference UI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Top nav ───────────────────────────────────── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .topbar-brand {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: 0.5px;
+    }
+    .topbar-breadcrumb {
+      font-size: 12px;
+      color: #888;
+    }
+    .topbar-breadcrumb span { color: #1a1a2e; font-weight: 500; }
+
+    /* ─── Tab strip ─────────────────────────────────── */
+    .tab-strip {
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0 24px;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn.active {
+      color: #1a1a2e;
+      font-weight: 700;
+      border-bottom-color: #1a1a2e;
+    }
+    .tab-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 8px;
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 12px;
+      color: #888;
+      background: #fafafa;
+    }
+
+    /* ─── Main layout: table + drawer ───────────────── */
+    .main-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─── Table pane ─────────────────────────────────── */
+    .table-pane {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      transition: flex 0.3s ease;
+    }
+    .table-pane.drawer-open {
+      flex: 0 0 58%;
+    }
+
+    .table-wrap {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #f9fafb;
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: 1px solid #e8e8e8;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 13px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #f5f7ff; }
+    tbody tr.selected td { background: #eef2ff; }
+
+    .buyer-link { color: #1976d2; font-weight: 500; text-decoration: none; pointer-events: none; }
+    .buyer-default { font-size: 11px; color: #c62828; font-weight: 600; margin-top: 2px; }
+    .num-blue { color: #1976d2; font-weight: 600; }
+    .status-chip {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600;
+      background: #e6f4ea; color: #2e7d32; border: 1px solid #c8e6c9;
+    }
+    .status-chip.pending { background: #fff8e1; color: #f57f17; border-color: #ffe082; }
+    .btn-add {
+      background: #1a1a2e; color: #fff; border: none; border-radius: 20px;
+      padding: 5px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .btn-view {
+      background: #1a1a2e; color: #fff; border: none; border-radius: 6px;
+      padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .expand-icon {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #f0f0f0; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #888; transition: background 0.15s;
+    }
+    tbody tr.selected .expand-icon { background: #c5cae9; color: #3949ab; }
+
+    /* ─── Utilisation bar ────────────────────────────── */
+    .util-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .util-bar-track { width: 80px; height: 4px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+    .util-bar-fill { height: 100%; border-radius: 4px; background: #3949ab; }
+    .util-bar-fill.high { background: #e53935; }
+    .util-label { font-size: 11px; color: #555; }
+
+    /* ─── Side drawer ────────────────────────────────── */
+    .drawer {
+      width: 0;
+      overflow: hidden;
+      background: #fff;
+      border-left: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s ease;
+      flex-shrink: 0;
+    }
+    .drawer.open { width: 42%; }
+
+    .drawer-inner {
+      width: 100%;
+      min-width: 360px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .drawer-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      flex-shrink: 0;
+    }
+    .drawer-header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .drawer-buyer-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .drawer-buyer-meta {
+      font-size: 12px;
+      color: #888;
+      margin-top: 3px;
+    }
+    .drawer-close {
+      background: none; border: none; cursor: pointer;
+      color: #888; font-size: 18px; line-height: 1; padding: 2px;
+    }
+    .drawer-close:hover { color: #1a1a2e; }
+
+    .drawer-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .dtag {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    }
+    .dtag.industry { background: #e8eaf6; color: #3949ab; }
+    .dtag.rating   { background: #e0f7fa; color: #00695c; }
+    .dtag.default  { background: #fde8e8; color: #c62828; }
+    .dtag.approved { background: #e6f4ea; color: #2e7d32; }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    /* ─── Drawer sections ────────────────────────────── */
+    .drawer-section { margin-bottom: 20px; }
+    .drawer-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #aaa;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ─── KPI grid ───────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kpi-card {
+      background: #f9fafb;
+      border: 1px solid #efefef;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .kpi-label { font-size: 10px; color: #888; font-weight: 500; margin-bottom: 4px; }
+    .kpi-value { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+    .kpi-value.blue { color: #3949ab; }
+    .kpi-sub { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+    /* ─── MTD/YTD comparison card ────────────────────── */
+    .compare-card {
+      background: #f9fafb;
+      border: 1px solid #efefef;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .compare-card-title { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 10px; }
+    .compare-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .compare-row:last-child { margin-bottom: 0; }
+    .compare-label { font-size: 11px; color: #888; width: 60px; flex-shrink: 0; }
+    .compare-bars { flex: 1; margin: 0 10px; }
+    .compare-bar-row { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+    .compare-bar-track { flex: 1; height: 6px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+    .compare-bar-fill { height: 100%; border-radius: 4px; }
+    .compare-bar-fill.mine { background: #3949ab; }
+    .compare-bar-fill.plat { background: #c5cae9; }
+    .compare-bar-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .compare-bar-dot.mine { background: #3949ab; }
+    .compare-bar-dot.plat { background: #c5cae9; }
+    .compare-bar-name { font-size: 9px; color: #aaa; width: 36px; }
+    .compare-value { font-size: 12px; font-weight: 600; color: #1a1a2e; text-align: right; width: 80px; flex-shrink: 0; }
+    .compare-share {
+      font-size: 10px;
+      background: #e8eaf6;
+      color: #3949ab;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-align: center;
+      width: 48px;
+      flex-shrink: 0;
+    }
+    .compare-share.low { background: #fde8e8; color: #c62828; }
+
+    /* ─── Mom pill ───────────────────────────────────── */
+    .mom-pill {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600;
+    }
+    .mom-pill.up   { background: #e6f4ea; color: #2e7d32; }
+    .mom-pill.down { background: #fde8e8; color: #c62828; }
+
+    /* ─── Risk section ───────────────────────────────── */
+    .risk-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #f9fafb;
+      border: 1px solid #efefef;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .risk-row:last-child { margin-bottom: 0; }
+    .risk-row-label { font-size: 11px; color: #555; font-weight: 500; }
+    .risk-badge {
+      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    }
+    .risk-badge.red    { background: #fde8e8; color: #b71c1c; }
+    .risk-badge.amber  { background: #fff8e1; color: #e65100; }
+    .risk-badge.green  { background: #e6f4ea; color: #2e7d32; }
+
+    /* ─── Divider ─────────────────────────────────────── */
+    .drawer-divider { height: 1px; background: #f0f0f0; margin: 4px 0 16px; }
+
+    /* ─── Legend (moved fields note) ─────────────────── */
+    .legend {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+    .legend-title { font-size: 11px; font-weight: 700; color: #555; margin-bottom: 8px; }
+    .legend-row { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-dot.table { background: #1a1a2e; }
+    .legend-dot.drawer { background: #3949ab; }
+    .legend-text { font-size: 11px; color: #555; }
+    .legend-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+    .lchip {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    }
+    .lchip.table  { background: #f0f0f0; color: #444; }
+    .lchip.drawer { background: #e8eaf6; color: #3949ab; }
+
+    /* ─── Tab content switching ──────────────────────── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ─── Annotation ─────────────────────────────────── */
+    .annotation {
+      font-size: 11px; color: #999; margin-top: 14px; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825; border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+    /* ─── Limit expiry warning ───────────────────────── */
+    .expiry-warn { font-size: 11px; color: #e65100; font-weight: 600; margin-top: 1px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-brand">TREDS</span>
+    <span class="topbar-breadcrumb">Financier &rsaquo; <span>Buyer Management</span></span>
+  </div>
+
+  <!-- Tab strip -->
+  <div class="tab-strip">
+    <button class="tab-btn active" onclick="switchTab('active')">Active Buyers</button>
+    <button class="tab-btn" onclick="switchTab('my')">My Buyers</button>
+    <div class="tab-right">
+      <div class="search-box">
+        <svg width="12" height="12" fill="none" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="5" stroke="#aaa" stroke-width="1.5"/><path d="M10 10l3.5 3.5" stroke="#aaa" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Search Buyer by Name
+      </div>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="main-layout">
+
+    <!-- Table pane -->
+    <div class="table-pane" id="tablePane">
+
+      <!-- ── ACTIVE BUYERS ── -->
+      <div class="tab-content active" id="tab-active">
+
+        <div class="legend">
+          <div class="legend-title">Column split — Active Buyers</div>
+          <div class="legend-row">
+            <span class="legend-dot table"></span>
+            <span class="legend-text">Stays on table:</span>
+            <div class="legend-chips">
+              <span class="lchip table">Buyer</span>
+              <span class="lchip table">Industry</span>
+              <span class="lchip table">Credit Rating</span>
+              <span class="lchip table">Suppliers Network</span>
+            </div>
+          </div>
+          <div class="legend-row">
+            <span class="legend-dot drawer"></span>
+            <span class="legend-text">Moves to drawer:</span>
+            <div class="legend-chips">
+              <span class="lchip drawer">Plat. Financed (All Time)</span>
+              <span class="lchip drawer">Plat. Financed (YTD)</span>
+              <span class="lchip drawer">Suppliers list</span>
+              <span class="lchip drawer">+ future fields</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Industry</th>
+                <th>Credit Rating</th>
+                <th>Suppliers Network</th>
+                <th>Settings</th>
+                <th style="width:40px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="openDrawer('active','tata')">
+                <td><span class="buyer-link">Tata Motors Limited</span></td>
+                <td>Automotive</td>
+                <td style="color:#00695c;font-weight:600;">AAA</td>
+                <td class="num-blue">12</td>
+                <td><button class="btn-add" onclick="event.stopPropagation()">Add</button></td>
+                <td><button class="expand-icon" id="icon-active-tata">›</button></td>
+              </tr>
+              <tr onclick="openDrawer('active','hul')">
+                <td><span class="buyer-link">Hindustan Unilever Ltd</span></td>
+                <td>FMCG</td>
+                <td style="color:#00695c;font-weight:600;">AA+</td>
+                <td class="num-blue">8</td>
+                <td><button class="btn-add" onclick="event.stopPropagation()">Add</button></td>
+                <td><button class="expand-icon" id="icon-active-hul">›</button></td>
+              </tr>
+              <tr onclick="openDrawer('active','buyer329')">
+                <td><span class="buyer-link">Performance Testing Buyer329</span></td>
+                <td>–</td>
+                <td>–</td>
+                <td class="num-blue">1</td>
+                <td><button class="btn-add" onclick="event.stopPropagation()">Add</button></td>
+                <td><button class="expand-icon" id="icon-active-buyer329">›</button></td>
+              </tr>
+              <tr onclick="openDrawer('active','reliance')">
+                <td><span class="buyer-link">Reliance Retail Ltd</span></td>
+                <td>Retail</td>
+                <td style="color:#00695c;font-weight:600;">A+</td>
+                <td class="num-blue">5</td>
+                <td><button class="btn-add" onclick="event.stopPropagation()">Add</button></td>
+                <td><button class="expand-icon" id="icon-active-reliance">›</button></td>
+              </tr>
+              <tr onclick="openDrawer('active','buyer2223')">
+                <td><span class="buyer-link">Performance Testing Buyer2223</span></td>
+                <td>–</td>
+                <td>–</td>
+                <td class="num-blue">1</td>
+                <td><button class="btn-add" onclick="event.stopPropagation()">Add</button></td>
+                <td><button class="expand-icon" id="icon-active-buyer2223">›</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="annotation"><strong>Table intent:</strong> Identify buyers at a glance. Click any row to open the drawer and see platform activity before deciding to give a limit.</div>
+      </div>
+
+      <!-- ── MY BUYERS ── -->
+      <div class="tab-content" id="tab-my">
+
+        <div class="legend">
+          <div class="legend-title">Column split — My Buyers</div>
+          <div class="legend-row">
+            <span class="legend-dot table"></span>
+            <span class="legend-text">Stays on table:</span>
+            <div class="legend-chips">
+              <span class="lchip table">Buyer</span>
+              <span class="lchip table">Exposure Limit</span>
+              <span class="lchip table">Utilisation</span>
+              <span class="lchip table">Limit Expiry</span>
+              <span class="lchip table">Checker Status</span>
+            </div>
+          </div>
+          <div class="legend-row">
+            <span class="legend-dot drawer"></span>
+            <span class="legend-text">Moves to drawer:</span>
+            <div class="legend-chips">
+              <span class="lchip drawer">Suppliers Network</span>
+              <span class="lchip drawer">Disc. MTD + MoM%</span>
+              <span class="lchip drawer">Disc. YTD</span>
+              <span class="lchip drawer">Platform MTD</span>
+              <span class="lchip drawer">Platform YTD</span>
+              <span class="lchip drawer">My Share %</span>
+              <span class="lchip drawer">Past Defaults</span>
+              <span class="lchip drawer">Outside TREDS Settlement %</span>
+              <span class="lchip drawer">+ future fields</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Exposure Limit</th>
+                <th>Utilisation</th>
+                <th>↓ Limit Expiry</th>
+                <th>Status</th>
+                <th style="width:40px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="openDrawer('my','kc')">
+                <td><span class="buyer-link">K C India Limited</span></td>
+                <td>₹ 10,25,990</td>
+                <td>
+                  <div class="util-wrap">
+                    <span class="util-label">₹ 8,00,400 &nbsp;<span style="color:#888;font-size:10px;">(78%)</span></span>
+                    <div class="util-bar-track"><div class="util-bar-fill" style="width:78%;"></div></div>
+                  </div>
+                </td>
+                <td>Jul 31, 2026</td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="expand-icon" id="icon-my-kc">›</button></td>
+              </tr>
+              <tr onclick="openDrawer('my','hul')">
+                <td><span class="buyer-link">Hindustan Unilever Ltd</span></td>
+                <td>₹ 25,00,000</td>
+                <td>
+                  <div class="util-wrap">
+                    <span class="util-label">₹ 18,50,000 &nbsp;<span style="color:#888;font-size:10px;">(74%)</span></span>
+                    <div class="util-bar-track"><div class="util-bar-fill" style="width:74%;"></div></div>
+                  </div>
+                </td>
+                <td>
+                  Mar 15, 2026
+                  <div class="expiry-warn">⚠ Expiring soon</div>
+                </td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="expand-icon" id="icon-my-hul">›</button></td>
+              </tr>
+              <tr onclick="openDrawer('my','reliance')">
+                <td>
+                  <span class="buyer-link">Reliance Retail Ltd</span>
+                  <div class="buyer-default">⊘ Under Default</div>
+                </td>
+                <td>₹ 15,00,000</td>
+                <td>
+                  <div class="util-wrap">
+                    <span class="util-label">₹ 14,80,000 &nbsp;<span style="color:#e53935;font-size:10px;font-weight:600;">(99%)</span></span>
+                    <div class="util-bar-track"><div class="util-bar-fill high" style="width:99%;"></div></div>
+                  </div>
+                </td>
+                <td>Jan 10, 2026</td>
+                <td><span class="status-chip pending">Pending</span></td>
+                <td><button class="expand-icon" id="icon-my-reliance">›</button></td>
+              </tr>
+              <tr onclick="openDrawer('my','tata')">
+                <td><span class="buyer-link">Tata Motors Limited</span></td>
+                <td>₹ 50,00,000</td>
+                <td>
+                  <div class="util-wrap">
+                    <span class="util-label">₹ 22,00,000 &nbsp;<span style="color:#888;font-size:10px;">(44%)</span></span>
+                    <div class="util-bar-track"><div class="util-bar-fill" style="width:44%;"></div></div>
+                  </div>
+                </td>
+                <td>Dec 31, 2026</td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="expand-icon" id="icon-my-tata">›</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="annotation"><strong>Table intent:</strong> Monitor limit health at a glance — utilisation, expiry, status. Click any row to open the drawer for the full picture: disc. activity, platform comparison, and risk.</div>
+      </div>
+
+    </div><!-- /table-pane -->
+
+
+    <!-- ─── Side drawer ──────────────────────────────── -->
+    <div class="drawer" id="drawer">
+      <div class="drawer-inner">
+
+        <!-- Header (filled by JS) -->
+        <div class="drawer-header" id="drawerHeader"></div>
+
+        <!-- Body (filled by JS) -->
+        <div class="drawer-body" id="drawerBody"></div>
+
+      </div>
+    </div>
+
+  </div><!-- /main-layout -->
+
+
+  <script>
+    let currentTab = 'active';
+    let currentRow = null;
+
+    /* ─── Tab switching ──────────────────────────────── */
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach((b, i) =>
+        b.classList.toggle('active', (i === 0 && tab === 'active') || (i === 1 && tab === 'my'))
+      );
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      closeDrawer();
+    }
+
+    /* ─── Drawer data ────────────────────────────────── */
+    const drawerData = {
+      active: {
+        tata: {
+          name: 'Tata Motors Limited',
+          meta: 'Automotive · 12 suppliers on TREDS',
+          tags: [{label:'Automotive', cls:'industry'}, {label:'AAA', cls:'rating'}],
+          platAllTime: '₹ 4,82,00,000',
+          platYTD: '₹ 1,20,50,000',
+          topSuppliers: ['Bharat Forge Ltd', 'Motherson Sumi', 'Minda Industries', '+9 more'],
+          note: 'High platform activity. Strong candidate for limit.'
+        },
+        hul: {
+          name: 'Hindustan Unilever Ltd',
+          meta: 'FMCG · 8 suppliers on TREDS',
+          tags: [{label:'FMCG', cls:'industry'}, {label:'AA+', cls:'rating'}],
+          platAllTime: '₹ 2,14,00,000',
+          platYTD: '₹ 62,00,000',
+          topSuppliers: ['ITC Packaging', 'HSIL Limited', 'Gujarat Petro', '+5 more'],
+          note: 'Consistent platform activity across 8 suppliers.'
+        },
+        buyer329: {
+          name: 'Performance Testing Buyer329',
+          meta: 'Industry not set · 1 supplier on TREDS',
+          tags: [],
+          platAllTime: '₹ 2,10,000',
+          platYTD: '₹ 0',
+          topSuppliers: ['Test Supplier 001'],
+          note: 'Very low platform activity. New or inactive buyer.'
+        },
+        reliance: {
+          name: 'Reliance Retail Ltd',
+          meta: 'Retail · 5 suppliers on TREDS',
+          tags: [{label:'Retail', cls:'industry'}, {label:'A+', cls:'rating'}],
+          platAllTime: '₹ 1,80,00,000',
+          platYTD: '₹ 38,00,000',
+          topSuppliers: ['Jyothy Labs', 'Emami Ltd', 'Bajaj Consumer', '+2 more'],
+          note: 'Moderate activity. Check risk history before adding.'
+        },
+        buyer2223: {
+          name: 'Performance Testing Buyer2223',
+          meta: 'Industry not set · 1 supplier on TREDS',
+          tags: [],
+          platAllTime: '₹ 12,30,000',
+          platYTD: '₹ 4,80,000',
+          topSuppliers: ['Test Supplier 002'],
+          note: 'Limited data available.'
+        }
+      },
+      my: {
+        kc: {
+          name: 'K C India Limited',
+          meta: 'Manufacturing · 5 suppliers',
+          tags: [{label:'Approved', cls:'approved'}],
+          myMTD: '₹ 10,25,990', platMTD: '₹ 48,50,000', shareMTD: '21', momMTD: '+18.4', momUp: true,
+          myYTD: '₹ 80,04,000', platYTD: '₹ 3,20,00,000', shareYTD: '25',
+          defaults: 0, extSettle: null, expiry: 'Jul 31, 2026',
+          suppliers: 5
+        },
+        hul: {
+          name: 'Hindustan Unilever Ltd',
+          meta: 'FMCG · 8 suppliers',
+          tags: [{label:'Approved', cls:'approved'}],
+          myMTD: '₹ 3,20,000', platMTD: '₹ 62,00,000', shareMTD: '5', momMTD: '-18.4', momUp: false,
+          myYTD: '₹ 28,00,000', platYTD: '₹ 4,80,00,000', shareYTD: '6',
+          defaults: 1, extSettle: '40%', expiry: 'Mar 15, 2026',
+          suppliers: 8
+        },
+        reliance: {
+          name: 'Reliance Retail Ltd',
+          meta: 'Retail · 3 suppliers',
+          tags: [{label:'Under Default', cls:'default'}],
+          myMTD: '₹ 1,00,000', platMTD: '₹ 38,00,000', shareMTD: '3', momMTD: '-62.0', momUp: false,
+          myYTD: '₹ 9,00,000', platYTD: '₹ 2,90,00,000', shareYTD: '3',
+          defaults: 2, extSettle: '80%', expiry: 'Jan 10, 2026',
+          suppliers: 3
+        },
+        tata: {
+          name: 'Tata Motors Limited',
+          meta: 'Automotive · 12 suppliers',
+          tags: [{label:'Approved', cls:'approved'}],
+          myMTD: '₹ 22,00,000', platMTD: '₹ 1,20,50,000', shareMTD: '18', momMTD: '+9.2', momUp: true,
+          myYTD: '₹ 1,80,00,000', platYTD: '₹ 9,60,00,000', shareYTD: '19',
+          defaults: 0, extSettle: null, expiry: 'Dec 31, 2026',
+          suppliers: 12
+        }
+      }
+    };
+
+    /* ─── Open drawer ────────────────────────────────── */
+    function openDrawer(tab, key) {
+      const data = drawerData[tab][key];
+      if (!data) return;
+
+      // Highlight selected row
+      document.querySelectorAll('#tab-' + tab + ' tbody tr').forEach(r => r.classList.remove('selected'));
+      document.querySelectorAll('#tab-' + tab + ' .expand-icon').forEach(i => i.textContent = '›');
+      event.currentTarget && event.currentTarget.classList && event.currentTarget.classList.add('selected');
+
+      const iconEl = document.getElementById('icon-' + tab + '-' + key);
+      if (iconEl) iconEl.textContent = '‹';
+
+      // Build header
+      const tagsHtml = data.tags.map(t => `<span class="dtag ${t.cls}">${t.label}</span>`).join('');
+      document.getElementById('drawerHeader').innerHTML = `
+        <div class="drawer-header-top">
+          <div>
+            <div class="drawer-buyer-name">${data.name}</div>
+            <div class="drawer-buyer-meta">${data.meta}</div>
+          </div>
+          <button class="drawer-close" onclick="closeDrawer()">✕</button>
+        </div>
+        ${tagsHtml ? `<div class="drawer-tags">${tagsHtml}</div>` : ''}
+      `;
+
+      // Build body
+      let bodyHtml = '';
+
+      if (tab === 'active') {
+        bodyHtml += `
+          <div class="drawer-section">
+            <div class="drawer-section-title">Platform Activity</div>
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-label">Total Financed (All Time)</div>
+                <div class="kpi-value blue">${data.platAllTime}</div>
+                <div class="kpi-sub">since inception</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Total Financed (YTD)</div>
+                <div class="kpi-value blue">${data.platYTD}</div>
+                <div class="kpi-sub">Apr – May 2026</div>
+              </div>
+            </div>
+          </div>
+          <div class="drawer-divider"></div>
+          <div class="drawer-section">
+            <div class="drawer-section-title">Suppliers on TREDS</div>
+            <div class="kpi-card" style="grid-column:span 2;">
+              ${data.topSuppliers.map(s => `<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid #f0f0f0;">${s}</div>`).join('')}
+            </div>
+          </div>
+          <div class="drawer-divider"></div>
+          <div class="drawer-section">
+            <div class="drawer-section-title">Decision Note</div>
+            <div style="font-size:12px;color:#555;padding:10px 12px;background:#f9fafb;border-radius:8px;border:1px solid #efefef;">${data.note}</div>
+          </div>
+        `;
+      }
+
+      if (tab === 'my') {
+        const shareClass = parseInt(data.shareMTD) < 15 ? 'low' : '';
+        const riskLevel = data.defaults === 0 ? 'green' : data.defaults === 1 ? 'amber' : 'red';
+        const riskLabel = data.defaults === 0 ? 'No defaults' : `${data.defaults} default${data.defaults > 1 ? 's' : ''}`;
+        const settleLabel = data.extSettle ? data.extSettle + ' settled outside TREDS' : 'All settled via TREDS';
+
+        bodyHtml += `
+          <div class="drawer-section">
+            <div class="drawer-section-title">Financing Activity vs Platform</div>
+            <div class="compare-card">
+              <div class="compare-card-title">Month to Date (MTD)
+                <span class="mom-pill ${data.momUp ? 'up' : 'down'}" style="margin-left:6px;">
+                  ${data.momUp ? '↑' : '↓'} ${Math.abs(parseFloat(data.momMTD))}% MoM
+                </span>
+              </div>
+              <div class="compare-row">
+                <span class="compare-label">Mine</span>
+                <div class="compare-bars">
+                  <div class="compare-bar-row">
+                    <span class="compare-bar-dot mine"></span>
+                    <span class="compare-bar-name">Mine</span>
+                    <div class="compare-bar-track">
+                      <div class="compare-bar-fill mine" style="width:${data.shareMTD}%;"></div>
+                    </div>
+                  </div>
+                  <div class="compare-bar-row" style="margin-top:4px;">
+                    <span class="compare-bar-dot plat"></span>
+                    <span class="compare-bar-name">Plat.</span>
+                    <div class="compare-bar-track">
+                      <div class="compare-bar-fill plat" style="width:100%;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:12px;font-weight:600;">${data.myMTD}</div>
+                  <div style="font-size:10px;color:#aaa;">Plat: ${data.platMTD}</div>
+                </div>
+                <div style="width:8px;"></div>
+                <span class="compare-share ${shareClass}">${data.shareMTD}%<br><span style="font-weight:400;font-size:9px;">share</span></span>
+              </div>
+            </div>
+
+            <div class="compare-card">
+              <div class="compare-card-title">Year to Date (YTD)</div>
+              <div class="compare-row">
+                <span class="compare-label">Mine</span>
+                <div class="compare-bars">
+                  <div class="compare-bar-row">
+                    <span class="compare-bar-dot mine"></span>
+                    <span class="compare-bar-name">Mine</span>
+                    <div class="compare-bar-track">
+                      <div class="compare-bar-fill mine" style="width:${data.shareYTD}%;"></div>
+                    </div>
+                  </div>
+                  <div class="compare-bar-row" style="margin-top:4px;">
+                    <span class="compare-bar-dot plat"></span>
+                    <span class="compare-bar-name">Plat.</span>
+                    <div class="compare-bar-track">
+                      <div class="compare-bar-fill plat" style="width:100%;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:12px;font-weight:600;">${data.myYTD}</div>
+                  <div style="font-size:10px;color:#aaa;">Plat: ${data.platYTD}</div>
+                </div>
+                <div style="width:8px;"></div>
+                <span class="compare-share ${parseInt(data.shareYTD) < 15 ? 'low' : ''}">${data.shareYTD}%<br><span style="font-weight:400;font-size:9px;">share</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-divider"></div>
+
+          <div class="drawer-section">
+            <div class="drawer-section-title">Risk Profile</div>
+            <div class="risk-row">
+              <span class="risk-row-label">Past Defaults</span>
+              <span class="risk-badge ${riskLevel}">${riskLabel}</span>
+            </div>
+            <div class="risk-row">
+              <span class="risk-row-label">Outside TREDS Settlement</span>
+              <span class="risk-badge ${data.extSettle ? (parseFloat(data.extSettle) > 50 ? 'red' : 'amber') : 'green'}">${settleLabel}</span>
+            </div>
+          </div>
+
+          <div class="drawer-divider"></div>
+
+          <div class="drawer-section">
+            <div class="drawer-section-title">Limit Details</div>
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-label">Suppliers Network</div>
+                <div class="kpi-value blue">${data.suppliers}</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Limit Expiry</div>
+                <div class="kpi-value">${data.expiry}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('drawerBody').innerHTML = bodyHtml;
+
+      // Open drawer
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('tablePane').classList.add('drawer-open');
+      currentRow = key;
+    }
+
+    /* ─── Close drawer ───────────────────────────────── */
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('tablePane').classList.remove('drawer-open');
+      document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('selected'));
+      document.querySelectorAll('.expand-icon').forEach(i => i.textContent = '›');
+      currentRow = null;
+    }
+  </script>
+
+</body>
+</html>
