@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Buyers — FOMO Signal Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 40px 32px;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 12px; }
+
+    .insight-box {
+      background: #fffde7;
+      border-left: 3px solid #f9a825;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    .insight-box strong { color: #1a1a2e; }
+
+    /* ─── Section ───────────────────────────────────── */
+    .section { margin-bottom: 52px; }
+    .section-header {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 16px; border-bottom: 1.5px solid #e0e0e0; padding-bottom: 8px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+    .section-desc { font-size: 12px; color: #888; }
+    .badge-tag {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+      background: #e8eaf6; color: #3949ab; letter-spacing: 0.5px;
+    }
+    .badge-tag.green { background: #e6f4ea; color: #2e7d32; }
+    .badge-tag.amber { background: #fff3e0; color: #e65100; }
+
+    /* ─── Table ─────────────────────────────────────── */
+    .table-wrap {
+      background: #fff; border-radius: 10px; border: 1px solid #e8e8e8; overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #f9fafb; font-size: 11px; font-weight: 600; color: #555;
+      text-align: left; padding: 10px 16px; border-bottom: 1px solid #e8e8e8;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 13px 16px; border-bottom: 1px solid #f0f0f0; vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .buyer-link { color: #1976d2; font-weight: 500; text-decoration: none; }
+    .buyer-default { font-size: 11px; color: #c62828; font-weight: 600; margin-top: 2px; }
+    .status-chip {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600;
+      background: #e6f4ea; color: #2e7d32; border: 1px solid #c8e6c9;
+    }
+    .btn-view {
+      background: #1a1a2e; color: #fff; border: none; border-radius: 6px;
+      padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .main-amount { font-size: 13px; font-weight: 500; color: #1a1a2e; }
+
+    /* Utilisation bar */
+    .util-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .util-label { font-size: 12px; }
+    .util-bar-track { width: 90px; height: 4px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+    .util-bar-fill { height: 100%; border-radius: 4px; background: #3949ab; }
+    .util-bar-fill.high { background: #e53935; }
+
+    /* Limit expiry */
+    .expiry-warn { font-size: 11px; color: #e65100; font-weight: 600; margin-top: 1px; }
+
+    /* Annotation */
+    .annotation {
+      font-size: 11px; color: #999; margin-top: 12px; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825; border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+
+    /* ══════════════════════════════════════════════════
+       VARIANT 1 — Left accent border + inline signal chip
+       under buyer name. No new column.
+    ══════════════════════════════════════════════════ */
+
+    /* Left border accent on the entire row via first-cell */
+    .v1-row td:first-child { border-left: 3px solid transparent; }
+    .v1-row.sig-opportunity td:first-child { border-left-color: #f57c00; background: #fffaf5; }
+    .v1-row.sig-slipping    td:first-child { border-left-color: #e53935; background: #fff8f8; }
+    .v1-row.sig-expiry      td:first-child { border-left-color: #f9a825; background: #fffdf0; }
+    .v1-row.sig-healthy     td:first-child { border-left-color: transparent; }
+
+    /* Extend the tint across the whole row */
+    .v1-row.sig-opportunity td { background: #fffaf5; }
+    .v1-row.sig-slipping    td { background: #fff8f8; }
+    .v1-row.sig-expiry      td { background: #fffdf0; }
+
+    /* Signal chip inline under buyer name */
+    .v1-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600; padding: 2px 7px;
+      border-radius: 4px; margin-top: 4px;
+    }
+    .v1-chip.opportunity { background: #fff3e0; color: #e65100; }
+    .v1-chip.slipping    { background: #fde8e8; color: #c62828; }
+    .v1-chip.expiry      { background: #fff8e1; color: #f57f17; }
+
+
+    /* ══════════════════════════════════════════════════
+       VARIANT 2 — Single "Signal" column (interpreted,
+       not raw data). One column replaces the urge to add
+       platform MTD/YTD columns.
+    ══════════════════════════════════════════════════ */
+
+    .v2-signal-cell { min-width: 180px; }
+    .v2-signal {
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .v2-headline {
+      font-size: 12px; font-weight: 600;
+    }
+    .v2-headline.opportunity { color: #e65100; }
+    .v2-headline.slipping    { color: #c62828; }
+    .v2-headline.expiry      { color: #f57f17; }
+    .v2-headline.healthy     { color: #2e7d32; }
+    .v2-sub {
+      font-size: 10px; color: #999;
+    }
+    .v2-icon { font-size: 13px; }
+
+
+    /* ══════════════════════════════════════════════════
+       VARIANT 3 — Dual micro-bar on the Utilisation cell.
+       Top bar = limit utilisation (what you already show).
+       Bottom bar = your share of platform MTD.
+       Visual mismatch between the two = opportunity gap.
+       Zero new columns.
+    ══════════════════════════════════════════════════ */
+
+    .v3-dual-wrap { display: flex; flex-direction: column; gap: 5px; }
+    .v3-bar-group { display: flex; flex-direction: column; gap: 2px; }
+    .v3-bar-label-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .v3-bar-label { font-size: 10px; color: #888; }
+    .v3-bar-value { font-size: 10px; font-weight: 600; color: #1a1a2e; }
+    .v3-track { width: 110px; height: 5px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+    .v3-fill { height: 100%; border-radius: 4px; }
+    .v3-fill.util  { background: #3949ab; }
+    .v3-fill.util.high { background: #e53935; }
+    .v3-fill.share { background: #ffb74d; }
+    .v3-fill.share.low { background: #ef9a9a; }
+    /* Gap annotation that appears when share is low */
+    .v3-gap-note {
+      font-size: 10px; color: #e65100; font-weight: 600;
+      display: flex; align-items: center; gap: 3px; margin-top: 2px;
+    }
+    .v3-gap-note.hidden { visibility: hidden; }
+
+
+    /* ══════════════════════════════════════════════════
+       VARIANT 4 — Pulse dot + contextual row.
+       A small animated dot on rows that need attention.
+       No text added to row at rest. Hover dot reveals why.
+    ══════════════════════════════════════════════════ */
+
+    .v4-buyer-cell { position: relative; padding-left: 28px !important; }
+    .v4-dot-wrap {
+      position: absolute;
+      left: 14px; top: 50%; transform: translateY(-50%);
+    }
+    .v4-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      display: block; position: relative;
+    }
+    .v4-dot.opportunity { background: #f57c00; }
+    .v4-dot.slipping    { background: #e53935; }
+    .v4-dot.expiry      { background: #f9a825; }
+    .v4-dot.healthy     { background: #c8e6c9; }
+
+    /* Pulse ring only on actionable dots */
+    .v4-dot.opportunity::after,
+    .v4-dot.slipping::after,
+    .v4-dot.expiry::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      opacity: 0;
+      animation: pulse-ring 2s ease-out infinite;
+    }
+    .v4-dot.opportunity::after { border-color: #f57c00; }
+    .v4-dot.slipping::after    { border-color: #e53935; }
+    .v4-dot.expiry::after      { border-color: #f9a825; }
+
+    @keyframes pulse-ring {
+      0%   { inset: -2px; opacity: 0.8; }
+      100% { inset: -7px; opacity: 0; }
+    }
+
+    /* Tooltip that appears on hover over the dot */
+    .v4-dot-wrap { cursor: default; }
+    .v4-tooltip {
+      position: absolute;
+      left: 16px; top: 50%; transform: translateY(-50%);
+      background: #1a1a2e; color: #fff;
+      font-size: 11px; padding: 5px 10px; border-radius: 6px;
+      white-space: nowrap; opacity: 0; pointer-events: none;
+      transition: opacity 0.15s; z-index: 20;
+    }
+    .v4-tooltip::before {
+      content: '';
+      position: absolute;
+      right: 100%; top: 50%; transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-right-color: #1a1a2e;
+    }
+    .v4-dot-wrap:hover .v4-tooltip { opacity: 1; }
+
+  </style>
+</head>
+<body>
+
+  <h1>My Buyers — Creating the Sense of Missing Out</h1>
+  <p class="subtitle">How to signal opportunity and risk on the table row itself — without the financier needing to open every drawer.</p>
+
+  <div class="insight-box">
+    <strong>The real scenario:</strong> Financier opens My Buyers at 9am. Scans the list in under 10 seconds. If nothing jumps out, they move on.<br>
+    <strong>The signal logic used across all variants:</strong>
+    &nbsp;🟠 <strong>Opportunity</strong> = Platform MTD growing but your share is below 15% — you're leaving business on the table. &nbsp;
+    🔴 <strong>Slipping</strong> = Your disc. MTD dropped MoM — you're doing less than last month. &nbsp;
+    🟡 <strong>Expiry</strong> = Limit expires within 60 days — action needed. &nbsp;
+    🟢 <strong>Healthy</strong> = No signal needed.
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       VARIANT 1 — Left border + inline chip
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 1 — Coloured row border + signal chip under buyer name</span>
+      <span class="badge-tag amber">RECOMMENDED</span>
+      <span class="section-desc">Left border creates pre-attentive colour scan. Chip under name gives the "why" in 3 words. Zero new columns.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Opportunity: platform surging, low share -->
+          <tr class="v1-row sig-opportunity">
+            <td>
+              <a class="buyer-link" href="#">Hindustan Unilever Ltd</a>
+              <div><span class="v1-chip opportunity">⚡ Platform up, low capture</span></div>
+            </td>
+            <td>₹ 25,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 18,50,000 <span style="color:#888;font-size:10px;">(74%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:74%;"></div></div>
+              </div>
+            </td>
+            <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <!-- Slipping: my MTD dropping -->
+          <tr class="v1-row sig-slipping">
+            <td>
+              <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+              <div class="buyer-default">⊘ Under Default</div>
+              <div><span class="v1-chip slipping">↓ Your activity falling</span></div>
+            </td>
+            <td>₹ 15,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 14,80,000 <span style="color:#e53935;font-size:10px;font-weight:600;">(99%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill high" style="width:99%;"></div></div>
+              </div>
+            </td>
+            <td>Jan 10, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <!-- Healthy -->
+          <tr class="v1-row sig-healthy">
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>₹ 10,25,990</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 8,00,400 <span style="color:#888;font-size:10px;">(78%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:78%;"></div></div>
+              </div>
+            </td>
+            <td>Jul 31, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <!-- Expiry -->
+          <tr class="v1-row sig-expiry">
+            <td>
+              <a class="buyer-link" href="#">Tata Motors Limited</a>
+              <div><span class="v1-chip expiry">⏳ Limit expiring in 22 days</span></div>
+            </td>
+            <td>₹ 50,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 22,00,000 <span style="color:#888;font-size:10px;">(44%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:44%;"></div></div>
+              </div>
+            </td>
+            <td>Jun 1, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Why it works:</strong> The coloured left border fires before the financier reads a single word — orange rows say "there is money here you're not getting", red rows say "something is going wrong". The chip under the name answers "why" in 3–4 words without needing to open the drawer. A financier scanning 30 rows sees the orange ones in under 2 seconds.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       VARIANT 2 — Single interpreted "Signal" column
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 2 — Single "Signal" column (interpreted, not raw data)</span>
+      <span class="badge-tag">EXPLICIT</span>
+      <span class="section-desc">One new column. Not a number — a human-readable insight. Removes the need for platform MTD/YTD columns entirely.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>Status</th>
+            <th style="min-width:180px;">Signal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+            <td>₹ 25,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 18,50,000 <span style="color:#888;font-size:10px;">(74%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:74%;"></div></div>
+              </div>
+            </td>
+            <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td class="v2-signal-cell">
+              <div class="v2-signal">
+                <span class="v2-headline opportunity">⚡ Platform surging</span>
+                <span class="v2-sub">You're capturing only 5% of platform MTD</span>
+              </div>
+            </td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <tr>
+            <td>
+              <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+              <div class="buyer-default">⊘ Under Default</div>
+            </td>
+            <td>₹ 15,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 14,80,000 <span style="color:#e53935;font-size:10px;font-weight:600;">(99%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill high" style="width:99%;"></div></div>
+              </div>
+            </td>
+            <td>Jan 10, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td class="v2-signal-cell">
+              <div class="v2-signal">
+                <span class="v2-headline slipping">↓ Activity down 62%</span>
+                <span class="v2-sub">Your MTD fell sharply vs last month</span>
+              </div>
+            </td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>₹ 10,25,990</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 8,00,400 <span style="color:#888;font-size:10px;">(78%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:78%;"></div></div>
+              </div>
+            </td>
+            <td>Jul 31, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td class="v2-signal-cell">
+              <div class="v2-signal">
+                <span class="v2-headline healthy">✓ Performing well</span>
+                <span class="v2-sub">21% platform share, growing MoM</span>
+              </div>
+            </td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <tr>
+            <td><a class="buyer-link" href="#">Tata Motors Limited</a></td>
+            <td>₹ 50,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 22,00,000 <span style="color:#888;font-size:10px;">(44%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:44%;"></div></div>
+              </div>
+            </td>
+            <td>Jun 1, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td class="v2-signal-cell">
+              <div class="v2-signal">
+                <span class="v2-headline expiry">⏳ Renew to keep earning</span>
+                <span class="v2-sub">Limit expires in 22 days</span>
+              </div>
+            </td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Why it works:</strong> Instead of putting numbers in a column and asking the financier to interpret them, you interpret for them. "You're capturing only 5% of platform MTD" is actionable. "₹ 3,20,000 / ₹ 62,00,000" requires mental division. The Signal column speaks the language of decisions, not data.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       VARIANT 3 — Dual micro-bar on Utilisation cell
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 3 — Dual bar on Utilisation: limit use vs platform share</span>
+      <span class="badge-tag">VISUAL GAP</span>
+      <span class="section-desc">No new column, no chip, no text. Two bars tell the story: one for limit utilisation, one for your share of platform MTD. The gap between them is the signal.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation &amp; Platform Share</th>
+            <th>↓ Limit Expiry</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Opportunity: util ok, but platform share tiny -->
+          <tr>
+            <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+            <td>₹ 25,00,000</td>
+            <td>
+              <div class="v3-dual-wrap">
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Limit used</span>
+                    <span class="v3-bar-value">74%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill util" style="width:74%;"></div></div>
+                </div>
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Plat. share</span>
+                    <span class="v3-bar-value" style="color:#e65100;">5%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill share low" style="width:5%;"></div></div>
+                </div>
+                <div class="v3-gap-note">⚡ Capturing only 5% of buyer's platform MTD</div>
+              </div>
+            </td>
+            <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <!-- Risk: util nearly maxed, platform share also low -->
+          <tr>
+            <td>
+              <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+              <div class="buyer-default">⊘ Under Default</div>
+            </td>
+            <td>₹ 15,00,000</td>
+            <td>
+              <div class="v3-dual-wrap">
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Limit used</span>
+                    <span class="v3-bar-value" style="color:#e53935;">99%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill util high" style="width:99%;"></div></div>
+                </div>
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Plat. share</span>
+                    <span class="v3-bar-value" style="color:#e65100;">3%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill share low" style="width:3%;"></div></div>
+                </div>
+                <div class="v3-gap-note">↓ Activity down 62% vs last month</div>
+              </div>
+            </td>
+            <td>Jan 10, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <!-- Healthy: both bars reasonably aligned -->
+          <tr>
+            <td><a class="buyer-link" href="#">K C India Limited</a></td>
+            <td>₹ 10,25,990</td>
+            <td>
+              <div class="v3-dual-wrap">
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Limit used</span>
+                    <span class="v3-bar-value">78%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill util" style="width:78%;"></div></div>
+                </div>
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Plat. share</span>
+                    <span class="v3-bar-value" style="color:#2e7d32;">21%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill share" style="width:21%;background:#81c784;"></div></div>
+                </div>
+                <div class="v3-gap-note hidden">–</div>
+              </div>
+            </td>
+            <td>Jul 31, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <!-- Good share, healthy -->
+          <tr>
+            <td><a class="buyer-link" href="#">Tata Motors Limited</a></td>
+            <td>₹ 50,00,000</td>
+            <td>
+              <div class="v3-dual-wrap">
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Limit used</span>
+                    <span class="v3-bar-value">44%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill util" style="width:44%;"></div></div>
+                </div>
+                <div class="v3-bar-group">
+                  <div class="v3-bar-label-row">
+                    <span class="v3-bar-label">Plat. share</span>
+                    <span class="v3-bar-value" style="color:#2e7d32;">18%</span>
+                  </div>
+                  <div class="v3-track"><div class="v3-fill share" style="width:18%;background:#81c784;"></div></div>
+                </div>
+                <div class="v3-gap-note hidden">–</div>
+              </div>
+            </td>
+            <td>Jun 1, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Why it works:</strong> The visual gap between the two bars IS the story. A financier doing a 3-second scan sees a long blue bar (high limit use) next to a short orange bar (tiny platform share) and immediately feels the mismatch — even without reading the labels. No new column added; the existing utilisation cell absorbs the signal.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       VARIANT 4 — Pulsing dot only, hover to reveal
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 4 — Pulsing attention dot (hover to reveal)</span>
+      <span class="badge-tag">MINIMAL</span>
+      <span class="section-desc">Cleanest table at rest. An animated dot on the buyer name is the only addition. Hover reveals the signal. Works like an unread indicator.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="padding-left:38px;">Buyer</th>
+            <th>Exposure Limit</th>
+            <th>Utilisation</th>
+            <th>↓ Limit Expiry</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td class="v4-buyer-cell">
+              <div class="v4-dot-wrap">
+                <span class="v4-dot opportunity"></span>
+                <div class="v4-tooltip">⚡ Platform surging — you're capturing only 5%</div>
+              </div>
+              <a class="buyer-link" href="#">Hindustan Unilever Ltd</a>
+            </td>
+            <td>₹ 25,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 18,50,000 <span style="color:#888;font-size:10px;">(74%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:74%;"></div></div>
+              </div>
+            </td>
+            <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <tr>
+            <td class="v4-buyer-cell">
+              <div class="v4-dot-wrap">
+                <span class="v4-dot slipping"></span>
+                <div class="v4-tooltip">↓ Your activity fell 62% — check this buyer</div>
+              </div>
+              <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+              <div class="buyer-default">⊘ Under Default</div>
+            </td>
+            <td>₹ 15,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 14,80,000 <span style="color:#e53935;font-size:10px;font-weight:600;">(99%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill high" style="width:99%;"></div></div>
+              </div>
+            </td>
+            <td>Jan 10, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <tr>
+            <td class="v4-buyer-cell">
+              <div class="v4-dot-wrap">
+                <span class="v4-dot healthy"></span>
+                <div class="v4-tooltip">✓ Performing well — 21% platform share</div>
+              </div>
+              <a class="buyer-link" href="#">K C India Limited</a>
+            </td>
+            <td>₹ 10,25,990</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 8,00,400 <span style="color:#888;font-size:10px;">(78%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:78%;"></div></div>
+              </div>
+            </td>
+            <td>Jul 31, 2026</td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+          <tr>
+            <td class="v4-buyer-cell">
+              <div class="v4-dot-wrap">
+                <span class="v4-dot expiry"></span>
+                <div class="v4-tooltip">⏳ Limit expires in 22 days — renew to keep earning</div>
+              </div>
+              <a class="buyer-link" href="#">Tata Motors Limited</a>
+            </td>
+            <td>₹ 50,00,000</td>
+            <td>
+              <div class="util-wrap">
+                <span class="util-label">₹ 22,00,000 <span style="color:#888;font-size:10px;">(44%)</span></span>
+                <div class="util-bar-track"><div class="util-bar-fill" style="width:44%;"></div></div>
+              </div>
+            </td>
+            <td>Jun 1, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+            <td><span class="status-chip">Approved</span></td>
+            <td><button class="btn-view">VIEW</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Tradeoff:</strong> Cleanest table — nothing added except a small coloured dot. The animation draws the eye on actionable rows. Downside: requires hover to understand why, so a financier who doesn't interact misses the reason. Best paired with V1 or V2 if the platform has mobile or tablet users.
+    </div>
+  </div>
+
+</body>
+</html>
