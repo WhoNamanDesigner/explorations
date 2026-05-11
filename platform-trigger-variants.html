@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Buyers — Platform Trigger Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 40px 32px;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 40px; }
+
+    /* ─── Section ─────────────────────────────────── */
+    .section { margin-bottom: 56px; }
+    .section-header {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 16px; border-bottom: 1.5px solid #e0e0e0; padding-bottom: 8px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+    .section-desc { font-size: 12px; color: #888; }
+    .badge-tag {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+      background: #e8eaf6; color: #3949ab; letter-spacing: 0.5px;
+    }
+    .badge-tag.green { background: #e6f4ea; color: #2e7d32; }
+    .badge-tag.amber { background: #fff3e0; color: #e65100; }
+
+    /* ─── Layout: table + drawer side by side ──────── */
+    .layout-wrap {
+      display: flex;
+      gap: 0;
+      align-items: flex-start;
+      position: relative;
+    }
+    .table-side {
+      flex: 1;
+      min-width: 0;
+      transition: flex 0.3s ease;
+    }
+    .table-side.shrink { flex: 0 0 58%; }
+
+    /* ─── Table ─────────────────────────────────────── */
+    .table-wrap {
+      background: #fff; border-radius: 10px; border: 1px solid #e8e8e8; overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #f9fafb; font-size: 11px; font-weight: 600; color: #555;
+      text-align: left; padding: 10px 14px;
+      border-bottom: 1px solid #e8e8e8; white-space: nowrap;
+    }
+    tbody td {
+      padding: 13px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #fafafa; }
+    tbody tr.row-selected td { background: #eef2ff; }
+
+    .buyer-link { color: #1976d2; font-weight: 500; text-decoration: none; }
+    .buyer-default { font-size: 11px; color: #c62828; font-weight: 600; margin-top: 2px; }
+    .main-amount { font-size: 13px; font-weight: 500; color: #1a1a2e; display: block; }
+
+    /* Platform % — plain text, no interaction */
+    .plat-pct {
+      font-size: 11px;
+      color: #888;
+      margin-top: 3px;
+      display: block;
+    }
+    .plat-pct.low  { color: #e65100; }
+    .plat-pct.good { color: #2e7d32; }
+
+    /* MoM sub-line */
+    .mom-line {
+      font-size: 11px; font-weight: 500; margin-top: 2px; display: block;
+    }
+    .mom-line.up   { color: #2e7d32; }
+    .mom-line.down { color: #c62828; }
+
+    /* Util */
+    .util-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .util-label { font-size: 12px; color: #1a1a2e; }
+    .util-pct   { font-size: 10px; color: #888; }
+    .util-bar-track { width: 80px; height: 4px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+    .util-bar-fill  { height: 100%; border-radius: 4px; background: #3949ab; }
+    .util-bar-fill.high { background: #e53935; }
+
+    .expiry-warn { font-size: 11px; color: #e65100; font-weight: 600; margin-top: 2px; }
+
+    .status-chip {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600;
+      background: #e6f4ea; color: #2e7d32; border: 1px solid #c8e6c9;
+    }
+
+    /* ─── Trigger styles ────────────────────────────── */
+
+    /* Generic VIEW button */
+    .btn-view {
+      background: #1a1a2e; color: #fff; border: none; border-radius: 6px;
+      padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Text link trigger — "Platform ↗" style */
+    .trigger-link {
+      font-size: 11px; font-weight: 600; color: #3949ab;
+      text-decoration: none; cursor: pointer; white-space: nowrap;
+      border-bottom: 1px dashed #3949ab;
+      padding-bottom: 1px;
+      background: none; border-top: none; border-left: none; border-right: none;
+      font-family: inherit;
+    }
+    .trigger-link:hover { color: #1a237e; border-bottom-color: #1a237e; }
+
+    /* Icon button trigger */
+    .trigger-icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 6px;
+      background: #e8eaf6; border: 1px solid #c5cae9;
+      cursor: pointer; color: #3949ab; font-size: 13px;
+      transition: background 0.15s;
+    }
+    .trigger-icon-btn:hover { background: #c5cae9; }
+
+    /* Pill button trigger */
+    .trigger-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; color: #3949ab;
+      background: #e8eaf6; border: 1px solid #c5cae9;
+      border-radius: 20px; padding: 3px 10px;
+      cursor: pointer; white-space: nowrap;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .trigger-pill:hover { background: #c5cae9; }
+
+    /* Underline-only text trigger (hyperlink style) */
+    .trigger-text {
+      font-size: 11px; font-weight: 500; color: #1976d2;
+      text-decoration: underline; cursor: pointer;
+      background: none; border: none; font-family: inherit;
+      padding: 0;
+    }
+    .trigger-text:hover { color: #1565c0; }
+
+    /* Actions cell — flex row */
+    .actions-cell {
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+
+    /* Buyer name secondary link (Position B) */
+    .buyer-platform-link {
+      font-size: 11px; color: #3949ab; font-weight: 500;
+      text-decoration: none; cursor: pointer; display: block; margin-top: 3px;
+      border: none; background: none; font-family: inherit; padding: 0; text-align: left;
+    }
+    .buyer-platform-link:hover { text-decoration: underline; }
+
+    /* ─── Side drawer ───────────────────────────────── */
+    .drawer {
+      width: 0; overflow: hidden; background: #fff;
+      border: 1px solid #e0e0e0; border-radius: 10px;
+      margin-left: 16px;
+      display: flex; flex-direction: column;
+      transition: width 0.3s ease; flex-shrink: 0;
+    }
+    .drawer.open { width: 38%; }
+
+    .drawer-inner {
+      min-width: 300px; width: 100%;
+      display: flex; flex-direction: column; height: 100%;
+    }
+
+    .drawer-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #f0f0f0; flex-shrink: 0;
+    }
+    .drawer-header-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .drawer-title { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+    .drawer-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+    .drawer-close {
+      background: none; border: none; cursor: pointer;
+      color: #aaa; font-size: 16px; line-height: 1;
+    }
+    .drawer-close:hover { color: #1a1a2e; }
+
+    .drawer-body { padding: 14px 16px; overflow-y: auto; flex: 1; }
+
+    .drawer-section { margin-bottom: 18px; }
+    .drawer-section-title {
+      font-size: 10px; font-weight: 700; color: #aaa;
+      letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    /* KPI row inside drawer */
+    .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .kpi-card {
+      background: #f9fafb; border: 1px solid #efefef;
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .kpi-label { font-size: 10px; color: #888; margin-bottom: 3px; }
+    .kpi-value { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+    .kpi-value.blue { color: #3949ab; }
+    .kpi-sub { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+    /* Share bar */
+    .share-card {
+      background: #f9fafb; border: 1px solid #efefef;
+      border-radius: 8px; padding: 12px; margin-bottom: 8px;
+    }
+    .share-card-title { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 10px; }
+    .share-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .share-row:last-child { margin-bottom: 0; }
+    .share-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .share-dot.mine { background: #3949ab; }
+    .share-dot.others { background: #e0e0e0; }
+    .share-name { font-size: 10px; color: #888; width: 44px; flex-shrink: 0; }
+    .share-track { flex: 1; height: 6px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+    .share-fill { height: 100%; border-radius: 4px; }
+    .share-fill.mine { background: #3949ab; }
+    .share-fill.others { background: #bdbdbd; }
+    .share-val { font-size: 11px; font-weight: 600; color: #1a1a2e; width: 52px; text-align: right; }
+    .share-pct {
+      font-size: 10px; font-weight: 700; padding: 2px 6px;
+      border-radius: 4px; width: 36px; text-align: center;
+    }
+    .share-pct.low  { background: #fde8e8; color: #c62828; }
+    .share-pct.good { background: #e6f4ea; color: #2e7d32; }
+
+    .drawer-divider { height: 1px; background: #f0f0f0; margin: 4px 0 16px; }
+
+    .financier-count {
+      font-size: 12px; color: #555;
+      background: #f9fafb; border: 1px solid #efefef;
+      border-radius: 8px; padding: 10px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .financier-count span { font-weight: 700; color: #3949ab; }
+
+    .annotation {
+      font-size: 11px; color: #999; margin-top: 12px; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825; border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+  </style>
+</head>
+<body>
+
+  <h1>My Buyers — Platform Trigger Variants</h1>
+  <p class="subtitle">MTD and YTD % are plain text. One separate trigger per row opens platform stats drawer. Click any trigger to see the drawer.</p>
+
+
+  <!-- ══════════════════════════════════════════════
+       POSITION A — Dedicated column at row end
+       Trigger sits in its own column, always visible,
+       consistent position across all rows.
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Position A — Dedicated column at row end</span>
+      <span class="badge-tag amber">RECOMMENDED</span>
+      <span class="section-desc">Platform trigger lives in its own fixed column. Consistent. No ambiguity about what it opens.</span>
+    </div>
+
+    <!-- A1: Text link trigger -->
+    <p style="font-size:11px;color:#888;margin-bottom:8px;font-weight:600;">A1 — Text link &nbsp;"Platform ↗"</p>
+    <div class="layout-wrap" id="layout-a1">
+      <div class="table-side" id="table-a1">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Exposure Limit</th>
+                <th>Utilisation</th>
+                <th>↓ Limit Expiry</th>
+                <th>↓ Financed MTD</th>
+                <th>↓ Financed YTD</th>
+                <th>Status</th>
+                <th>Platform</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-a1-kc">
+                <td><a class="buyer-link" href="#">K C India Limited</a></td>
+                <td>₹ 10,25,990</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 8,00,400</span><span class="util-pct">78%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:78%"></div></div></div></td>
+                <td>Jul 31, 2026</td>
+                <td><span class="main-amount">₹ 10,25,990</span><span class="mom-line up">+18.4% MoM</span><span class="plat-pct good">21% of platform</span></td>
+                <td><span class="main-amount">₹ 80,04,000</span><span class="plat-pct good">25% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="trigger-link" onclick="openDrawer('a1','kc')">Platform ↗</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-a1-hul">
+                <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+                <td>₹ 25,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 18,50,000</span><span class="util-pct">74%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:74%"></div></div></div></td>
+                <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+                <td><span class="main-amount">₹ 3,20,000</span><span class="mom-line down">-18.4% MoM</span><span class="plat-pct low">5% of platform</span></td>
+                <td><span class="main-amount">₹ 28,00,000</span><span class="plat-pct low">6% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="trigger-link" onclick="openDrawer('a1','hul')">Platform ↗</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-a1-reliance">
+                <td><a class="buyer-link" href="#">Reliance Retail Ltd</a><div class="buyer-default">⊘ Under Default</div></td>
+                <td>₹ 15,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 14,80,000</span><span class="util-pct" style="color:#e53935;font-weight:600;">99%</span><div class="util-bar-track"><div class="util-bar-fill high" style="width:99%"></div></div></div></td>
+                <td>Jan 10, 2026</td>
+                <td><span class="main-amount">₹ 1,00,000</span><span class="mom-line down">-62.0% MoM</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="main-amount">₹ 9,00,000</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="trigger-link" onclick="openDrawer('a1','reliance')">Platform ↗</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer" id="drawer-a1">
+        <div class="drawer-inner">
+          <div class="drawer-header" id="dh-a1"></div>
+          <div class="drawer-body" id="db-a1"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;"></div>
+
+    <!-- A2: Icon button trigger -->
+    <p style="font-size:11px;color:#888;margin-bottom:8px;font-weight:600;">A2 — Icon button &nbsp;&#9783; (chart icon)</p>
+    <div class="layout-wrap" id="layout-a2">
+      <div class="table-side" id="table-a2">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Exposure Limit</th>
+                <th>Utilisation</th>
+                <th>↓ Limit Expiry</th>
+                <th>↓ Financed MTD</th>
+                <th>↓ Financed YTD</th>
+                <th>Status</th>
+                <th style="width:48px;text-align:center;">Plat.</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-a2-kc">
+                <td><a class="buyer-link" href="#">K C India Limited</a></td>
+                <td>₹ 10,25,990</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 8,00,400</span><span class="util-pct">78%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:78%"></div></div></div></td>
+                <td>Jul 31, 2026</td>
+                <td><span class="main-amount">₹ 10,25,990</span><span class="mom-line up">+18.4% MoM</span><span class="plat-pct good">21% of platform</span></td>
+                <td><span class="main-amount">₹ 80,04,000</span><span class="plat-pct good">25% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td style="text-align:center;"><button class="trigger-icon-btn" onclick="openDrawer('a2','kc')" title="View platform stats">⬡</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-a2-hul">
+                <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+                <td>₹ 25,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 18,50,000</span><span class="util-pct">74%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:74%"></div></div></div></td>
+                <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+                <td><span class="main-amount">₹ 3,20,000</span><span class="mom-line down">-18.4% MoM</span><span class="plat-pct low">5% of platform</span></td>
+                <td><span class="main-amount">₹ 28,00,000</span><span class="plat-pct low">6% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td style="text-align:center;"><button class="trigger-icon-btn" onclick="openDrawer('a2','hul')" title="View platform stats">⬡</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-a2-reliance">
+                <td><a class="buyer-link" href="#">Reliance Retail Ltd</a><div class="buyer-default">⊘ Under Default</div></td>
+                <td>₹ 15,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 14,80,000</span><span class="util-pct" style="color:#e53935;font-weight:600;">99%</span><div class="util-bar-track"><div class="util-bar-fill high" style="width:99%"></div></div></div></td>
+                <td>Jan 10, 2026</td>
+                <td><span class="main-amount">₹ 1,00,000</span><span class="mom-line down">-62.0% MoM</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="main-amount">₹ 9,00,000</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td style="text-align:center;"><button class="trigger-icon-btn" onclick="openDrawer('a2','reliance')" title="View platform stats">⬡</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer" id="drawer-a2">
+        <div class="drawer-inner">
+          <div class="drawer-header" id="dh-a2"></div>
+          <div class="drawer-body" id="db-a2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;"></div>
+
+    <!-- A3: Pill trigger -->
+    <p style="font-size:11px;color:#888;margin-bottom:8px;font-weight:600;">A3 — Pill button &nbsp;"⬡ Platform stats"</p>
+    <div class="layout-wrap" id="layout-a3">
+      <div class="table-side" id="table-a3">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Exposure Limit</th>
+                <th>Utilisation</th>
+                <th>↓ Limit Expiry</th>
+                <th>↓ Financed MTD</th>
+                <th>↓ Financed YTD</th>
+                <th>Status</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-a3-kc">
+                <td><a class="buyer-link" href="#">K C India Limited</a></td>
+                <td>₹ 10,25,990</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 8,00,400</span><span class="util-pct">78%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:78%"></div></div></div></td>
+                <td>Jul 31, 2026</td>
+                <td><span class="main-amount">₹ 10,25,990</span><span class="mom-line up">+18.4% MoM</span><span class="plat-pct good">21% of platform</span></td>
+                <td><span class="main-amount">₹ 80,04,000</span><span class="plat-pct good">25% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="trigger-pill" onclick="openDrawer('a3','kc')">⬡ Platform stats</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-a3-hul">
+                <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+                <td>₹ 25,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 18,50,000</span><span class="util-pct">74%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:74%"></div></div></div></td>
+                <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+                <td><span class="main-amount">₹ 3,20,000</span><span class="mom-line down">-18.4% MoM</span><span class="plat-pct low">5% of platform</span></td>
+                <td><span class="main-amount">₹ 28,00,000</span><span class="plat-pct low">6% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="trigger-pill" onclick="openDrawer('a3','hul')">⬡ Platform stats</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-a3-reliance">
+                <td><a class="buyer-link" href="#">Reliance Retail Ltd</a><div class="buyer-default">⊘ Under Default</div></td>
+                <td>₹ 15,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 14,80,000</span><span class="util-pct" style="color:#e53935;font-weight:600;">99%</span><div class="util-bar-track"><div class="util-bar-fill high" style="width:99%"></div></div></div></td>
+                <td>Jan 10, 2026</td>
+                <td><span class="main-amount">₹ 1,00,000</span><span class="mom-line down">-62.0% MoM</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="main-amount">₹ 9,00,000</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="trigger-pill" onclick="openDrawer('a3','reliance')">⬡ Platform stats</button></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer" id="drawer-a3">
+        <div class="drawer-inner">
+          <div class="drawer-header" id="dh-a3"></div>
+          <div class="drawer-body" id="db-a3"></div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Position A read:</strong> Most explicit — the column header "Platform" or "Plat." labels the intent before the financier even looks at the trigger. Scales well: new columns can be added without touching this trigger. VIEW and Platform sit side by side as two distinct row-level actions.</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       POSITION B — Inside buyer name cell
+       Trigger lives below the buyer name, same cell.
+       Uses the existing "Under Default" pattern.
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Position B — Inside buyer name cell</span>
+      <span class="badge-tag">CONTEXTUAL</span>
+      <span class="section-desc">Trigger sits below buyer name. Follows existing pattern ("Under Default" lives here too). No extra column.</span>
+    </div>
+    <div class="layout-wrap" id="layout-b">
+      <div class="table-side" id="table-b">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Exposure Limit</th>
+                <th>Utilisation</th>
+                <th>↓ Limit Expiry</th>
+                <th>↓ Financed MTD</th>
+                <th>↓ Financed YTD</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-b-kc">
+                <td>
+                  <a class="buyer-link" href="#">K C India Limited</a>
+                  <button class="buyer-platform-link" onclick="openDrawer('b','kc')">⬡ Platform stats ↗</button>
+                </td>
+                <td>₹ 10,25,990</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 8,00,400</span><span class="util-pct">78%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:78%"></div></div></div></td>
+                <td>Jul 31, 2026</td>
+                <td><span class="main-amount">₹ 10,25,990</span><span class="mom-line up">+18.4% MoM</span><span class="plat-pct good">21% of platform</span></td>
+                <td><span class="main-amount">₹ 80,04,000</span><span class="plat-pct good">25% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-b-hul">
+                <td>
+                  <a class="buyer-link" href="#">Hindustan Unilever Ltd</a>
+                  <button class="buyer-platform-link" onclick="openDrawer('b','hul')">⬡ Platform stats ↗</button>
+                </td>
+                <td>₹ 25,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 18,50,000</span><span class="util-pct">74%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:74%"></div></div></div></td>
+                <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+                <td><span class="main-amount">₹ 3,20,000</span><span class="mom-line down">-18.4% MoM</span><span class="plat-pct low">5% of platform</span></td>
+                <td><span class="main-amount">₹ 28,00,000</span><span class="plat-pct low">6% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+              <tr id="row-b-reliance">
+                <td>
+                  <a class="buyer-link" href="#">Reliance Retail Ltd</a>
+                  <div class="buyer-default">⊘ Under Default</div>
+                  <button class="buyer-platform-link" onclick="openDrawer('b','reliance')">⬡ Platform stats ↗</button>
+                </td>
+                <td>₹ 15,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 14,80,000</span><span class="util-pct" style="color:#e53935;font-weight:600;">99%</span><div class="util-bar-track"><div class="util-bar-fill high" style="width:99%"></div></div></div></td>
+                <td>Jan 10, 2026</td>
+                <td><span class="main-amount">₹ 1,00,000</span><span class="mom-line down">-62.0% MoM</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="main-amount">₹ 9,00,000</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td><button class="btn-view">VIEW</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer" id="drawer-b">
+        <div class="drawer-inner">
+          <div class="drawer-header" id="dh-b"></div>
+          <div class="drawer-body" id="db-b"></div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Position B read:</strong> No extra column. Buyer name cell becomes the identity + context anchor. Works well because "Under Default" already lives here — platform stats follow the same inline pattern. Downside: buyer cell grows taller when both "Under Default" and platform link coexist (see Reliance row).</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       POSITION C — Alongside VIEW button
+       Two actions at row end: Platform stats + VIEW.
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Position C — Alongside VIEW button</span>
+      <span class="badge-tag">GROUPED</span>
+      <span class="section-desc">All row actions grouped at the end. Platform stats and VIEW are two distinct intents sitting together.</span>
+    </div>
+    <div class="layout-wrap" id="layout-c">
+      <div class="table-side" id="table-c">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Exposure Limit</th>
+                <th>Utilisation</th>
+                <th>↓ Limit Expiry</th>
+                <th>↓ Financed MTD</th>
+                <th>↓ Financed YTD</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-c-kc">
+                <td><a class="buyer-link" href="#">K C India Limited</a></td>
+                <td>₹ 10,25,990</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 8,00,400</span><span class="util-pct">78%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:78%"></div></div></div></td>
+                <td>Jul 31, 2026</td>
+                <td><span class="main-amount">₹ 10,25,990</span><span class="mom-line up">+18.4% MoM</span><span class="plat-pct good">21% of platform</span></td>
+                <td><span class="main-amount">₹ 80,04,000</span><span class="plat-pct good">25% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="trigger-text" onclick="openDrawer('c','kc')">Platform stats</button>
+                    <button class="btn-view">VIEW</button>
+                  </div>
+                </td>
+              </tr>
+              <tr id="row-c-hul">
+                <td><a class="buyer-link" href="#">Hindustan Unilever Ltd</a></td>
+                <td>₹ 25,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 18,50,000</span><span class="util-pct">74%</span><div class="util-bar-track"><div class="util-bar-fill" style="width:74%"></div></div></div></td>
+                <td>Mar 15, 2026<div class="expiry-warn">⚠ Expiring soon</div></td>
+                <td><span class="main-amount">₹ 3,20,000</span><span class="mom-line down">-18.4% MoM</span><span class="plat-pct low">5% of platform</span></td>
+                <td><span class="main-amount">₹ 28,00,000</span><span class="plat-pct low">6% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="trigger-text" onclick="openDrawer('c','hul')">Platform stats</button>
+                    <button class="btn-view">VIEW</button>
+                  </div>
+                </td>
+              </tr>
+              <tr id="row-c-reliance">
+                <td><a class="buyer-link" href="#">Reliance Retail Ltd</a><div class="buyer-default">⊘ Under Default</div></td>
+                <td>₹ 15,00,000</td>
+                <td><div class="util-wrap"><span class="util-label">₹ 14,80,000</span><span class="util-pct" style="color:#e53935;font-weight:600;">99%</span><div class="util-bar-track"><div class="util-bar-fill high" style="width:99%"></div></div></div></td>
+                <td>Jan 10, 2026</td>
+                <td><span class="main-amount">₹ 1,00,000</span><span class="mom-line down">-62.0% MoM</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="main-amount">₹ 9,00,000</span><span class="plat-pct low">3% of platform</span></td>
+                <td><span class="status-chip">Approved</span></td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="trigger-text" onclick="openDrawer('c','reliance')">Platform stats</button>
+                    <button class="btn-view">VIEW</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer" id="drawer-c">
+        <div class="drawer-inner">
+          <div class="drawer-header" id="dh-c"></div>
+          <div class="drawer-body" id="db-c"></div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Position C read:</strong> All row-level actions in one place. Financier knows the last column is always "things I can do with this row." Underlined text link differentiates Platform stats from VIEW visually — different weights, different styles, different intents. No extra column needed.</div>
+  </div>
+
+
+  <script>
+    const data = {
+      kc: {
+        name: 'K C India Limited',
+        myMTD: '₹ 10,25,990', platMTD: '₹ 48,50,000', shareMTD: 21, momUp: true, mom: '18.4',
+        myYTD: '₹ 80,04,000', platYTD: '₹ 3,20,00,000', shareYTD: 25,
+        activeFinanciers: 4, totalFinanciers: 11
+      },
+      hul: {
+        name: 'Hindustan Unilever Ltd',
+        myMTD: '₹ 3,20,000', platMTD: '₹ 62,00,000', shareMTD: 5, momUp: false, mom: '18.4',
+        myYTD: '₹ 28,00,000', platYTD: '₹ 4,80,00,000', shareYTD: 6,
+        activeFinanciers: 7, totalFinanciers: 11
+      },
+      reliance: {
+        name: 'Reliance Retail Ltd',
+        myMTD: '₹ 1,00,000', platMTD: '₹ 38,00,000', shareMTD: 3, momUp: false, mom: '62.0',
+        myYTD: '₹ 9,00,000', platYTD: '₹ 2,90,00,000', shareYTD: 3,
+        activeFinanciers: 5, totalFinanciers: 11
+      }
+    };
+
+    function drawerContent(key) {
+      const d = data[key];
+      const lowMTD = d.shareMTD < 15;
+      const lowYTD = d.shareYTD < 15;
+      const othersMTD = 100 - d.shareMTD;
+      const othersYTD = 100 - d.shareYTD;
+
+      return {
+        header: `
+          <div class="drawer-header-top">
+            <div>
+              <div class="drawer-title">Platform Stats — ${d.name}</div>
+              <div class="drawer-subtitle">How this buyer is financed across all financiers on TREDS</div>
+            </div>
+            <button class="drawer-close" onclick="closeAll()">✕</button>
+          </div>
+        `,
+        body: `
+          <div class="drawer-section">
+            <div class="drawer-section-title">Month to Date (MTD)</div>
+            <div class="kpi-row">
+              <div class="kpi-card">
+                <div class="kpi-label">Platform Total</div>
+                <div class="kpi-value blue">${d.platMTD}</div>
+                <div class="kpi-sub">all financiers combined</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Your Financed</div>
+                <div class="kpi-value">${d.myMTD}</div>
+                <div class="kpi-sub">${d.momUp ? '↑' : '↓'} ${d.mom}% vs last month</div>
+              </div>
+            </div>
+            <div class="share-card">
+              <div class="share-card-title">Your share of platform MTD</div>
+              <div class="share-row">
+                <span class="share-dot mine"></span>
+                <span class="share-name">You</span>
+                <div class="share-track"><div class="share-fill mine" style="width:${d.shareMTD}%"></div></div>
+                <span class="share-val">${d.myMTD}</span>
+                <span class="share-pct ${lowMTD ? 'low' : 'good'}">${d.shareMTD}%</span>
+              </div>
+              <div class="share-row">
+                <span class="share-dot others"></span>
+                <span class="share-name">Others</span>
+                <div class="share-track"><div class="share-fill others" style="width:${othersMTD}%"></div></div>
+                <span class="share-val" style="font-size:11px;color:#aaa;">rest</span>
+                <span class="share-pct" style="background:#f5f5f5;color:#888;">${othersMTD}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-divider"></div>
+
+          <div class="drawer-section">
+            <div class="drawer-section-title">Year to Date (YTD)</div>
+            <div class="kpi-row">
+              <div class="kpi-card">
+                <div class="kpi-label">Platform Total</div>
+                <div class="kpi-value blue">${d.platYTD}</div>
+                <div class="kpi-sub">all financiers combined</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Your Financed</div>
+                <div class="kpi-value">${d.myYTD}</div>
+              </div>
+            </div>
+            <div class="share-card">
+              <div class="share-card-title">Your share of platform YTD</div>
+              <div class="share-row">
+                <span class="share-dot mine"></span>
+                <span class="share-name">You</span>
+                <div class="share-track"><div class="share-fill mine" style="width:${d.shareYTD}%"></div></div>
+                <span class="share-val">${d.myYTD}</span>
+                <span class="share-pct ${lowYTD ? 'low' : 'good'}">${d.shareYTD}%</span>
+              </div>
+              <div class="share-row">
+                <span class="share-dot others"></span>
+                <span class="share-name">Others</span>
+                <div class="share-track"><div class="share-fill others" style="width:${othersYTD}%"></div></div>
+                <span class="share-val" style="font-size:11px;color:#aaa;">rest</span>
+                <span class="share-pct" style="background:#f5f5f5;color:#888;">${othersYTD}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-divider"></div>
+
+          <div class="drawer-section">
+            <div class="drawer-section-title">Financier Activity</div>
+            <div class="financier-count">
+              <span>Active financiers on this buyer</span>
+              <span>${d.activeFinanciers} of ${d.totalFinanciers}</span>
+            </div>
+          </div>
+        `
+      };
+    }
+
+    function openDrawer(variant, key) {
+      closeAll();
+      const content = drawerContent(key);
+      document.getElementById('dh-' + variant).innerHTML = content.header;
+      document.getElementById('db-' + variant).innerHTML = content.body;
+      document.getElementById('drawer-' + variant).classList.add('open');
+      document.getElementById('table-' + variant).classList.add('shrink');
+      const row = document.getElementById('row-' + variant + '-' + key);
+      if (row) row.classList.add('row-selected');
+    }
+
+    function closeAll() {
+      document.querySelectorAll('.drawer').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.table-side').forEach(t => t.classList.remove('shrink'));
+      document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('row-selected'));
+    }
+  </script>
+
+</body>
+</html>
