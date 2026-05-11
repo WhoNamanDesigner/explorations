@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reference Snapshots — Risk + Performance in Tables</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      padding: 40px 32px;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .page-subtitle { font-size: 13px; color: #666; margin-bottom: 8px; }
+    .page-note {
+      font-size: 11px; color: #999; margin-bottom: 48px;
+      padding: 8px 12px; background: #fff8e1;
+      border-left: 3px solid #f9a825; border-radius: 0 4px 4px 0;
+      display: inline-block;
+    }
+
+    /* ─── Section wrapper ───────────────────────────── */
+    .ref-section { margin-bottom: 64px; }
+    .ref-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: #aaa; margin-bottom: 6px;
+    }
+    .ref-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .ref-desc { font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.5; }
+    .ref-insight {
+      font-size: 11px; color: #555; margin-top: 12px; padding: 10px 14px;
+      background: #e8eaf6; border-left: 3px solid #3949ab;
+      border-radius: 0 6px 6px 0; line-height: 1.6;
+    }
+    .ref-insight strong { color: #1a1a2e; }
+
+
+    /* ══════════════════════════════════════════════════
+       1. SALESFORCE FINANCIAL SERVICES CLOUD
+    ══════════════════════════════════════════════════ */
+
+    .sf-wrap {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #dddbda;
+      overflow: hidden;
+      font-family: 'Salesforce Sans', -apple-system, sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .sf-topbar {
+      background: #0176d3;
+      padding: 8px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sf-topbar-title { font-size: 13px; font-weight: 600; color: #fff; }
+    .sf-topbar-sub { font-size: 11px; color: #c9dff7; }
+
+    .sf-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .sf-table thead th {
+      background: #f3f3f3; font-size: 11px; font-weight: 600; color: #444;
+      text-align: left; padding: 9px 14px; border-bottom: 1px solid #dddbda;
+      white-space: nowrap;
+    }
+    .sf-table tbody td {
+      padding: 11px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle;
+    }
+    .sf-table tbody tr:last-child td { border-bottom: none; }
+    .sf-table tbody tr:hover td { background: #f5f5f5; }
+
+    .sf-account-name { color: #0176d3; font-weight: 500; font-size: 13px; }
+
+    /* Health score — Salesforce uses a circular badge */
+    .sf-health {
+      display: inline-flex; flex-direction: column; align-items: center;
+      gap: 2px;
+    }
+    .sf-health-ring {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; border: 3px solid;
+    }
+    .sf-health-ring.good   { border-color: #2e844a; color: #2e844a; background: #f3fbf5; }
+    .sf-health-ring.warn   { border-color: #dd7a01; color: #dd7a01; background: #fef7ee; }
+    .sf-health-ring.risk   { border-color: #ba0517; color: #ba0517; background: #fff1f1; }
+    .sf-health-label { font-size: 9px; color: #888; font-weight: 500; }
+
+    /* Risk flags — inline chips below account name */
+    .sf-flags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .sf-flag {
+      font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 4px;
+      display: inline-flex; align-items: center; gap: 3px;
+    }
+    .sf-flag.default  { background: #fde8e8; color: #ba0517; }
+    .sf-flag.overdue  { background: #fff1e0; color: #dd7a01; }
+    .sf-flag.clean    { background: #f3fbf5; color: #2e844a; }
+
+    .sf-kpi { font-size: 13px; font-weight: 500; }
+    .sf-kpi-sub { font-size: 10px; color: #888; margin-top: 1px; }
+    .sf-kpi-up   { color: #2e844a; font-size: 10px; font-weight: 600; }
+    .sf-kpi-down { color: #ba0517; font-size: 10px; font-weight: 600; }
+
+
+    /* ══════════════════════════════════════════════════
+       2. BLOOMBERG TERMINAL
+    ══════════════════════════════════════════════════ */
+
+    .bb-wrap {
+      background: #1a1a1a;
+      border-radius: 4px;
+      border: 1px solid #333;
+      overflow: hidden;
+      font-family: 'Courier New', 'Lucida Console', monospace;
+    }
+    .bb-topbar {
+      background: #ff6600;
+      padding: 4px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .bb-topbar-title { font-size: 11px; font-weight: 700; color: #000; letter-spacing: 1px; }
+    .bb-topbar-meta  { font-size: 10px; color: #000; opacity: 0.7; }
+
+    .bb-subbar {
+      background: #2a2a2a; padding: 5px 12px;
+      display: flex; gap: 24px;
+    }
+    .bb-subbar-item { font-size: 10px; color: #aaa; }
+    .bb-subbar-item span { color: #fff; font-weight: 600; }
+    .bb-subbar-item span.up   { color: #00c176; }
+    .bb-subbar-item span.down { color: #ff4444; }
+
+    .bb-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    .bb-table thead th {
+      background: #2a2a2a; color: #ff6600; font-size: 10px; font-weight: 700;
+      text-align: right; padding: 6px 12px; border-bottom: 1px solid #444;
+      letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .bb-table thead th:first-child { text-align: left; }
+    .bb-table thead th.risk-group { color: #ff4444; }
+
+    .bb-table tbody td {
+      padding: 7px 12px; border-bottom: 1px solid #2a2a2a;
+      text-align: right; color: #e0e0e0; font-size: 11px;
+      vertical-align: middle;
+    }
+    .bb-table tbody td:first-child { text-align: left; }
+    .bb-table tbody tr:hover td { background: #252525; }
+
+    .bb-name { color: #fff; font-weight: 700; font-size: 12px; }
+    .bb-name-sub { color: #888; font-size: 10px; margin-top: 1px; }
+    .bb-up   { color: #00c176; }
+    .bb-down { color: #ff4444; }
+    .bb-warn { color: #ffaa00; }
+    .bb-neutral { color: #e0e0e0; }
+
+    /* Bloomberg risk score — a number in a colored cell */
+    .bb-risk-score {
+      display: inline-block; padding: 3px 8px; border-radius: 3px;
+      font-size: 12px; font-weight: 700; font-family: monospace;
+    }
+    .bb-risk-score.high   { background: #3d0000; color: #ff4444; border: 1px solid #ff4444; }
+    .bb-risk-score.medium { background: #3d2600; color: #ffaa00; border: 1px solid #ffaa00; }
+    .bb-risk-score.low    { background: #003d1a; color: #00c176; border: 1px solid #00c176; }
+
+    /* Bloomberg uses column grouping — risk section is visually separated */
+    .bb-divider-col { border-left: 2px solid #ff440033 !important; }
+    .bb-risk-divider-col { border-left: 2px solid #ff444066 !important; }
+
+
+    /* ══════════════════════════════════════════════════
+       3. EXPERIAN / CIBIL BUSINESS
+    ══════════════════════════════════════════════════ */
+
+    .cibil-wrap {
+      background: #fff; border-radius: 8px;
+      border: 1px solid #e0e0e0; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      font-family: -apple-system, sans-serif;
+    }
+    .cibil-header {
+      background: linear-gradient(135deg, #c0392b 0%, #8e1a12 100%);
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cibil-header-title { font-size: 14px; font-weight: 700; color: #fff; }
+    .cibil-header-sub   { font-size: 11px; color: #f5b8b8; }
+
+    .cibil-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .cibil-table thead th {
+      background: #fafafa; font-size: 10px; font-weight: 700; color: #666;
+      text-align: left; padding: 9px 16px; border-bottom: 2px solid #f0f0f0;
+      text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .cibil-table tbody td {
+      padding: 14px 16px; border-bottom: 1px solid #f5f5f5; vertical-align: middle;
+    }
+    .cibil-table tbody tr:last-child td { border-bottom: none; }
+
+    /* CIBIL score gauge — the key pattern: score is PRIMARY, displayed like a KPI */
+    .cibil-score-wrap { display: flex; align-items: center; gap: 10px; }
+    .cibil-score-badge {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; flex-shrink: 0;
+      border: 3px solid;
+    }
+    .cibil-score-badge.excellent { background: #e8f5e9; color: #1b5e20; border-color: #4caf50; }
+    .cibil-score-badge.good      { background: #e3f2fd; color: #0d47a1; border-color: #2196f3; }
+    .cibil-score-badge.fair      { background: #fff8e1; color: #e65100; border-color: #ff9800; }
+    .cibil-score-badge.poor      { background: #ffebee; color: #b71c1c; border-color: #f44336; }
+
+    .cibil-score-detail { display: flex; flex-direction: column; gap: 2px; }
+    .cibil-score-label  { font-size: 11px; font-weight: 700; }
+    .cibil-score-label.excellent { color: #2e7d32; }
+    .cibil-score-label.good      { color: #1565c0; }
+    .cibil-score-label.fair      { color: #e65100; }
+    .cibil-score-label.poor      { color: #c62828; }
+    .cibil-score-sub { font-size: 10px; color: #888; }
+
+    /* DPD — Days Past Due — CIBIL's primary default indicator */
+    .dpd-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .dpd-count { font-size: 13px; font-weight: 700; }
+    .dpd-count.zero   { color: #2e7d32; }
+    .dpd-count.low    { color: #f57f17; }
+    .dpd-count.high   { color: #c62828; }
+    .dpd-label { font-size: 10px; color: #888; }
+
+    /* Default history dots — timeline-style */
+    .dpd-dots { display: flex; gap: 3px; margin-top: 4px; }
+    .dpd-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .dpd-dot.default { background: #c62828; }
+    .dpd-dot.ok      { background: #c8e6c9; }
+    .dpd-dot.na      { background: #eeeeee; }
+
+    .cibil-name { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+    .cibil-cin  { font-size: 10px; color: #aaa; margin-top: 2px; }
+    .cibil-kpi  { font-size: 13px; font-weight: 500; }
+    .cibil-kpi-sub { font-size: 10px; color: #888; margin-top: 2px; }
+
+
+    /* ══════════════════════════════════════════════════
+       4. SAP CREDIT MANAGEMENT
+    ══════════════════════════════════════════════════ */
+
+    .sap-wrap {
+      background: #fff; border-radius: 4px;
+      border: 1px solid #d9d9d9; overflow: hidden;
+      font-family: '72', 'SAP72', -apple-system, sans-serif;
+    }
+    .sap-titlebar {
+      background: #0a6ed1;
+      padding: 8px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sap-titlebar-title { font-size: 13px; font-weight: 600; color: #fff; }
+    .sap-titlebar-count { font-size: 11px; color: #c0d7f5; }
+
+    .sap-toolbar {
+      background: #f7f7f7; padding: 6px 16px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sap-btn {
+      font-size: 11px; padding: 4px 10px; border: 1px solid #d9d9d9;
+      background: #fff; border-radius: 3px; cursor: pointer; color: #333;
+    }
+
+    .sap-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .sap-table thead th {
+      background: #fafafa; font-size: 11px; font-weight: 600; color: #333;
+      text-align: left; padding: 8px 12px; border-bottom: 2px solid #e0e0e0;
+      white-space: nowrap;
+    }
+    .sap-table thead th.risk-col { background: #fff8e1; color: #e65100; }
+    .sap-table tbody td {
+      padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle;
+      font-size: 12px; color: #333;
+    }
+    .sap-table tbody tr:last-child td { border-bottom: none; }
+    .sap-table tbody tr:hover td { background: #fafbff; }
+
+    /* SAP Risk Class — their primary pattern: categorical A/B/C/D */
+    .sap-risk-class {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .sap-risk-letter {
+      width: 28px; height: 28px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; flex-shrink: 0;
+    }
+    .sap-risk-letter.A { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .sap-risk-letter.B { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+    .sap-risk-letter.C { background: #fff8e1; color: #e65100; border: 1px solid #ffe082; }
+    .sap-risk-letter.D { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+    .sap-risk-desc { font-size: 10px; color: #888; }
+
+    /* SAP shows arrears days as a number with color */
+    .sap-arrears { font-size: 13px; font-weight: 700; }
+    .sap-arrears.zero { color: #2e7d32; }
+    .sap-arrears.low  { color: #f57f17; }
+    .sap-arrears.high { color: #c62828; }
+    .sap-arrears-label { font-size: 10px; color: #888; margin-top: 1px; }
+
+    /* SAP credit exposure bar */
+    .sap-exposure-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .sap-exposure-label { font-size: 11px; color: #333; }
+    .sap-exposure-track { width: 90px; height: 5px; background: #e0e0e0; border-radius: 3px; overflow: hidden; }
+    .sap-exposure-fill  { height: 100%; border-radius: 3px; background: #0a6ed1; }
+    .sap-exposure-fill.warn { background: #e65100; }
+    .sap-exposure-pct   { font-size: 10px; color: #888; }
+
+    .sap-blocked {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      background: #ffebee; color: #c62828; padding: 2px 7px;
+      border-radius: 3px; border: 1px solid #ef9a9a;
+    }
+    .sap-clear {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      background: #e8f5e9; color: #2e7d32; padding: 2px 7px;
+      border-radius: 3px; border: 1px solid #a5d6a7;
+    }
+
+    /* Annotation */
+    .annotation {
+      font-size: 11px; color: #999; margin-top: 12px; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825; border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+  </style>
+</head>
+<body>
+
+  <h1>Reference Snapshots — How platforms show Risk + Performance together</h1>
+  <p class="page-subtitle">Four product-inspired patterns for surfacing defaults alongside KPIs in a table.</p>
+  <span class="page-note">Conceptual recreations based on known design patterns — not pixel-perfect replicas</span>
+
+
+  <!-- ══════════════════════════════════════════════════
+       1. SALESFORCE FINANCIAL SERVICES CLOUD
+       Key pattern: Health Score ring + inline Risk Flags
+       Risk and performance coexist on the same row.
+       The health score summarises everything into one number.
+  ═══════════════════════════════════════════════════ -->
+  <div class="ref-section">
+    <div class="ref-label">Reference 01</div>
+    <div class="ref-title">Salesforce Financial Services Cloud</div>
+    <div class="ref-desc">
+      Account Health Score (circular ring badge) summarises risk into a single number 0–100.
+      Risk flags (red/amber chips) appear inline below the account name.
+      Performance KPIs sit in their own columns but the health score provides the interpretive frame first.
+    </div>
+
+    <div class="sf-wrap">
+      <div class="sf-topbar">
+        <span class="sf-topbar-title">Account List — Buyer Portfolio</span>
+        <span class="sf-topbar-sub">4 accounts · Sorted by Health Score</span>
+      </div>
+      <table class="sf-table">
+        <thead>
+          <tr>
+            <th>Account Name</th>
+            <th style="text-align:center;">Health Score</th>
+            <th>Credit Limit</th>
+            <th>Outstanding</th>
+            <th>MTD Financed</th>
+            <th>YTD Financed</th>
+            <th>Payment Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="sf-account-name">Reliance Retail Ltd</div>
+              <div class="sf-flags">
+                <span class="sf-flag default">⚠ 4 defaults</span>
+                <span class="sf-flag overdue">Overdue 45d</span>
+              </div>
+            </td>
+            <td style="text-align:center;">
+              <div class="sf-health">
+                <div class="sf-health-ring risk">22</div>
+                <div class="sf-health-label">At Risk</div>
+              </div>
+            </td>
+            <td><div class="sf-kpi">₹ 15,00,000</div></td>
+            <td><div class="sf-kpi">₹ 14,80,000</div><div class="sf-kpi-sub" style="color:#c62828;">99% utilized</div></td>
+            <td><div class="sf-kpi">₹ 1,00,000</div><div class="sf-kpi-down">↓ 62% MoM</div></td>
+            <td><div class="sf-kpi">₹ 9,00,000</div></td>
+            <td><span style="background:#fde8e8;color:#c62828;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;">Blocked</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sf-account-name">Hindustan Unilever Ltd</div>
+              <div class="sf-flags">
+                <span class="sf-flag default">⚠ 1 default</span>
+              </div>
+            </td>
+            <td style="text-align:center;">
+              <div class="sf-health">
+                <div class="sf-health-ring warn">54</div>
+                <div class="sf-health-label">Review</div>
+              </div>
+            </td>
+            <td><div class="sf-kpi">₹ 25,00,000</div></td>
+            <td><div class="sf-kpi">₹ 18,50,000</div><div class="sf-kpi-sub">74% utilized</div></td>
+            <td><div class="sf-kpi">₹ 3,20,000</div><div class="sf-kpi-down">↓ 18.4% MoM</div></td>
+            <td><div class="sf-kpi">₹ 28,00,000</div></td>
+            <td><span style="background:#fff8e1;color:#f57f17;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;">Watch</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sf-account-name">Tata Motors Limited</div>
+              <div class="sf-flags">
+                <span class="sf-flag clean">✓ No defaults</span>
+              </div>
+            </td>
+            <td style="text-align:center;">
+              <div class="sf-health">
+                <div class="sf-health-ring good">82</div>
+                <div class="sf-health-label">Healthy</div>
+              </div>
+            </td>
+            <td><div class="sf-kpi">₹ 50,00,000</div></td>
+            <td><div class="sf-kpi">₹ 22,00,000</div><div class="sf-kpi-sub">44% utilized</div></td>
+            <td><div class="sf-kpi">₹ 22,00,000</div><div class="sf-kpi-up">↑ 9.2% MoM</div></td>
+            <td><div class="sf-kpi">₹ 1,80,00,000</div></td>
+            <td><span style="background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;">Active</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sf-account-name">K C India Limited</div>
+              <div class="sf-flags">
+                <span class="sf-flag clean">✓ No defaults</span>
+              </div>
+            </td>
+            <td style="text-align:center;">
+              <div class="sf-health">
+                <div class="sf-health-ring good">91</div>
+                <div class="sf-health-label">Healthy</div>
+              </div>
+            </td>
+            <td><div class="sf-kpi">₹ 10,25,990</div></td>
+            <td><div class="sf-kpi">₹ 8,00,400</div><div class="sf-kpi-sub">78% utilized</div></td>
+            <td><div class="sf-kpi">₹ 10,25,990</div><div class="sf-kpi-up">↑ 18.4% MoM</div></td>
+            <td><div class="sf-kpi">₹ 80,04,000</div></td>
+            <td><span style="background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;">Active</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ref-insight">
+      <strong>What to take from Salesforce:</strong> The Health Score ring is the single number that contextualises all other data on the row. A financier sees 22/100 before reading any MTD/YTD figure — so the defaults don't have to compete with positive KPIs, they've already been factored into a score. Risk flags below the name reinforce the "why" without cluttering the metric columns.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       2. BLOOMBERG TERMINAL
+       Key pattern: Colour-coded column groups. Risk gets
+       its own column group, visually separated. Numbers
+       carry all the meaning — no chips, no labels.
+  ═══════════════════════════════════════════════════ -->
+  <div class="ref-section">
+    <div class="ref-label">Reference 02</div>
+    <div class="ref-title">Bloomberg Terminal — Credit Risk Screen</div>
+    <div class="ref-desc">
+      Dark interface with strict colour coding: green = positive, red = negative, amber = warning.
+      Risk metrics get their own column group separated by a visual divider.
+      No chips or badges — the numbers and their colours are the entire language.
+      Default probability shown as a percentage, not a count.
+    </div>
+
+    <div class="bb-wrap">
+      <div class="bb-topbar">
+        <span class="bb-topbar-title">CRDT &lt;GO&gt; — CREDIT EXPOSURE MONITOR</span>
+        <span class="bb-topbar-meta">11 MAY 2026 09:42 IST</span>
+      </div>
+      <div class="bb-subbar">
+        <span class="bb-subbar-item">PORTFOLIO: <span>BUYER-FIN</span></span>
+        <span class="bb-subbar-item">TOTAL EXPOSURE: <span>₹1.05CR</span></span>
+        <span class="bb-subbar-item">AT RISK: <span class="down">₹29L</span></span>
+        <span class="bb-subbar-item">WATCHLIST: <span class="warn">2</span></span>
+      </div>
+      <table class="bb-table">
+        <thead>
+          <tr>
+            <th>COUNTERPARTY</th>
+            <th>LIMIT (₹)</th>
+            <th>EXPOSURE (₹)</th>
+            <th>UTIL %</th>
+            <th>MTD (₹)</th>
+            <th>MoM %</th>
+            <!-- Risk group — visually separated -->
+            <th class="risk-group bb-risk-divider-col">DRSK SCORE</th>
+            <th class="risk-group">DEF HIST</th>
+            <th class="risk-group">DPD</th>
+            <th class="risk-group">STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="bb-name">RELIANCE RETAIL</div>
+              <div class="bb-name-sub">IN:RELRET · BBB-</div>
+            </td>
+            <td class="bb-neutral">15,00,000</td>
+            <td class="bb-warn">14,80,000</td>
+            <td class="bb-down">99.0</td>
+            <td class="bb-down">1,00,000</td>
+            <td class="bb-down">-62.0%</td>
+            <td class="bb-risk-divider-col" style="text-align:center;">
+              <span class="bb-risk-score high">78</span>
+            </td>
+            <td class="bb-down" style="font-weight:700;">4×</td>
+            <td class="bb-down">45d</td>
+            <td><span style="color:#ff4444;font-weight:700;font-size:11px;">BLOCK</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="bb-name">HIND UNILEVER</div>
+              <div class="bb-name-sub">IN:HUL · A+</div>
+            </td>
+            <td class="bb-neutral">25,00,000</td>
+            <td class="bb-neutral">18,50,000</td>
+            <td class="bb-warn">74.0</td>
+            <td class="bb-down">3,20,000</td>
+            <td class="bb-down">-18.4%</td>
+            <td class="bb-risk-divider-col" style="text-align:center;">
+              <span class="bb-risk-score medium">41</span>
+            </td>
+            <td class="bb-warn">1×</td>
+            <td class="bb-warn">12d</td>
+            <td><span style="color:#ffaa00;font-weight:700;font-size:11px;">WATCH</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="bb-name">TATA MOTORS</div>
+              <div class="bb-name-sub">IN:TATAMOT · AA</div>
+            </td>
+            <td class="bb-neutral">50,00,000</td>
+            <td class="bb-neutral">22,00,000</td>
+            <td class="bb-neutral">44.0</td>
+            <td class="bb-up">22,00,000</td>
+            <td class="bb-up">+9.2%</td>
+            <td class="bb-risk-divider-col" style="text-align:center;">
+              <span class="bb-risk-score low">12</span>
+            </td>
+            <td class="bb-up">0×</td>
+            <td class="bb-up">0d</td>
+            <td><span style="color:#00c176;font-weight:700;font-size:11px;">CLEAR</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="bb-name">KC INDIA LTD</div>
+              <div class="bb-name-sub">IN:KCINDIA · A</div>
+            </td>
+            <td class="bb-neutral">10,25,990</td>
+            <td class="bb-neutral">8,00,400</td>
+            <td class="bb-neutral">78.1</td>
+            <td class="bb-up">10,25,990</td>
+            <td class="bb-up">+18.4%</td>
+            <td class="bb-risk-divider-col" style="text-align:center;">
+              <span class="bb-risk-score low">8</span>
+            </td>
+            <td class="bb-up">0×</td>
+            <td class="bb-up">0d</td>
+            <td><span style="color:#00c176;font-weight:700;font-size:11px;">CLEAR</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ref-insight">
+      <strong>What to take from Bloomberg:</strong> Risk gets its own column group, separated by a visual divider line. The eye naturally groups "performance" vs "risk" as two distinct zones on the same row. Default history shown as <code>4×</code> — compact, factual, no labels needed. The DRSK score (0–100, high = risky) converts complexity into one scannable number per row.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       3. EXPERIAN / CIBIL BUSINESS
+       Key pattern: Score is FIRST — it precedes all data.
+       DPD (Days Past Due) shown with a history dot timeline.
+       Score creates the interpretive frame before any number.
+  ═══════════════════════════════════════════════════ -->
+  <div class="ref-section">
+    <div class="ref-label">Reference 03</div>
+    <div class="ref-title">Experian / CIBIL Business Credit Report</div>
+    <div class="ref-desc">
+      Credit score displayed as a circular badge — the leftmost element after the name.
+      DPD (Days Past Due) shows the default timeline as coloured dots (red = default month, green = clean month).
+      Score bands: 700+ Excellent · 600–699 Good · 500–599 Fair · Below 500 Poor.
+    </div>
+
+    <div class="cibil-wrap">
+      <div class="cibil-header">
+        <div>
+          <div class="cibil-header-title">Business Credit Monitor — Buyer Portfolio</div>
+          <div class="cibil-header-sub">Commercial Credit Bureau Data · Updated May 2026</div>
+        </div>
+      </div>
+      <table class="cibil-table">
+        <thead>
+          <tr>
+            <th>Business Name</th>
+            <th>Credit Score</th>
+            <th>DPD History (12M)</th>
+            <th>Defaults</th>
+            <th>Credit Limit</th>
+            <th>Outstanding</th>
+            <th>MTD Financed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="cibil-name">Reliance Retail Ltd</div>
+              <div class="cibil-cin">CIN: U52100MH2006PLC166281</div>
+            </td>
+            <td>
+              <div class="cibil-score-wrap">
+                <div class="cibil-score-badge poor">312</div>
+                <div class="cibil-score-detail">
+                  <span class="cibil-score-label poor">Poor</span>
+                  <span class="cibil-score-sub">Below 500</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="dpd-dots">
+                <div class="dpd-dot ok" title="Jun"></div>
+                <div class="dpd-dot default" title="Jul — 30 DPD"></div>
+                <div class="dpd-dot default" title="Aug — 60 DPD"></div>
+                <div class="dpd-dot ok" title="Sep"></div>
+                <div class="dpd-dot default" title="Oct — 30 DPD"></div>
+                <div class="dpd-dot default" title="Nov — 90 DPD"></div>
+                <div class="dpd-dot ok" title="Dec"></div>
+                <div class="dpd-dot ok" title="Jan"></div>
+                <div class="dpd-dot default" title="Feb — 30 DPD"></div>
+                <div class="dpd-dot ok" title="Mar"></div>
+                <div class="dpd-dot ok" title="Apr"></div>
+                <div class="dpd-dot default" title="May — Active"></div>
+              </div>
+              <div style="font-size:10px;color:#888;margin-top:4px;">Current DPD: 45 days</div>
+            </td>
+            <td>
+              <div class="dpd-wrap">
+                <span class="dpd-count high">4 times</span>
+                <span class="dpd-label">last 24 months</span>
+              </div>
+            </td>
+            <td><div class="cibil-kpi">₹ 15,00,000</div></td>
+            <td><div class="cibil-kpi" style="color:#c62828;">₹ 14,80,000</div><div class="cibil-kpi-sub">99% utilized</div></td>
+            <td><div class="cibil-kpi">₹ 1,00,000</div></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="cibil-name">Hindustan Unilever Ltd</div>
+              <div class="cibil-cin">CIN: L15140MH1933PLC002030</div>
+            </td>
+            <td>
+              <div class="cibil-score-wrap">
+                <div class="cibil-score-badge fair">548</div>
+                <div class="cibil-score-detail">
+                  <span class="cibil-score-label fair">Fair</span>
+                  <span class="cibil-score-sub">500–599</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="dpd-dots">
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot default" title="Nov — 30 DPD"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+              </div>
+              <div style="font-size:10px;color:#888;margin-top:4px;">Current DPD: 12 days</div>
+            </td>
+            <td>
+              <div class="dpd-wrap">
+                <span class="dpd-count low">1 time</span>
+                <span class="dpd-label">last 24 months</span>
+              </div>
+            </td>
+            <td><div class="cibil-kpi">₹ 25,00,000</div></td>
+            <td><div class="cibil-kpi">₹ 18,50,000</div><div class="cibil-kpi-sub">74% utilized</div></td>
+            <td><div class="cibil-kpi">₹ 3,20,000</div></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="cibil-name">Tata Motors Limited</div>
+              <div class="cibil-cin">CIN: L28920MH1945PLC004520</div>
+            </td>
+            <td>
+              <div class="cibil-score-wrap">
+                <div class="cibil-score-badge excellent">782</div>
+                <div class="cibil-score-detail">
+                  <span class="cibil-score-label excellent">Excellent</span>
+                  <span class="cibil-score-sub">700+</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="dpd-dots">
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+                <div class="dpd-dot ok"></div>
+              </div>
+              <div style="font-size:10px;color:#2e7d32;margin-top:4px;">No overdue payments</div>
+            </td>
+            <td>
+              <div class="dpd-wrap">
+                <span class="dpd-count zero">0 times</span>
+                <span class="dpd-label">last 24 months</span>
+              </div>
+            </td>
+            <td><div class="cibil-kpi">₹ 50,00,000</div></td>
+            <td><div class="cibil-kpi">₹ 22,00,000</div><div class="cibil-kpi-sub">44% utilized</div></td>
+            <td><div class="cibil-kpi">₹ 22,00,000</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ref-insight">
+      <strong>What to take from CIBIL:</strong> The DPD dot timeline is powerful — 12 coloured dots (one per month) show the entire default history at a glance without any numbers. A row of red dots tells a story no count can. "4 times" as a number is abstract; 4 red dots scattered across 12 months is visceral. Consider this for your drawer — not the table, but the widget.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       4. SAP CREDIT MANAGEMENT
+       Key pattern: Risk Class (A/B/C/D) as a categorical
+       column. Days in Arrears as a dedicated field.
+       Structured, dense, enterprise-grade.
+  ═══════════════════════════════════════════════════ -->
+  <div class="ref-section">
+    <div class="ref-label">Reference 04</div>
+    <div class="ref-title">SAP Credit Management</div>
+    <div class="ref-desc">
+      Risk Class is a categorical field (A = lowest risk → D = highest risk), not a score.
+      Days in Arrears shown as a number with colour. Credit exposure visualised as a bar.
+      Clean separation: limit management columns on the left, risk class and arrears on the right.
+    </div>
+
+    <div class="sap-wrap">
+      <div class="sap-titlebar">
+        <span class="sap-titlebar-title">Credit Management — Business Partner Overview</span>
+        <span class="sap-titlebar-count">4 entries · Sorted by Risk Class</span>
+      </div>
+      <div class="sap-toolbar">
+        <button class="sap-btn">Filter</button>
+        <button class="sap-btn">Sort</button>
+        <button class="sap-btn">Export</button>
+      </div>
+      <table class="sap-table">
+        <thead>
+          <tr>
+            <th>Business Partner</th>
+            <th>Credit Limit</th>
+            <th>Credit Exposure</th>
+            <th>Utilisation</th>
+            <th>MTD Financed</th>
+            <th>YTD Financed</th>
+            <!-- Risk group -->
+            <th class="risk-col">Risk Class</th>
+            <th class="risk-col">Days in Arrears</th>
+            <th class="risk-col">Order Block</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div style="font-size:12px;font-weight:600;color:#333;">Reliance Retail Ltd</div>
+              <div style="font-size:10px;color:#aaa;">BP: 100041 · Segment: Retail</div>
+            </td>
+            <td>₹ 15,00,000</td>
+            <td>₹ 14,80,000</td>
+            <td>
+              <div class="sap-exposure-wrap">
+                <span class="sap-exposure-pct" style="color:#c62828;font-weight:700;">99%</span>
+                <div class="sap-exposure-track"><div class="sap-exposure-fill warn" style="width:99%"></div></div>
+              </div>
+            </td>
+            <td>₹ 1,00,000</td>
+            <td>₹ 9,00,000</td>
+            <td>
+              <div class="sap-risk-class">
+                <div class="sap-risk-letter D">D</div>
+                <div class="sap-risk-desc">Very High<br>Risk</div>
+              </div>
+            </td>
+            <td>
+              <div class="sap-arrears high">45 days</div>
+              <div class="sap-arrears-label">4 occurrences</div>
+            </td>
+            <td><span class="sap-blocked">Blocked</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-size:12px;font-weight:600;color:#333;">Hindustan Unilever Ltd</div>
+              <div style="font-size:10px;color:#aaa;">BP: 100028 · Segment: FMCG</div>
+            </td>
+            <td>₹ 25,00,000</td>
+            <td>₹ 18,50,000</td>
+            <td>
+              <div class="sap-exposure-wrap">
+                <span class="sap-exposure-pct">74%</span>
+                <div class="sap-exposure-track"><div class="sap-exposure-fill" style="width:74%"></div></div>
+              </div>
+            </td>
+            <td>₹ 3,20,000</td>
+            <td>₹ 28,00,000</td>
+            <td>
+              <div class="sap-risk-class">
+                <div class="sap-risk-letter C">C</div>
+                <div class="sap-risk-desc">Medium<br>Risk</div>
+              </div>
+            </td>
+            <td>
+              <div class="sap-arrears low">12 days</div>
+              <div class="sap-arrears-label">1 occurrence</div>
+            </td>
+            <td><span class="sap-blocked">Watch</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-size:12px;font-weight:600;color:#333;">Tata Motors Limited</div>
+              <div style="font-size:10px;color:#aaa;">BP: 100012 · Segment: Auto</div>
+            </td>
+            <td>₹ 50,00,000</td>
+            <td>₹ 22,00,000</td>
+            <td>
+              <div class="sap-exposure-wrap">
+                <span class="sap-exposure-pct">44%</span>
+                <div class="sap-exposure-track"><div class="sap-exposure-fill" style="width:44%"></div></div>
+              </div>
+            </td>
+            <td>₹ 22,00,000</td>
+            <td>₹ 1,80,00,000</td>
+            <td>
+              <div class="sap-risk-class">
+                <div class="sap-risk-letter B">B</div>
+                <div class="sap-risk-desc">Low<br>Risk</div>
+              </div>
+            </td>
+            <td>
+              <div class="sap-arrears zero">0 days</div>
+              <div class="sap-arrears-label">0 occurrences</div>
+            </td>
+            <td><span class="sap-clear">Clear</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-size:12px;font-weight:600;color:#333;">K C India Limited</div>
+              <div style="font-size:10px;color:#aaa;">BP: 100033 · Segment: Mfg.</div>
+            </td>
+            <td>₹ 10,25,990</td>
+            <td>₹ 8,00,400</td>
+            <td>
+              <div class="sap-exposure-wrap">
+                <span class="sap-exposure-pct">78%</span>
+                <div class="sap-exposure-track"><div class="sap-exposure-fill" style="width:78%"></div></div>
+              </div>
+            </td>
+            <td>₹ 10,25,990</td>
+            <td>₹ 80,04,000</td>
+            <td>
+              <div class="sap-risk-class">
+                <div class="sap-risk-letter A">A</div>
+                <div class="sap-risk-desc">Very Low<br>Risk</div>
+              </div>
+            </td>
+            <td>
+              <div class="sap-arrears zero">0 days</div>
+              <div class="sap-arrears-label">0 occurrences</div>
+            </td>
+            <td><span class="sap-clear">Clear</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ref-insight">
+      <strong>What to take from SAP:</strong> Risk Class A/B/C/D is categorical — not a score, not a count. It abstracts all risk signals (defaults, arrears, exposure) into a single letter. A financier learns once what A/B/C/D means and never has to re-interpret. "Days in Arrears + occurrences" as two lines in one cell is the cleanest way to show default severity + frequency together without adding two columns.
+    </div>
+  </div>
+
+</body>
+</html>
