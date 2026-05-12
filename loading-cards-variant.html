@@ -77,47 +77,54 @@
     .qoq-card-pct   { font-size: 22px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
     .qoq-card-sub   { font-size: 10px; color: #aaa; }
 
-    /* ── NEW: Invoice Loading cards (similar structure, different feel) ── */
+    /* ── NEW: Invoice Loading cards ── */
     .load-cards {
-      display: flex; border: 1px solid #e8e8e8;
-      border-radius: 12px; overflow: hidden;
+      display: flex; gap: 8px;
     }
     .load-card {
-      flex: 1; padding: 14px 8px 0; text-align: center;
-      border-right: 1px solid #e8e8e8;
-      display: flex; flex-direction: column; align-items: center;
-      position: relative;
+      flex: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      border: 1px solid #e8eaf6;
+      background: #fff;
     }
-    .load-card:last-child { border-right: none; }
-    .load-card.latest { background: #f5f7ff; }
+    .load-card.latest {
+      border-color: #3949ab;
+      box-shadow: 0 2px 10px rgba(57,73,171,0.13);
+    }
 
-    .load-card-q   {
-      font-size: 11px; color: #aaa; font-weight: 600; margin-bottom: 6px;
+    /* coloured top accent bar — proportional height */
+    .load-card-topbar {
+      width: 100%;
+      background: #c5cae9;
+      flex-shrink: 0;
     }
-    .load-card.latest .load-card-q { color: #3949ab; font-weight: 700; }
+    .load-card.q2 .load-card-topbar { background: #9fa8da; }
+    .load-card.q3 .load-card-topbar { background: #7986cb; }
+    .load-card.latest .load-card-topbar { background: #3949ab; }
+
+    .load-card-body {
+      padding: 10px 8px 12px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+
+    .load-card-q {
+      font-size: 10px; color: #aaa; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px;
+    }
+    .load-card.latest .load-card-q { color: #3949ab; }
 
     .load-card-amt {
-      font-size: 16px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px;
+      font-size: 15px; font-weight: 800; color: #1a1a2e;
     }
     .load-card.latest .load-card-amt { color: #3949ab; }
 
-    /* QoQ growth arrow */
     .load-card-growth {
-      font-size: 10px; font-weight: 700; margin-bottom: 10px;
+      font-size: 10px; font-weight: 700;
     }
     .load-card-growth.up   { color: #2e7d32; }
-    .load-card-growth.base { color: #aaa; font-weight: 400; }
-
-    /* proportional bar at bottom — key differentiator */
-    .load-card-bar {
-      width: 100%; height: 5px;
-      margin-top: auto;
-    }
-    .load-card-bar-fill {
-      height: 100%; border-radius: 0;
-      background: #c5cae9;
-    }
-    .load-card.latest .load-card-bar-fill { background: #3949ab; }
+    .load-card-growth.base { color: #bbb; font-weight: 400; font-size: 9px; }
 
     .load-footer {
       display: flex; align-items: center; justify-content: space-between;
@@ -189,40 +196,48 @@
 
     <div class="qoq-title">QoQ View</div>
 
-    <!-- Cards: amounts as hero, proportional bar at base, growth % as sub -->
+    <!-- Cards: coloured top bar grows taller + darker each quarter -->
     <div class="load-cards">
-      <div class="load-card">
-        <div class="load-card-q">Q1</div>
-        <div class="load-card-amt">₹1.8Cr</div>
-        <div class="load-card-growth base">Base</div>
-        <!-- bar: 1.8/2.8 = 64% -->
-        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:64%;"></div></div>
+      <div class="load-card q1">
+        <!-- top bar: 1.8/2.8 = 64% → 20px -->
+        <div class="load-card-topbar" style="height:20px;"></div>
+        <div class="load-card-body">
+          <div class="load-card-q">Q1</div>
+          <div class="load-card-amt">₹1.8Cr</div>
+          <div class="load-card-growth base">Base</div>
+        </div>
       </div>
-      <div class="load-card">
-        <div class="load-card-q">Q2</div>
-        <div class="load-card-amt">₹2.1Cr</div>
-        <div class="load-card-growth up">▲ 17%</div>
-        <!-- bar: 2.1/2.8 = 75% -->
-        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:75%;"></div></div>
+      <div class="load-card q2">
+        <!-- top bar: 2.1/2.8 = 75% → 24px -->
+        <div class="load-card-topbar" style="height:24px;"></div>
+        <div class="load-card-body">
+          <div class="load-card-q">Q2</div>
+          <div class="load-card-amt">₹2.1Cr</div>
+          <div class="load-card-growth up">▲ 17%</div>
+        </div>
       </div>
-      <div class="load-card">
-        <div class="load-card-q">Q3</div>
-        <div class="load-card-amt">₹2.3Cr</div>
-        <div class="load-card-growth up">▲ 10%</div>
-        <!-- bar: 2.3/2.8 = 82% -->
-        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:82%;"></div></div>
+      <div class="load-card q3">
+        <!-- top bar: 2.3/2.8 = 82% → 26px -->
+        <div class="load-card-topbar" style="height:26px;"></div>
+        <div class="load-card-body">
+          <div class="load-card-q">Q3</div>
+          <div class="load-card-amt">₹2.3Cr</div>
+          <div class="load-card-growth up">▲ 10%</div>
+        </div>
       </div>
-      <div class="load-card latest">
-        <div class="load-card-q">Q4 · Latest</div>
-        <div class="load-card-amt">₹2.8Cr</div>
-        <div class="load-card-growth up">▲ 22%</div>
-        <!-- bar: 2.8/2.8 = 100% -->
-        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:100%;"></div></div>
+      <div class="load-card q4 latest">
+        <!-- top bar: full → 32px -->
+        <div class="load-card-topbar" style="height:32px;"></div>
+        <div class="load-card-body">
+          <div class="load-card-q">Q4 · Now</div>
+          <div class="load-card-amt">₹2.8Cr</div>
+          <div class="load-card-growth up">▲ 22%</div>
+        </div>
       </div>
     </div>
 
     <div class="load-footer">
-      <div class="load-footer-text">Bar height = relative volume per quarter</div>
+      <div class="load-footer-text">Bar height + colour = relative volume</div>
       <span class="chip chip-blue">₹1.8Cr → ₹2.8Cr in FY26</span>
     </div>
   </div>
