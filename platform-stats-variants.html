@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Stats Widget — Look & Feel Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      padding: 32px 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub   { font-size: 13px; color: #888; margin-bottom: 40px; }
+
+    /* layout: 3 columns */
+    .variants-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    @media(max-width:900px){ .variants-grid { grid-template-columns: 1fr; } }
+
+    .variant-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .variant-tag  {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: #aaa;
+    }
+    .variant-name { font-size: 15px; font-weight: 800; color: #1a1a2e; margin-bottom: 2px; }
+    .variant-desc { font-size: 11px; color: #888; line-height: 1.5; margin-bottom: 8px; }
+
+    .annotation {
+      font-size: 11px; color: #999; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0; margin-top: 8px;
+    }
+    .annotation strong { color: #555; }
+
+    /* ════════════════════════════════════════════
+       VARIANT 2 — Dark header, light body
+       ════════════════════════════════════════════ */
+    .v2-modal {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    .v2-header {
+      background: #1a1a2e;
+      padding: 18px 20px 20px;
+      color: #fff;
+    }
+    .v2-header-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .v2-buyer-name { font-size: 15px; font-weight: 700; }
+    .v2-buyer-sub  { font-size: 11px; color: #9fa8da; margin-top: 2px; }
+    .v2-close {
+      background: rgba(255,255,255,0.1); border: none; color: #fff;
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+    }
+    .v2-kpi-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .v2-kpi {
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .v2-kpi-label { font-size: 10px; color: #9fa8da; margin-bottom: 4px; }
+    .v2-kpi-amt   { font-size: 16px; font-weight: 700; color: #fff; }
+    .v2-kpi-tag   {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; color: #a5d6a7; font-weight: 600; margin-top: 4px;
+    }
+    .v2-kpi-tag.muted { color: #9fa8da; }
+    .v2-kpi-tag.down  { color: #ef9a9a; }
+
+    .v2-body { padding: 16px 20px; }
+    .v2-section-title {
+      font-size: 10px; font-weight: 700; color: #aaa;
+      letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .v2-period-tab {
+      display: flex; gap: 0; margin-bottom: 14px;
+      border: 1px solid #e8e8e8; border-radius: 6px; overflow: hidden;
+      width: fit-content;
+    }
+    .v2-tab-btn {
+      padding: 5px 14px; font-size: 11px; font-weight: 600;
+      background: #fff; color: #888; border: none; cursor: pointer;
+    }
+    .v2-tab-btn.active { background: #1a1a2e; color: #fff; }
+
+    .v2-share-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .v2-share-label { font-size: 12px; font-weight: 600; color: #1a1a2e; }
+    .v2-chip-row { display: flex; gap: 5px; }
+    .v2-chip {
+      padding: 3px 8px; border-radius: 20px;
+      font-size: 10px; font-weight: 600;
+    }
+    .v2-chip.rank { background: #e8eaf6; color: #3949ab; }
+    .v2-chip.gap  { background: #fff8e1; color: #e65100; }
+    .v2-chip.lead { background: #e6f4ea; color: #2e7d32; }
+
+    .v2-bar-wrap { position: relative; margin-bottom: 4px; }
+    .v2-bar-track {
+      width: 100%; height: 8px; background: #e8eaf6;
+      border-radius: 20px; overflow: hidden;
+    }
+    .v2-bar-fill {
+      height: 100%; border-radius: 20px;
+      background: linear-gradient(90deg, #3949ab, #7986cb);
+    }
+    .v2-bar-pct {
+      text-align: right; font-size: 13px; font-weight: 700;
+      color: #3949ab; margin-top: 4px;
+    }
+    .v2-legend-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .v2-legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 10px; color: #888;
+    }
+    .v2-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .v2-divider { height: 1px; background: #f0f0f0; margin: 14px 0; }
+
+    .v2-track-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .v2-track-amt   { font-size: 18px; font-weight: 800; color: #1a1a2e; }
+    .v2-track-sub   { font-size: 10px; color: #aaa; margin-top: 2px; }
+    .v2-stats-row {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 8px; margin-bottom: 14px;
+    }
+    .v2-stat {
+      background: #f9fafb; border: 1px solid #efefef;
+      border-radius: 8px; padding: 8px 10px; text-align: center;
+    }
+    .v2-stat-num   { font-size: 18px; font-weight: 800; color: #1a1a2e; }
+    .v2-stat-num.fraction { font-size: 15px; }
+    .v2-stat-num .numer { color: #2e7d32; }
+    .v2-stat-num .denom { color: #888; font-size: 13px; }
+    .v2-stat-label { font-size: 9px; color: #aaa; margin-top: 3px; line-height: 1.3; }
+
+    .v2-qoq-label { font-size: 10px; font-weight: 700; color: #aaa; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 8px; }
+    .v2-chart { display: flex; align-items: flex-end; gap: 6px; height: 70px; }
+    .v2-bar-group { display: flex; gap: 2px; align-items: flex-end; flex: 1; flex-direction: column; position: relative; }
+    .v2-q-label { font-size: 9px; color: #bbb; text-align: center; margin-top: 4px; width: 100%; }
+    .v2-bar-g { display: flex; gap: 2px; align-items: flex-end; width: 100%; }
+    .v2-bar-b { border-radius: 3px 3px 0 0; }
+    .v2-chart-legend {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;
+    }
+    .v2-chart-legend-item {
+      display: flex; align-items: center; gap: 4px; font-size: 9px; color: #888;
+    }
+    .v2-chart-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+    /* ════════════════════════════════════════════
+       VARIANT 3 — Compact / Dense
+       ════════════════════════════════════════════ */
+    .v3-modal {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    .v3-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .v3-title { font-size: 14px; font-weight: 700; }
+    .v3-close {
+      background: #f5f5f5; border: none; color: #888;
+      width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+      font-size: 13px;
+    }
+    .v3-body { padding: 14px 20px; }
+
+    /* MTD/YTD side by side */
+    .v3-periods {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .v3-period-card {
+      background: #f9fafb; border: 1px solid #efefef;
+      border-radius: 10px; padding: 10px 12px;
+    }
+    .v3-period-tag {
+      font-size: 9px; font-weight: 700; color: #aaa;
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+    }
+    .v3-period-mine { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+    .v3-period-plat { font-size: 10px; color: #888; margin-top: 2px; }
+    .v3-mom { font-size: 10px; font-weight: 600; margin-top: 3px; }
+    .v3-mom.up   { color: #2e7d32; }
+    .v3-mom.down { color: #c62828; }
+
+    /* share inline */
+    .v3-share-section { margin-bottom: 14px; }
+    .v3-share-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .v3-share-label { font-size: 11px; font-weight: 600; color: #555; flex-shrink: 0; }
+    .v3-share-pct   { font-size: 13px; font-weight: 800; color: #3949ab; flex-shrink: 0; }
+    .v3-chip-sm {
+      padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600;
+    }
+    .v3-chip-sm.rank { background: #e8eaf6; color: #3949ab; }
+    .v3-chip-sm.gap  { background: #fff8e1; color: #e65100; }
+    .v3-bar-track {
+      width: 100%; height: 6px; background: #e8eaf6;
+      border-radius: 20px; overflow: hidden;
+    }
+    .v3-bar-fill {
+      height: 100%; border-radius: 20px; background: #3949ab;
+    }
+    .v3-bar-legend {
+      display: flex; gap: 12px; margin-top: 5px;
+    }
+    .v3-bar-legend-item {
+      display: flex; align-items: center; gap: 4px; font-size: 9px; color: #aaa;
+    }
+    .v3-bar-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    .v3-divider { height: 1px; background: #f0f0f0; margin: 12px 0; }
+
+    /* track record compact */
+    .v3-track-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .v3-track-title { font-size: 11px; font-weight: 700; color: #1a1a2e; }
+    .v3-track-amt   { font-size: 15px; font-weight: 800; color: #1a1a2e; }
+    .v3-track-sub   { font-size: 10px; color: #aaa; }
+
+    /* ratio pill */
+    .v3-ratio-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: #e6f4ea; border-radius: 20px; padding: 4px 10px;
+    }
+    .v3-ratio-num { font-size: 13px; font-weight: 700; }
+    .v3-ratio-num .numer { color: #2e7d32; }
+    .v3-ratio-num .denom { color: #888; font-size: 11px; }
+    .v3-ratio-label { font-size: 10px; color: #2e7d32; font-weight: 600; }
+
+    .v3-stats-inline {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .v3-stat-inline {
+      flex: 1; text-align: center; background: #f9fafb;
+      border: 1px solid #efefef; border-radius: 8px; padding: 7px 8px;
+    }
+    .v3-stat-inline-num   { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+    .v3-stat-inline-label { font-size: 9px; color: #aaa; margin-top: 2px; line-height: 1.3; }
+
+    /* qoq compact dots */
+    .v3-qoq-header { font-size: 10px; font-weight: 700; color: #aaa; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 8px; }
+    .v3-dot-chart {
+      display: flex; gap: 0; border: 1px solid #efefef; border-radius: 8px; overflow: hidden;
+    }
+    .v3-dot-col {
+      flex: 1; padding: 10px 8px; border-right: 1px solid #efefef; text-align: center;
+    }
+    .v3-dot-col:last-child { border-right: none; }
+    .v3-dot-q    { font-size: 9px; color: #aaa; margin-bottom: 6px; font-weight: 600; }
+    .v3-dot-rate { font-size: 13px; font-weight: 800; }
+    .v3-dot-rate.good { color: #2e7d32; }
+    .v3-dot-rate.fair { color: #f57f17; }
+    .v3-dot-rate.poor { color: #c62828; }
+    .v3-dot-subs { font-size: 9px; color: #aaa; margin-top: 3px; }
+    .v3-dot-def  { color: #c62828; font-weight: 600; }
+
+    /* ════════════════════════════════════════════
+       VARIANT 4 — Score-first / Graded
+       ════════════════════════════════════════════ */
+    .v4-modal {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    .v4-header {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .v4-title { font-size: 14px; font-weight: 700; }
+    .v4-close {
+      background: #f5f5f5; border: none; color: #888;
+      width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 13px;
+    }
+    .v4-body { padding: 16px 20px; }
+
+    /* health banner */
+    .v4-health-banner {
+      display: flex; align-items: center; gap: 16px;
+      background: #f0faf4; border: 1px solid #c8e6c9;
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
+    }
+    .v4-grade-ring {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 900; flex-shrink: 0;
+      border: 3px solid;
+    }
+    .v4-grade-ring.A { border-color: #2e7d32; color: #2e7d32; background: #e6f4ea; }
+    .v4-grade-ring.B { border-color: #f57f17; color: #f57f17; background: #fff8e1; }
+    .v4-grade-ring.C { border-color: #c62828; color: #c62828; background: #fde8e8; }
+    .v4-health-text-title { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+    .v4-health-text-sub   { font-size: 11px; color: #555; margin-top: 2px; line-height: 1.4; }
+
+    .v4-section-title {
+      font-size: 10px; font-weight: 700; color: #aaa;
+      letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    /* MTD/YTD two-row */
+    .v4-period-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .v4-period-label {
+      font-size: 10px; font-weight: 700; color: #aaa;
+      width: 32px; flex-shrink: 0; text-transform: uppercase;
+    }
+    .v4-period-mine { font-size: 14px; font-weight: 700; color: #1a1a2e; flex-shrink: 0; }
+    .v4-period-bar  { flex: 1; }
+    .v4-period-bar-track {
+      height: 6px; background: #e8eaf6; border-radius: 20px; overflow: hidden;
+    }
+    .v4-period-bar-fill {
+      height: 100%; border-radius: 20px; background: #3949ab;
+    }
+    .v4-period-bar-sub {
+      display: flex; justify-content: space-between;
+      font-size: 9px; color: #aaa; margin-top: 2px;
+    }
+    .v4-chip-xs {
+      padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; flex-shrink: 0;
+    }
+    .v4-chip-xs.rank { background: #e8eaf6; color: #3949ab; }
+    .v4-chip-xs.mom.up   { background: #e6f4ea; color: #2e7d32; }
+    .v4-chip-xs.mom.down { background: #fde8e8; color: #c62828; }
+
+    .v4-divider { height: 1px; background: #f0f0f0; margin: 14px 0; }
+
+    /* repayment horizontal */
+    .v4-repay-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .v4-repay-fraction { font-size: 20px; font-weight: 800; flex-shrink: 0; }
+    .v4-repay-fraction .numer { color: #2e7d32; }
+    .v4-repay-fraction .denom { color: #ccc; font-size: 14px; }
+    .v4-repay-bar-wrap { flex: 1; }
+    .v4-repay-bar-track {
+      height: 10px; background: #e8e8e8; border-radius: 20px; overflow: hidden;
+    }
+    .v4-repay-bar-fill {
+      height: 100%; border-radius: 20px; background: #2e7d32;
+    }
+    .v4-repay-bar-sub {
+      font-size: 10px; color: #888; margin-top: 3px;
+    }
+    .v4-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .v4-badge {
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .v4-badge.ok   { background: #e6f4ea; color: #2e7d32; }
+    .v4-badge.warn { background: #fff8e1; color: #e65100; }
+    .v4-badge.bad  { background: #fde8e8; color: #c62828; }
+
+    /* qoq horizontal bars */
+    .v4-qoq-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .v4-qoq-q { font-size: 10px; color: #888; width: 28px; flex-shrink: 0; font-weight: 600; }
+    .v4-qoq-bar-wrap { flex: 1; position: relative; }
+    .v4-qoq-bar-track { height: 14px; background: #f0f0f0; border-radius: 4px; overflow: hidden; display: flex; }
+    .v4-qoq-seg-ok  { background: #2e7d32; border-radius: 4px 0 0 4px; height: 100%; }
+    .v4-qoq-seg-out { background: #e65100; height: 100%; }
+    .v4-qoq-seg-def { background: #c62828; border-radius: 0 4px 4px 0; height: 100%; }
+    .v4-qoq-pct { font-size: 10px; font-weight: 700; width: 32px; flex-shrink: 0; text-align: right; }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">Platform Stats Widget — Look & Feel Variants</div>
+  <div class="page-sub">Same data points, 3 different visual approaches. Your current design is the reference.</div>
+
+  <div class="variants-grid">
+
+    <!-- ═══════════════════════════════════════════
+         VARIANT 2 — Dark header, light body
+         ═══════════════════════════════════════════ -->
+    <div class="variant-wrap">
+      <div>
+        <div class="variant-tag">Variant 2</div>
+        <div class="variant-name">Dark header · Light body</div>
+        <div class="variant-desc">Key amounts in a dark navy header — draws eye immediately. Body is white with clean sections. Progress bar gets a gradient fill.</div>
+      </div>
+
+      <div class="v2-modal">
+        <!-- Dark header -->
+        <div class="v2-header">
+          <div class="v2-header-top">
+            <div>
+              <div class="v2-buyer-name">Platform Stats — K C India Ltd</div>
+              <div class="v2-buyer-sub">Buyer Management · My Buyers</div>
+            </div>
+            <button class="v2-close">✕</button>
+          </div>
+          <div class="v2-kpi-row">
+            <div class="v2-kpi">
+              <div class="v2-kpi-label">Platform Financed · MTD</div>
+              <div class="v2-kpi-amt">₹ 10,25,990</div>
+              <div class="v2-kpi-tag muted">All Financiers Combined</div>
+            </div>
+            <div class="v2-kpi">
+              <div class="v2-kpi-label">Your Financed · MTD</div>
+              <div class="v2-kpi-amt">₹ 10,25,990</div>
+              <div class="v2-kpi-tag">▲ 18.4% vs last month</div>
+            </div>
+            <div class="v2-kpi">
+              <div class="v2-kpi-label">Platform Financed · YTD</div>
+              <div class="v2-kpi-amt">₹ 10,25,990</div>
+              <div class="v2-kpi-tag muted">All Financiers Combined</div>
+            </div>
+            <div class="v2-kpi">
+              <div class="v2-kpi-label">Your Financed · YTD</div>
+              <div class="v2-kpi-amt">₹ 10,25,990</div>
+              <div class="v2-kpi-tag">▲ 18.4% vs last month</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Light body -->
+        <div class="v2-body">
+
+          <!-- Share sections -->
+          <div class="v2-section-title">Your Share of Platform</div>
+
+          <!-- MTD share -->
+          <div style="margin-bottom:12px;">
+            <div class="v2-share-row">
+              <span style="font-size:11px;color:#888;">MTD</span>
+              <div class="v2-chip-row">
+                <span class="v2-chip rank">#4 of financiers</span>
+                <span class="v2-chip gap">#1 · ₹32.6L ahead</span>
+              </div>
+            </div>
+            <div class="v2-bar-track">
+              <div class="v2-bar-fill" style="width:21%;"></div>
+            </div>
+            <div class="v2-bar-pct">21%</div>
+          </div>
+
+          <!-- YTD share -->
+          <div style="margin-bottom:4px;">
+            <div class="v2-share-row">
+              <span style="font-size:11px;color:#888;">YTD</span>
+              <div class="v2-chip-row">
+                <span class="v2-chip rank">#4 of financiers</span>
+                <span class="v2-chip gap">#1 · ₹32.6L ahead</span>
+              </div>
+            </div>
+            <div class="v2-bar-track">
+              <div class="v2-bar-fill" style="width:21%;"></div>
+            </div>
+            <div class="v2-bar-pct">21%</div>
+          </div>
+
+          <div class="v2-legend-row">
+            <div class="v2-legend-item"><div class="v2-legend-dot" style="background:#c5cae9;"></div>Total</div>
+            <div class="v2-legend-item"><div class="v2-legend-dot" style="background:#3949ab;"></div>Your Contribution</div>
+          </div>
+
+          <div class="v2-divider"></div>
+
+          <!-- Repayment track -->
+          <div class="v2-section-title">Repayment Track Record</div>
+          <div class="v2-track-header">
+            <div>
+              <div class="v2-track-amt">₹ 80,40,212</div>
+              <div class="v2-track-sub">Financed via Platform · Last FY</div>
+            </div>
+          </div>
+
+          <div class="v2-stats-row">
+            <div class="v2-stat">
+              <div class="v2-stat-num fraction">
+                <span class="numer">250</span><span class="denom">/260</span>
+              </div>
+              <div class="v2-stat-label">FU's Financed<br>(Last FY)</div>
+            </div>
+            <div class="v2-stat">
+              <div class="v2-stat-num">–</div>
+              <div class="v2-stat-label">Past<br>Defaults</div>
+            </div>
+            <div class="v2-stat">
+              <div class="v2-stat-num">10</div>
+              <div class="v2-stat-label">Settled Outside<br>TReDS</div>
+            </div>
+          </div>
+
+          <!-- QoQ chart -->
+          <div class="v2-qoq-label">QoQ View</div>
+          <div class="v2-chart">
+            <!-- Q1: FU=73, Def=0, Out=2 max=73 -->
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+              <div class="v2-bar-g" style="height:60px;align-items:flex-end;">
+                <div class="v2-bar-b" style="flex:3;height:60px;background:#3949ab;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:2px;background:#4caf50;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:2px;background:#ff9800;border-radius:3px 3px 0 0;"></div>
+              </div>
+              <div class="v2-q-label">Q1</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+              <div class="v2-bar-g" style="height:60px;align-items:flex-end;">
+                <div class="v2-bar-b" style="flex:3;height:52px;background:#3949ab;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:2px;background:#4caf50;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:3px;background:#ff9800;border-radius:3px 3px 0 0;"></div>
+              </div>
+              <div class="v2-q-label">Q2</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+              <div class="v2-bar-g" style="height:60px;align-items:flex-end;">
+                <div class="v2-bar-b" style="flex:3;height:60px;background:#3949ab;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:2px;background:#4caf50;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:3px;background:#ff9800;border-radius:3px 3px 0 0;"></div>
+              </div>
+              <div class="v2-q-label">Q3</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+              <div class="v2-bar-g" style="height:60px;align-items:flex-end;">
+                <div class="v2-bar-b" style="flex:3;height:55px;background:#3949ab;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:2px;background:#4caf50;border-radius:3px 3px 0 0;"></div>
+                <div class="v2-bar-b" style="flex:1;height:4px;background:#ff9800;border-radius:3px 3px 0 0;"></div>
+              </div>
+              <div class="v2-q-label">Q4</div>
+            </div>
+          </div>
+          <div class="v2-chart-legend">
+            <div class="v2-chart-legend-item"><div class="v2-chart-legend-dot" style="background:#3949ab;"></div>Financed FU</div>
+            <div class="v2-chart-legend-item"><div class="v2-chart-legend-dot" style="background:#4caf50;"></div>Repayment Default</div>
+            <div class="v2-chart-legend-item"><div class="v2-chart-legend-dot" style="background:#ff9800;"></div>Settled Outside TReDS</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Change:</strong> MTD + YTD both in dark header together — one glance gets both periods. Share bars moved to body side by side (MTD · YTD stacked, no tabs needed).
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
+         VARIANT 3 — Compact / Dense
+         ═══════════════════════════════════════════ -->
+    <div class="variant-wrap">
+      <div>
+        <div class="variant-tag">Variant 3</div>
+        <div class="variant-name">Compact · Dense</div>
+        <div class="variant-desc">MTD and YTD side by side in cards. Share bar inline with %. QoQ as a 4-cell grid — on-time rate is the hero number per quarter, no chart needed.</div>
+      </div>
+
+      <div class="v3-modal">
+        <div class="v3-header">
+          <div class="v3-title">Platform Stats — K C India Limited</div>
+          <button class="v3-close">✕</button>
+        </div>
+        <div class="v3-body">
+
+          <!-- MTD + YTD side by side -->
+          <div class="v3-periods">
+            <div class="v3-period-card">
+              <div class="v3-period-tag">MTD</div>
+              <div class="v3-period-mine">₹ 10,25,990</div>
+              <div class="v3-period-plat">Plat: ₹ 10,25,990</div>
+              <div class="v3-mom up">▲ 18.4% vs last month</div>
+            </div>
+            <div class="v3-period-card">
+              <div class="v3-period-tag">YTD</div>
+              <div class="v3-period-mine">₹ 10,25,990</div>
+              <div class="v3-period-plat">Plat: ₹ 10,25,990</div>
+              <div class="v3-mom up">▲ 18.4% vs last month</div>
+            </div>
+          </div>
+
+          <!-- Share inline -->
+          <div class="v3-share-section">
+            <div class="v3-share-row">
+              <span class="v3-share-label">Your Share · MTD</span>
+              <span class="v3-share-pct">21%</span>
+              <span class="v3-chip-sm rank">#4 of financiers</span>
+              <span class="v3-chip-sm gap">#1 · ₹32.6L ahead</span>
+            </div>
+            <div class="v3-bar-track">
+              <div class="v3-bar-fill" style="width:21%;"></div>
+            </div>
+            <div class="v3-bar-legend">
+              <div class="v3-bar-legend-item"><div class="v3-bar-legend-dot" style="background:#c5cae9;"></div>Total</div>
+              <div class="v3-bar-legend-item"><div class="v3-bar-legend-dot" style="background:#3949ab;"></div>Your Contribution</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:8px;">
+            <div class="v3-share-row">
+              <span class="v3-share-label">Your Share · YTD</span>
+              <span class="v3-share-pct">21%</span>
+              <span class="v3-chip-sm rank">#4 of financiers</span>
+            </div>
+            <div class="v3-bar-track">
+              <div class="v3-bar-fill" style="width:21%;"></div>
+            </div>
+          </div>
+
+          <div class="v3-divider"></div>
+
+          <!-- Track record compact -->
+          <div class="v3-track-row">
+            <div>
+              <div class="v3-track-title">Repayment Track Record</div>
+              <div class="v3-track-amt">₹ 80,40,212</div>
+              <div class="v3-track-sub">Financed via Platform · Last FY</div>
+            </div>
+            <div class="v3-ratio-pill">
+              <span class="v3-ratio-num"><span class="numer">250</span><span class="denom">/260</span></span>
+              <span class="v3-ratio-label">on time</span>
+            </div>
+          </div>
+
+          <div class="v3-stats-inline">
+            <div class="v3-stat-inline">
+              <div class="v3-stat-inline-num">–</div>
+              <div class="v3-stat-inline-label">Past Defaults</div>
+            </div>
+            <div class="v3-stat-inline">
+              <div class="v3-stat-inline-num">10</div>
+              <div class="v3-stat-inline-label">Settled Outside TReDS</div>
+            </div>
+          </div>
+
+          <!-- QoQ as 4-cell grid -->
+          <div class="v3-qoq-header">QoQ View</div>
+          <div class="v3-dot-chart">
+            <div class="v3-dot-col">
+              <div class="v3-dot-q">Q1</div>
+              <div class="v3-dot-rate good">95%</div>
+              <div class="v3-dot-subs">73 FUs · <span class="v3-dot-def">0</span> def</div>
+            </div>
+            <div class="v3-dot-col">
+              <div class="v3-dot-q">Q2</div>
+              <div class="v3-dot-rate good">97%</div>
+              <div class="v3-dot-subs">65 FUs · <span class="v3-dot-def">0</span> def</div>
+            </div>
+            <div class="v3-dot-col">
+              <div class="v3-dot-q">Q3</div>
+              <div class="v3-dot-rate good">97%</div>
+              <div class="v3-dot-subs">65 FUs · <span class="v3-dot-def">0</span> def</div>
+            </div>
+            <div class="v3-dot-col">
+              <div class="v3-dot-q">Q4</div>
+              <div class="v3-dot-rate good">96%</div>
+              <div class="v3-dot-subs">68 FUs · <span class="v3-dot-def">0</span> def</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Change:</strong> QoQ bar chart replaced with a 4-cell number grid — on-time % is the hero per quarter, FU count and defaults as sub-text. Saves vertical space, easier to scan across quarters.
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
+         VARIANT 4 — Score / Grade first
+         ═══════════════════════════════════════════ -->
+    <div class="variant-wrap">
+      <div>
+        <div class="variant-tag">Variant 4</div>
+        <div class="variant-name">Grade-first · Summary banner</div>
+        <div class="variant-desc">Opens with a health grade (A/B/C) derived from on-time %. Financier gets the verdict before reading any numbers. MTD/YTD as horizontal rows with inline bar + chips. QoQ as horizontal stacked bars.</div>
+      </div>
+
+      <div class="v4-modal">
+        <div class="v4-header">
+          <div class="v4-title">Platform Stats — K C India Limited</div>
+          <button class="v4-close">✕</button>
+        </div>
+        <div class="v4-body">
+
+          <!-- Health grade banner -->
+          <div class="v4-health-banner">
+            <div class="v4-grade-ring A">A</div>
+            <div>
+              <div class="v4-health-text-title">Healthy buyer · Strong track record</div>
+              <div class="v4-health-text-sub">96% invoices paid on time · No past defaults · Low outside-TREDS settlement</div>
+            </div>
+          </div>
+
+          <!-- Financing section -->
+          <div class="v4-section-title">Financing Activity</div>
+
+          <div class="v4-period-row">
+            <div class="v4-period-label">MTD</div>
+            <div class="v4-period-mine">₹ 10,25,990</div>
+            <div class="v4-period-bar">
+              <div class="v4-period-bar-track">
+                <div class="v4-period-bar-fill" style="width:21%;"></div>
+              </div>
+              <div class="v4-period-bar-sub">
+                <span>Plat: ₹ 10,25,990</span>
+                <span>21%</span>
+              </div>
+            </div>
+            <span class="v4-chip-xs rank">#4</span>
+            <span class="v4-chip-xs mom up">▲ 18.4%</span>
+          </div>
+
+          <div class="v4-period-row">
+            <div class="v4-period-label">YTD</div>
+            <div class="v4-period-mine">₹ 10,25,990</div>
+            <div class="v4-period-bar">
+              <div class="v4-period-bar-track">
+                <div class="v4-period-bar-fill" style="width:21%;"></div>
+              </div>
+              <div class="v4-period-bar-sub">
+                <span>Plat: ₹ 10,25,990</span>
+                <span>21%</span>
+              </div>
+            </div>
+            <span class="v4-chip-xs rank">#4</span>
+            <span class="v4-chip-xs mom up">▲ 18.4%</span>
+          </div>
+
+          <div class="v4-divider"></div>
+
+          <!-- Repayment -->
+          <div class="v4-section-title">Repayment Track Record · Last FY</div>
+
+          <div class="v4-repay-row">
+            <div class="v4-repay-fraction">
+              <span class="numer">250</span><span class="denom">/260</span>
+            </div>
+            <div class="v4-repay-bar-wrap">
+              <div class="v4-repay-bar-track">
+                <div class="v4-repay-bar-fill" style="width:96%;"></div>
+              </div>
+              <div class="v4-repay-bar-sub">FU's paid on time · ₹ 80,40,212 financed</div>
+            </div>
+          </div>
+
+          <div class="v4-badges">
+            <span class="v4-badge ok">No past defaults</span>
+            <span class="v4-badge warn">10 settled outside TReDS</span>
+          </div>
+
+          <!-- QoQ horizontal bars -->
+          <div class="v4-section-title">QoQ View</div>
+
+          <div class="v4-qoq-row">
+            <div class="v4-qoq-q">Q1</div>
+            <div class="v4-qoq-bar-wrap">
+              <div class="v4-qoq-bar-track">
+                <div class="v4-qoq-seg-ok"  style="width:89%;"></div>
+                <div class="v4-qoq-seg-out"  style="width:3%;"></div>
+                <div class="v4-qoq-seg-def"  style="width:0%;"></div>
+              </div>
+            </div>
+            <div class="v4-qoq-pct" style="color:#2e7d32;">95%</div>
+          </div>
+          <div class="v4-qoq-row">
+            <div class="v4-qoq-q">Q2</div>
+            <div class="v4-qoq-bar-wrap">
+              <div class="v4-qoq-bar-track">
+                <div class="v4-qoq-seg-ok"  style="width:91%;"></div>
+                <div class="v4-qoq-seg-out"  style="width:3%;"></div>
+                <div class="v4-qoq-seg-def"  style="width:0%;"></div>
+              </div>
+            </div>
+            <div class="v4-qoq-pct" style="color:#2e7d32;">97%</div>
+          </div>
+          <div class="v4-qoq-row">
+            <div class="v4-qoq-q">Q3</div>
+            <div class="v4-qoq-bar-wrap">
+              <div class="v4-qoq-bar-track">
+                <div class="v4-qoq-seg-ok"  style="width:91%;"></div>
+                <div class="v4-qoq-seg-out"  style="width:3%;"></div>
+                <div class="v4-qoq-seg-def"  style="width:0%;"></div>
+              </div>
+            </div>
+            <div class="v4-qoq-pct" style="color:#2e7d32;">97%</div>
+          </div>
+          <div class="v4-qoq-row">
+            <div class="v4-qoq-q">Q4</div>
+            <div class="v4-qoq-bar-wrap">
+              <div class="v4-qoq-bar-track">
+                <div class="v4-qoq-seg-ok"  style="width:89%;"></div>
+                <div class="v4-qoq-seg-out"  style="width:4%;"></div>
+                <div class="v4-qoq-seg-def"  style="width:0%;"></div>
+              </div>
+            </div>
+            <div class="v4-qoq-pct" style="color:#2e7d32;">96%</div>
+          </div>
+
+          <div class="v2-chart-legend" style="margin-top:8px;">
+            <div class="v2-chart-legend-item"><div class="v2-chart-legend-dot" style="background:#2e7d32;"></div>On Time</div>
+            <div class="v2-chart-legend-item"><div class="v2-chart-legend-dot" style="background:#e65100;"></div>Outside TReDS</div>
+            <div class="v2-chart-legend-item"><div class="v2-chart-legend-dot" style="background:#c62828;"></div>Default</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Change:</strong> Grade ring (A/B/C) added at top — derived from on-time %. Financier sees verdict first, numbers second. QoQ changed to horizontal stacked bars — quarters on Y-axis reads faster when comparing 4 rows. MoM % moved inline with each period row instead of inside KPI cards.
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
