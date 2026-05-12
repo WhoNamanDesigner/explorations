@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice Loading Trend — Card Variant</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      padding: 32px 24px;
+    }
+
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub   { font-size: 13px; color: #888; margin-bottom: 32px; }
+
+    /* reference widget (screenshot recreation) */
+    .ref-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: #bbb; margin-bottom: 8px;
+    }
+
+    .widget {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      max-width: 520px;
+    }
+    .widget + .widget { margin-top: 24px; }
+
+    .section-title {
+      font-size: 15px; font-weight: 700; color: #1a1a2e;
+      margin-bottom: 10px;
+    }
+    .section-title span { color: #888; font-weight: 400; }
+
+    /* shared chip */
+    .chip {
+      display: inline-flex; align-items: center;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 10px; font-weight: 700;
+    }
+    .chip-green  { background: #e6f4ea; color: #2e7d32; }
+    .chip-blue   { background: #eef0fb; color: #3949ab; }
+    .chip-orange { background: #fff3e0; color: #e65100; }
+
+    .hero-amt {
+      font-size: 28px; font-weight: 900; color: #1a1a2e;
+      line-height: 1; margin-bottom: 12px; margin-top: 4px;
+    }
+
+    /* stat pills row */
+    .stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .stat-pill {
+      background: #f5f5f5; border-radius: 8px; padding: 5px 12px;
+      font-size: 12px; color: #444;
+    }
+    .stat-pill strong { font-weight: 800; color: #1a1a2e; }
+
+    /* ── REFERENCE: Repayment QoQ cards (same as screenshot) ── */
+    .qoq-title {
+      font-size: 13px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px;
+    }
+    .qoq-cards {
+      display: flex; border: 1px solid #e8e8e8;
+      border-radius: 12px; overflow: hidden;
+    }
+    .qoq-card {
+      flex: 1; padding: 14px 10px; text-align: center;
+      border-right: 1px solid #e8e8e8;
+    }
+    .qoq-card:last-child { border-right: none; }
+    .qoq-card-q     { font-size: 12px; color: #aaa; font-weight: 600; margin-bottom: 6px; }
+    .qoq-card-pct   { font-size: 22px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+    .qoq-card-sub   { font-size: 10px; color: #aaa; }
+
+    /* ── NEW: Invoice Loading cards (similar structure, different feel) ── */
+    .load-cards {
+      display: flex; border: 1px solid #e8e8e8;
+      border-radius: 12px; overflow: hidden;
+    }
+    .load-card {
+      flex: 1; padding: 14px 8px 0; text-align: center;
+      border-right: 1px solid #e8e8e8;
+      display: flex; flex-direction: column; align-items: center;
+      position: relative;
+    }
+    .load-card:last-child { border-right: none; }
+    .load-card.latest { background: #f5f7ff; }
+
+    .load-card-q   {
+      font-size: 11px; color: #aaa; font-weight: 600; margin-bottom: 6px;
+    }
+    .load-card.latest .load-card-q { color: #3949ab; font-weight: 700; }
+
+    .load-card-amt {
+      font-size: 16px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px;
+    }
+    .load-card.latest .load-card-amt { color: #3949ab; }
+
+    /* QoQ growth arrow */
+    .load-card-growth {
+      font-size: 10px; font-weight: 700; margin-bottom: 10px;
+    }
+    .load-card-growth.up   { color: #2e7d32; }
+    .load-card-growth.base { color: #aaa; font-weight: 400; }
+
+    /* proportional bar at bottom — key differentiator */
+    .load-card-bar {
+      width: 100%; height: 5px;
+      margin-top: auto;
+    }
+    .load-card-bar-fill {
+      height: 100%; border-radius: 0;
+      background: #c5cae9;
+    }
+    .load-card.latest .load-card-bar-fill { background: #3949ab; }
+
+    .load-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 10px;
+    }
+    .load-footer-text { font-size: 10px; color: #aaa; }
+    .divider { height: 1px; background: #f5f5f5; margin: 16px 0; }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">Invoice Loading Trend — Card Variant</div>
+  <div class="page-sub">Quarter-card layout inspired by Repayment section, but visually distinct.</div>
+
+  <!-- REFERENCE: Repayment Track Record (as in screenshot) -->
+  <div class="ref-label">Reference · Repayment Track Record (existing)</div>
+  <div class="widget" style="margin-bottom:10px;">
+    <div class="section-title">Repayment Track Record <span>· Last FY</span></div>
+
+    <div><span class="chip chip-green" style="margin-bottom:6px;">▲ 95% On-Time</span></div>
+    <div class="hero-amt">₹ 80,40,212</div>
+
+    <div class="stat-row">
+      <div class="stat-pill"><strong>250</strong>/260 on time</div>
+      <div class="stat-pill"><strong>04</strong> Past Defaults</div>
+      <div class="stat-pill"><strong>06</strong> Settled Outside TReDS</div>
+    </div>
+
+    <div class="qoq-title">QoQ View</div>
+    <div class="qoq-cards">
+      <div class="qoq-card">
+        <div class="qoq-card-q">Q1</div>
+        <div class="qoq-card-pct">100%</div>
+        <div class="qoq-card-sub">73 FUs · 0 Def.</div>
+      </div>
+      <div class="qoq-card">
+        <div class="qoq-card-q">Q2</div>
+        <div class="qoq-card-pct">95%</div>
+        <div class="qoq-card-sub">73 FUs · 4 Def.</div>
+      </div>
+      <div class="qoq-card">
+        <div class="qoq-card-q">Q3</div>
+        <div class="qoq-card-pct">97%</div>
+        <div class="qoq-card-sub">73 FUs · 3 Def.</div>
+      </div>
+      <div class="qoq-card">
+        <div class="qoq-card-q">Q4</div>
+        <div class="qoq-card-pct">99%</div>
+        <div class="qoq-card-sub">73 FUs · 1 Def.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;color:#aaa;margin:6px 0 6px 2px;">↓ New section — same card pattern, different visual treatment</div>
+
+  <!-- NEW: Invoice Loading Trend -->
+  <div class="ref-label" style="margin-top:16px;">New · Invoice Loading Trend</div>
+  <div class="widget">
+    <div class="section-title">Invoice Loading Trend <span>· FY 2025–26</span></div>
+
+    <div><span class="chip chip-green" style="margin-bottom:6px;">▲ 22% QoQ</span></div>
+    <div class="hero-amt">₹ 2,80,00,000</div>
+
+    <div class="stat-row">
+      <div class="stat-pill">Total FY <strong>₹9Cr</strong></div>
+      <div class="stat-pill">Growth <strong>▲ 55% YoY</strong></div>
+      <div class="stat-pill"><strong>4</strong> Qtrs active</div>
+    </div>
+
+    <div class="qoq-title">QoQ View</div>
+
+    <!-- Cards: amounts as hero, proportional bar at base, growth % as sub -->
+    <div class="load-cards">
+      <div class="load-card">
+        <div class="load-card-q">Q1</div>
+        <div class="load-card-amt">₹1.8Cr</div>
+        <div class="load-card-growth base">Base</div>
+        <!-- bar: 1.8/2.8 = 64% -->
+        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:64%;"></div></div>
+      </div>
+      <div class="load-card">
+        <div class="load-card-q">Q2</div>
+        <div class="load-card-amt">₹2.1Cr</div>
+        <div class="load-card-growth up">▲ 17%</div>
+        <!-- bar: 2.1/2.8 = 75% -->
+        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:75%;"></div></div>
+      </div>
+      <div class="load-card">
+        <div class="load-card-q">Q3</div>
+        <div class="load-card-amt">₹2.3Cr</div>
+        <div class="load-card-growth up">▲ 10%</div>
+        <!-- bar: 2.3/2.8 = 82% -->
+        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:82%;"></div></div>
+      </div>
+      <div class="load-card latest">
+        <div class="load-card-q">Q4 · Latest</div>
+        <div class="load-card-amt">₹2.8Cr</div>
+        <div class="load-card-growth up">▲ 22%</div>
+        <!-- bar: 2.8/2.8 = 100% -->
+        <div class="load-card-bar"><div class="load-card-bar-fill" style="width:100%;"></div></div>
+      </div>
+    </div>
+
+    <div class="load-footer">
+      <div class="load-footer-text">Bar height = relative volume per quarter</div>
+      <span class="chip chip-blue">₹1.8Cr → ₹2.8Cr in FY26</span>
+    </div>
+  </div>
+
+</body>
+</html>
