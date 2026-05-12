@@ -460,6 +460,62 @@
     .qoq-trend.up   { color: #2e7d32; }
     .qoq-trend.down { color: #c62828; }
 
+    /* ─── QoQ Chart view ─────────────────────────────── */
+    .view-toggle {
+      display: flex; gap: 0; margin-bottom: 14px;
+      border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;
+      width: fit-content;
+    }
+    .view-toggle-btn {
+      padding: 4px 12px; font-size: 11px; font-weight: 600;
+      background: #fff; color: #888; border: none; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .view-toggle-btn.active { background: #1a1a2e; color: #fff; }
+
+    .qoq-chart { display: flex; align-items: flex-end; gap: 10px; height: 120px; padding: 0 4px; }
+    .qoq-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 0; }
+    .qoq-bar-wrap {
+      flex: 1; width: 100%; display: flex; flex-direction: column;
+      justify-content: flex-end; position: relative;
+    }
+    .qoq-bar-stack {
+      width: 100%; display: flex; flex-direction: column-reverse;
+      border-radius: 4px 4px 0 0; overflow: hidden;
+      position: relative;
+    }
+    .qoq-seg { width: 100%; transition: opacity 0.15s; }
+    .qoq-seg.ontime  { background: #2e7d32; }
+    .qoq-seg.outside { background: #e65100; }
+    .qoq-seg.default { background: #c62828; }
+    .qoq-seg.other   { background: #cfd8dc; }
+    .qoq-pct-label {
+      font-size: 10px; font-weight: 700; text-align: center;
+      margin-bottom: 3px; line-height: 1;
+    }
+    .qoq-pct-label.good { color: #2e7d32; }
+    .qoq-pct-label.fair { color: #f57f17; }
+    .qoq-pct-label.poor { color: #c62828; }
+    .qoq-q-label {
+      font-size: 9px; color: #999; text-align: center;
+      margin-top: 5px; white-space: nowrap;
+    }
+    .qoq-trend-arrow {
+      font-size: 10px; font-weight: 700; text-align: center; margin-top: 2px;
+    }
+    .qoq-trend-arrow.up   { color: #2e7d32; }
+    .qoq-trend-arrow.down { color: #c62828; }
+    .qoq-trend-arrow.neutral { color: #aaa; }
+    .chart-legend {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;
+    }
+    .chart-legend-item {
+      display: flex; align-items: center; gap: 4px; font-size: 10px; color: #666;
+    }
+    .chart-legend-dot {
+      width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+    }
+
     /* ─── Suggested additions (dashed placeholder) ─── */
     .suggestion-card {
       border: 1.5px dashed #d0d5e8;
@@ -1066,8 +1122,8 @@
     function buildPaymentAccordion(pt) {
       const pct = Math.round((pt.onTime / pt.total) * 100);
       const tier = tierClass(pct);
-      const barW = pct;
 
+      // ── Table view rows ──
       const qoqRows = pt.qoq.map(row => {
         const t = tierClass(row.pct);
         const arrow = row.trend === 'up' ? '↑' : row.trend === 'down' ? '↓' : '–';
@@ -1083,8 +1139,38 @@
           </tr>`;
       }).join('');
 
+      // ── Chart view columns ──
+      // Normalise each quarter to 100% height; segments are % of total
+      const chartCols = [...pt.qoq].reverse().map(row => {
+        const ontimePct  = Math.round((row.onTime / row.total) * 100);
+        const defPct     = Math.round((row.defaults / row.total) * 100);
+        const outsidePct = Math.round((row.outside / row.total) * 100);
+        const otherPct   = Math.max(0, 100 - ontimePct - defPct - outsidePct);
+        const t          = tierClass(row.pct);
+        const arrowCls   = row.trend === 'up' ? 'up' : row.trend === 'down' ? 'down' : 'neutral';
+        const arrowChar  = row.trend === 'up' ? '↑' : row.trend === 'down' ? '↓' : '–';
+        // column label: Q4 FY25 → Q4
+        const qShort = row.q.split(' ')[0];
+        return `
+          <div class="qoq-col">
+            <div class="qoq-pct-label ${t}">${row.pct}%</div>
+            <div class="qoq-bar-wrap">
+              <div class="qoq-bar-stack" style="height:${Math.max(row.pct, 20)}px;">
+                ${defPct     > 0 ? `<div class="qoq-seg default"  style="height:${defPct}%;"></div>` : ''}
+                ${outsidePct > 0 ? `<div class="qoq-seg outside"  style="height:${outsidePct}%;"></div>` : ''}
+                ${otherPct   > 0 ? `<div class="qoq-seg other"    style="height:${otherPct}%;"></div>` : ''}
+                <div class="qoq-seg ontime"  style="height:${ontimePct}%;"></div>
+              </div>
+            </div>
+            <div class="qoq-q-label">${qShort}<br><span style="color:#bbb;">${row.q.slice(-4)}</span></div>
+            <div class="qoq-trend-arrow ${arrowCls}">${arrowChar}</div>
+          </div>`;
+      }).join('');
+
+      const accId = 'acc-' + Math.random().toString(36).slice(2, 7);
+
       return `
-        <div class="accordion" id="acc-payment">
+        <div class="accordion" id="${accId}">
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="accordion-left">
               <div class="accordion-title-row">
@@ -1097,7 +1183,7 @@
                   <span class="denominator" style="font-size:11px;">/${pt.total} invoices</span>
                 </span>
                 <div class="ratio-bar-track">
-                  <div class="ratio-bar-fill ${tier}" style="width:${barW}%;"></div>
+                  <div class="ratio-bar-fill ${tier}" style="width:${pct}%;"></div>
                 </div>
                 <span class="ratio-pct ${tier}">${pct}%</span>
                 <span class="ratio-label">on time</span>
@@ -1106,6 +1192,8 @@
             <span class="accordion-chevron">›</span>
           </div>
           <div class="accordion-body">
+
+            <!-- Summary cards -->
             <div class="breakdown-row">
               <div class="breakdown-card">
                 <div class="breakdown-num defaults">${pt.defaults}</div>
@@ -1113,29 +1201,62 @@
               </div>
               <div class="breakdown-card">
                 <div class="breakdown-num outside">${pt.outsideTREDS}</div>
-                <div class="breakdown-label">Settled<br>Outside TREDS</div>
+                <div class="breakdown-label">Settled Outside<br>TREDS</div>
               </div>
               <div class="breakdown-card">
-                <div class="breakdown-num" style="color:#1a1a2e;">${pt.total - pt.onTime - pt.defaults - pt.outsideTREDS > 0 ? pt.total - pt.onTime - pt.defaults - pt.outsideTREDS : 0}</div>
+                <div class="breakdown-num" style="color:#1a1a2e;">${Math.max(0, pt.total - pt.onTime - pt.defaults - pt.outsideTREDS)}</div>
                 <div class="breakdown-label">Other<br>Delays</div>
               </div>
             </div>
-            <div class="qoq-label">Quarter-by-Quarter</div>
-            <table class="qoq-table">
-              <thead>
-                <tr>
-                  <th>Quarter</th>
-                  <th>On Time</th>
-                  <th>Rate</th>
-                  <th>Defaults</th>
-                  <th>Outside TREDS</th>
-                  <th>Trend</th>
-                </tr>
-              </thead>
-              <tbody>${qoqRows}</tbody>
-            </table>
+
+            <!-- Toggle -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+              <div class="qoq-label" style="margin-bottom:0;">Quarter-by-Quarter</div>
+              <div class="view-toggle">
+                <button class="view-toggle-btn active" onclick="setQoqView(this,'chart','${accId}')">Chart</button>
+                <button class="view-toggle-btn"        onclick="setQoqView(this,'table','${accId}')">Table</button>
+              </div>
+            </div>
+
+            <!-- Chart view (default) -->
+            <div class="qoq-view-chart">
+              <div class="qoq-chart">${chartCols}</div>
+              <div class="chart-legend">
+                <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#2e7d32;"></div>On Time</div>
+                <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#c62828;"></div>Defaults</div>
+                <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#e65100;"></div>Outside TREDS</div>
+                <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#cfd8dc;"></div>Other Delays</div>
+              </div>
+            </div>
+
+            <!-- Table view (hidden by default) -->
+            <div class="qoq-view-table" style="display:none;">
+              <table class="qoq-table">
+                <thead>
+                  <tr>
+                    <th>Quarter</th>
+                    <th>On Time</th>
+                    <th>Rate</th>
+                    <th>Defaults</th>
+                    <th>Outside TREDS</th>
+                    <th>Trend</th>
+                  </tr>
+                </thead>
+                <tbody>${qoqRows}</tbody>
+              </table>
+            </div>
+
           </div>
         </div>`;
+    }
+
+    /* ─── QoQ chart / table toggle ──────────────────── */
+    function setQoqView(btn, view, accId) {
+      const acc = document.getElementById(accId);
+      acc.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      acc.querySelector('.qoq-view-chart').style.display = view === 'chart' ? '' : 'none';
+      acc.querySelector('.qoq-view-table').style.display = view === 'table' ? '' : 'none';
     }
 
     /* ─── Accordion toggle ───────────────────────────── */
