@@ -128,6 +128,32 @@
     }
     .seg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
+    /* ── Variant E — legend with rank + gap ─────────── */
+    .legend-bar-row {
+      display: flex; align-items: center; gap: 10px; margin-top: 10px;
+    }
+    .legend-dot-lg {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    }
+    .legend-text-main {
+      font-size: 12px; font-weight: 700; color: #1a1a2e;
+    }
+    .legend-text-sub {
+      font-size: 11px; color: #888; margin-top: 1px;
+    }
+    .legend-divider {
+      width: 1px; height: 28px; background: #e8e8e8; flex-shrink: 0; margin: 0 4px;
+    }
+    .gap-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      background: #fff8e1; color: #e65100;
+    }
+    .gap-tag.ahead {
+      background: #e6f4ea; color: #2e7d32;
+    }
+
     /* annotation */
     .annotation {
       font-size: 11px; color: #999; margin-top: 12px; padding: 8px 12px;
@@ -319,6 +345,49 @@
   </div>
 
 
+  <!-- ── Variant E — Legend: rank + gap to #1 ──────── -->
+  <div class="section">
+    <div class="section-tag">Option E — Your idea</div>
+    <div class="section-title">Legend — Your rank + gap to #1 in amount</div>
+    <div class="section-desc">Below the bar, a legend row shows: your dot + rank on the left, #1's dot + how far ahead they are in actual amount on the right. The gap in rupees hits harder than a percentage.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="variant-label">MTD</div>
+        <div class="card">
+          <div id="kpi-e-mtd"></div>
+          <div class="share-heading">Your Share of Platform MTD</div>
+          <div class="bar-wrap">
+            <div class="bar-track"><div class="bar-fill" id="bar-e-mtd"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <span style="font-size:11px;color:#888;">0%</span>
+            <span class="bar-pct" id="pct-e-mtd"></span>
+            <span style="font-size:11px;color:#888;">100%</span>
+          </div>
+          <div id="legend-e-mtd"></div>
+        </div>
+      </div>
+      <div>
+        <div class="variant-label">YTD</div>
+        <div class="card">
+          <div id="kpi-e-ytd"></div>
+          <div class="share-heading">Your Share of Platform YTD</div>
+          <div class="bar-wrap">
+            <div class="bar-track"><div class="bar-fill" id="bar-e-ytd"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <span style="font-size:11px;color:#888;">0%</span>
+            <span class="bar-pct" id="pct-e-ytd"></span>
+            <span style="font-size:11px;color:#888;">100%</span>
+          </div>
+          <div id="legend-e-ytd"></div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Best for:</strong> Making the gap feel real. ₹3.3L behind #1 is more motivating than "7% behind." Amount gap = actionable target — financier knows exactly how much more they need to deploy to overtake #1.</div>
+  </div>
+
   <script>
     const buyers = {
       kc: {
@@ -328,6 +397,7 @@
         momMTD: '+18.4', momUp: true,
         rankMTD: 2, topShareMTD: 28, avgShare: 18,
         rankYTD: 2, topShareYTD: 30,
+        gapMTD: '₹ 3.3L', gapYTD: '₹ 16.0L', isTop: false,
         financiers: [
           { label: 'You', cls: 'me',   pct: 21 },
           { label: '#2',  cls: 'p2',   pct: 28 },
@@ -343,6 +413,7 @@
         momMTD: '+9.2', momUp: true,
         rankMTD: 3, topShareMTD: 34, avgShare: 20,
         rankYTD: 3, topShareYTD: 36,
+        gapMTD: '₹ 19.4L', gapYTD: '₹ 1.63Cr', isTop: false,
         financiers: [
           { label: 'You', cls: 'me',   pct: 18 },
           { label: '#1',  cls: 'p2',   pct: 34 },
@@ -358,6 +429,7 @@
         momMTD: '-8.2', momUp: false,
         rankMTD: 5, topShareMTD: 41, avgShare: 20,
         rankYTD: 5, topShareYTD: 38,
+        gapMTD: '₹ 18.2L', gapYTD: '₹ 1.69Cr', isTop: false,
         financiers: [
           { label: 'You', cls: 'me',   pct: 6  },
           { label: '#1',  cls: 'p2',   pct: 41 },
@@ -373,6 +445,7 @@
         momMTD: '-62.0', momUp: false,
         rankMTD: 6, topShareMTD: 45, avgShare: 17,
         rankYTD: 6, topShareYTD: 42,
+        gapMTD: '₹ 16.1L', gapYTD: '₹ 1.21Cr', isTop: false,
         financiers: [
           { label: 'You', cls: 'me',   pct: 3  },
           { label: '#1',  cls: 'p2',   pct: 45 },
@@ -413,6 +486,43 @@
       return `<span class="chip top">#1 holds ${topPct}%</span>`;
     }
 
+    function legendE(rank, gap, myAmt, isTop) {
+      if (isTop) {
+        return `
+          <div style="border-top:1px solid #f0f0f0;margin-top:12px;padding-top:10px;">
+            <div class="legend-bar-row">
+              <div class="legend-dot-lg" style="background:#1a237e;"></div>
+              <div>
+                <div class="legend-text-main">You · #1 financier</div>
+                <div class="legend-text-sub">${myAmt}</div>
+              </div>
+              <div style="margin-left:auto;">
+                <span class="gap-tag ahead">Leading the pack</span>
+              </div>
+            </div>
+          </div>`;
+      }
+      return `
+        <div style="border-top:1px solid #f0f0f0;margin-top:12px;padding-top:10px;">
+          <div class="legend-bar-row">
+            <div class="legend-dot-lg" style="background:#1a237e;"></div>
+            <div>
+              <div class="legend-text-main">You · #${rank} financier</div>
+              <div class="legend-text-sub">${myAmt}</div>
+            </div>
+            <div class="legend-divider"></div>
+            <div class="legend-dot-lg" style="background:#7986cb;"></div>
+            <div>
+              <div class="legend-text-main">#1 financier</div>
+              <div class="legend-text-sub" style="color:#e65100;">${gap} ahead of you</div>
+            </div>
+            <div style="margin-left:auto;">
+              <span class="gap-tag">${gap} gap</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
     function render(key) {
       const d = buyers[key];
 
@@ -440,6 +550,13 @@
         tick.style.left = d.avgShare + '%';
         tickLabel.style.left = d.avgShare + '%';
         tickLabel.textContent = `Avg ${d.avgShare}%`;
+
+        // ── Variant E ──
+        document.getElementById(`kpi-e-${period}`).innerHTML = kpiHtml(myAmt, platAmt, d.momMTD, d.momUp);
+        document.getElementById(`bar-e-${period}`).style.width = share + '%';
+        document.getElementById(`pct-e-${period}`).textContent = share + '%';
+        const gap = period === 'mtd' ? d.gapMTD : d.gapYTD;
+        document.getElementById(`legend-e-${period}`).innerHTML = legendE(rank, gap, myAmt, d.isTop);
 
         // ── Variant C ──
         document.getElementById(`kpi-c-${period}`).innerHTML = kpiHtml(myAmt, platAmt, d.momMTD, d.momUp);
