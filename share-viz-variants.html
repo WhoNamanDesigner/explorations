@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MTD & YTD Share — Visualization Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      padding: 32px 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub   { font-size: 13px; color: #888; margin-bottom: 8px; }
+    .page-note  {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; color: #666; background: #fff8e1;
+      border: 1px solid #ffe082; border-radius: 6px;
+      padding: 5px 10px; margin-bottom: 36px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media(max-width:960px){ .grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:600px){ .grid { grid-template-columns: 1fr; } }
+
+    .col { display: flex; flex-direction: column; gap: 10px; }
+    .col-tag  { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #bbb; }
+    .col-name { font-size: 15px; font-weight: 800; color: #1a1a2e; }
+    .col-desc { font-size: 11px; color: #888; line-height: 1.5; }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+    .card-header {
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid #f5f5f5;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title { font-size: 12px; font-weight: 700; color: #1a1a2e; }
+    .card-sub   { font-size: 10px; color: #aaa; margin-top: 1px; }
+    .close-btn {
+      background: #f5f5f5; border: none; color: #999;
+      width: 22px; height: 22px; border-radius: 50%; font-size: 11px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .card-body { padding: 14px 16px; }
+
+    /* ── shared chips ────────────────── */
+    .chip {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 20px;
+      font-size: 10px; font-weight: 600; white-space: nowrap;
+    }
+    .chip-rank { background: #e8eaf6; color: #3949ab; }
+    .chip-gap  { background: #fff8e1; color: #e65100; }
+    .chip-mom-up   { background: #e6f4ea; color: #2e7d32; }
+    .chip-mom-down { background: #fde8e8; color: #c62828; }
+
+    /* ── period divider ──────────────── */
+    .period-divider {
+      height: 1px; background: #f5f5f5; margin: 12px 0;
+    }
+
+    /* ── annotation ─────────────────── */
+    .annotation {
+      font-size: 11px; color: #999; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+    /* ════════════════════════════════════════════
+       VARIANT A — Progress Bar  (baseline)
+       ════════════════════════════════════════════ */
+    .va-period { margin-bottom: 4px; }
+    .va-top-row {
+      display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px;
+    }
+    .va-period-tag {
+      font-size: 9px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase; color: #aaa; flex-shrink: 0;
+    }
+    .va-amount { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+    .va-plat   { font-size: 10px; color: #aaa; margin-bottom: 6px; }
+    .va-bar-wrap { margin-bottom: 4px; }
+    .va-bar-track {
+      width: 100%; height: 7px; background: #e8eaf6; border-radius: 20px; overflow: hidden;
+    }
+    .va-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg,#3949ab,#7986cb); }
+    .va-bar-footer {
+      display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap;
+    }
+    .va-pct { font-size: 13px; font-weight: 800; color: #3949ab; margin-right: 2px; }
+
+    /* ════════════════════════════════════════════
+       VARIANT B — Mini Donut Ring
+       ════════════════════════════════════════════ */
+    .vb-period {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 4px;
+    }
+    .vb-ring-wrap { flex-shrink: 0; position: relative; }
+    .vb-ring-wrap svg { display: block; }
+    .vb-right { flex: 1; }
+    .vb-period-tag {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #aaa; margin-bottom: 3px;
+    }
+    .vb-amount { font-size: 15px; font-weight: 800; color: #1a1a2e; margin-bottom: 3px; }
+    .vb-chip-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .vb-plat { font-size: 10px; color: #aaa; margin-top: 4px; }
+
+    /* ════════════════════════════════════════════
+       VARIANT C — Two-tone Stacked Pill
+       ════════════════════════════════════════════ */
+    .vc-period { margin-bottom: 4px; }
+    .vc-top-row {
+      display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;
+    }
+    .vc-period-tag {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #aaa; flex-shrink: 0;
+    }
+    .vc-amount { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+    .vc-pill-wrap { margin-bottom: 5px; }
+    .vc-pill {
+      display: flex; height: 22px; border-radius: 20px; overflow: hidden;
+      width: 100%;
+    }
+    .vc-pill-you {
+      background: #3949ab;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: #fff;
+      white-space: nowrap; padding: 0 8px;
+    }
+    .vc-pill-others {
+      background: #e8eaf6;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 600; color: #7986cb;
+      flex: 1; padding: 0 8px;
+    }
+    .vc-footer {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 5px;
+    }
+    .vc-plat { font-size: 10px; color: #aaa; }
+
+    /* ════════════════════════════════════════════
+       VARIANT D — Dot Grid
+       ════════════════════════════════════════════ */
+    .vd-period { margin-bottom: 4px; }
+    .vd-top-row {
+      display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;
+    }
+    .vd-period-tag {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #aaa; flex-shrink: 0;
+    }
+    .vd-amount { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+    .vd-dot-grid {
+      display: grid; grid-template-columns: repeat(10, 1fr);
+      gap: 3px; margin-bottom: 6px;
+    }
+    .vd-dot {
+      width: 100%; aspect-ratio: 1;
+      border-radius: 50%;
+    }
+    .vd-dot.filled { background: #3949ab; }
+    .vd-dot.empty  { background: #e8eaf6; }
+    .vd-grid-footer {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .vd-pct { font-size: 13px; font-weight: 800; color: #3949ab; margin-right: 2px; }
+    .vd-of  { font-size: 10px; color: #aaa; }
+
+    /* ════════════════════════════════════════════
+       VARIANT E — Arc Gauge
+       ════════════════════════════════════════════ */
+    .ve-period { margin-bottom: 4px; }
+    .ve-period-tag {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #aaa; margin-bottom: 6px;
+    }
+    .ve-inner {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .ve-gauge { flex-shrink: 0; }
+    .ve-right { flex: 1; }
+    .ve-amount { font-size: 15px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+    .ve-chip-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .ve-plat { font-size: 10px; color: #aaa; margin-top: 4px; }
+
+  </style>
+</head>
+<body>
+
+  <div class="page-title">MTD & YTD Share — Visualization Variants</div>
+  <div class="page-sub">5 ways to show Your Share of Platform financing for both periods, with rank and gap chips.</div>
+  <div class="page-note">
+    ⚑ Only the "Your Share" section varies — same data across all variants: MTD ₹10,25,990 · 21% · #4 · YTD ₹85,40,000 · 20% · #3
+  </div>
+
+  <div class="grid">
+
+    <!-- ═══════════════════════════
+         VARIANT A — Progress Bar (baseline)
+         ═══════════════════════════ -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant A</div>
+        <div class="col-name">Progress Bar</div>
+        <div class="col-desc">Current baseline. Bar fills left to right, % right-aligned. Chips stack below.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Platform Stats — K C India Ltd</div>
+            <div class="card-sub">Your Share of Platform Financing</div>
+          </div>
+          <button class="close-btn">✕</button>
+        </div>
+        <div class="card-body">
+
+          <!-- MTD -->
+          <div class="va-period">
+            <div class="va-top-row">
+              <span class="va-period-tag">MTD</span>
+              <span class="va-amount">₹ 10,25,990</span>
+              <span class="chip chip-mom-up">▲ 18.4%</span>
+            </div>
+            <div class="va-plat">All financiers · ₹ 48,50,000</div>
+            <div class="va-bar-wrap">
+              <div class="va-bar-track">
+                <div class="va-bar-fill" style="width:21%;"></div>
+              </div>
+            </div>
+            <div class="va-bar-footer">
+              <span class="va-pct">21%</span>
+              <span class="chip chip-rank">#4 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹32.6L ahead</span>
+            </div>
+          </div>
+
+          <div class="period-divider"></div>
+
+          <!-- YTD -->
+          <div class="va-period">
+            <div class="va-top-row">
+              <span class="va-period-tag">YTD</span>
+              <span class="va-amount">₹ 85,40,000</span>
+            </div>
+            <div class="va-plat">All financiers · ₹ 4,22,00,000</div>
+            <div class="va-bar-wrap">
+              <div class="va-bar-track">
+                <div class="va-bar-fill" style="width:20%;background:linear-gradient(90deg,#5c6bc0,#9fa8da);"></div>
+              </div>
+            </div>
+            <div class="va-bar-footer">
+              <span class="va-pct" style="color:#5c6bc0;">20%</span>
+              <span class="chip chip-rank">#3 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹1.2Cr ahead</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Baseline:</strong> Familiar left-fill bar. Easy to understand but the absolute difference between 21% and 20% is hard to see — bars look nearly identical.
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════
+         VARIANT B — Mini Donut Ring
+         ═══════════════════════════ -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant B</div>
+        <div class="col-name">Mini Donut Ring</div>
+        <div class="col-desc">SVG ring per period. Part-of-whole reads instantly. % lives inside the ring. Chips sit beside it.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Platform Stats — K C India Ltd</div>
+            <div class="card-sub">Your Share of Platform Financing</div>
+          </div>
+          <button class="close-btn">✕</button>
+        </div>
+        <div class="card-body">
+
+          <!-- MTD -->
+          <div class="vb-period">
+            <div class="vb-ring-wrap">
+              <!-- 21% of circumference: C = 2π×15.9 ≈ 99.9; 21% = 20.98 -->
+              <svg width="58" height="58" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e8eaf6" stroke-width="3.5"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3949ab" stroke-width="3.5"
+                  stroke-dasharray="21 79" stroke-dashoffset="25"
+                  stroke-linecap="round" transform="rotate(-90 18 18)"/>
+                <text x="18" y="17" text-anchor="middle" font-size="7" font-weight="800" fill="#3949ab">21%</text>
+                <text x="18" y="24" text-anchor="middle" font-size="4.5" fill="#aaa">MTD</text>
+              </svg>
+            </div>
+            <div class="vb-right">
+              <div class="vb-amount">₹ 10,25,990 <span class="chip chip-mom-up" style="font-size:9px;">▲ 18.4%</span></div>
+              <div class="vb-chip-row">
+                <span class="chip chip-rank">#4 of financiers</span>
+                <span class="chip chip-gap">#1 · ₹32.6L ahead</span>
+              </div>
+              <div class="vb-plat">All financiers · ₹ 48,50,000</div>
+            </div>
+          </div>
+
+          <div class="period-divider"></div>
+
+          <!-- YTD -->
+          <div class="vb-period">
+            <div class="vb-ring-wrap">
+              <!-- 20% -->
+              <svg width="58" height="58" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e8eaf6" stroke-width="3.5"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#5c6bc0" stroke-width="3.5"
+                  stroke-dasharray="20 80" stroke-dashoffset="25"
+                  stroke-linecap="round" transform="rotate(-90 18 18)"/>
+                <text x="18" y="17" text-anchor="middle" font-size="7" font-weight="800" fill="#5c6bc0">20%</text>
+                <text x="18" y="24" text-anchor="middle" font-size="4.5" fill="#aaa">YTD</text>
+              </svg>
+            </div>
+            <div class="vb-right">
+              <div class="vb-amount">₹ 85,40,000</div>
+              <div class="vb-chip-row">
+                <span class="chip chip-rank">#3 of financiers</span>
+                <span class="chip chip-gap">#1 · ₹1.2Cr ahead</span>
+              </div>
+              <div class="vb-plat">All financiers · ₹ 4,22,00,000</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Difference from baseline:</strong> Ring replaces the bar. The arc feel reads "out of 100%" more naturally than a left-fill bar. MTD vs YTD comparison works better — rings are visually distinct even at similar percentages.
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════
+         VARIANT C — Two-tone Pill
+         ═══════════════════════════ -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant C</div>
+        <div class="col-name">Two-tone Pill</div>
+        <div class="col-desc">Pill split into "You" (colored) + "Others" (muted). Both ends are labeled. Feels like a comparison, not a meter.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Platform Stats — K C India Ltd</div>
+            <div class="card-sub">Your Share of Platform Financing</div>
+          </div>
+          <button class="close-btn">✕</button>
+        </div>
+        <div class="card-body">
+
+          <!-- MTD -->
+          <div class="vc-period">
+            <div class="vc-top-row">
+              <span class="vc-period-tag">MTD</span>
+              <span class="vc-amount">₹ 10,25,990</span>
+              <span class="chip chip-mom-up">▲ 18.4%</span>
+            </div>
+            <div class="vc-pill-wrap">
+              <div class="vc-pill">
+                <div class="vc-pill-you" style="width:21%;">You · 21%</div>
+                <div class="vc-pill-others">Others · 79%</div>
+              </div>
+            </div>
+            <div class="vc-footer">
+              <span class="chip chip-rank">#4 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹32.6L ahead</span>
+            </div>
+            <div class="vc-plat" style="margin-top:4px;">All financiers · ₹ 48,50,000</div>
+          </div>
+
+          <div class="period-divider"></div>
+
+          <!-- YTD -->
+          <div class="vc-period">
+            <div class="vc-top-row">
+              <span class="vc-period-tag">YTD</span>
+              <span class="vc-amount">₹ 85,40,000</span>
+            </div>
+            <div class="vc-pill-wrap">
+              <div class="vc-pill">
+                <div class="vc-pill-you" style="width:20%;background:#5c6bc0;">You · 20%</div>
+                <div class="vc-pill-others" style="color:#9fa8da;">Others · 80%</div>
+              </div>
+            </div>
+            <div class="vc-footer">
+              <span class="chip chip-rank">#3 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹1.2Cr ahead</span>
+            </div>
+            <div class="vc-plat" style="margin-top:4px;">All financiers · ₹ 4,22,00,000</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Difference from baseline:</strong> Pill has two active segments instead of a filled track on empty space. Surfaces "Others = 79%" explicitly — makes the competition visible. Works best when your share is small.
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════
+         VARIANT D — Dot Grid
+         ═══════════════════════════ -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant D</div>
+        <div class="col-name">Dot Grid</div>
+        <div class="col-desc">20 dots = 100%. Filled dots = your share. Low % values (like 21%) feel concrete — "4 dots out of 20" is more tangible than a thin bar.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Platform Stats — K C India Ltd</div>
+            <div class="card-sub">Your Share of Platform Financing</div>
+          </div>
+          <button class="close-btn">✕</button>
+        </div>
+        <div class="card-body">
+
+          <!-- MTD -->
+          <div class="vd-period">
+            <div class="vd-top-row">
+              <span class="vd-period-tag">MTD</span>
+              <span class="vd-amount">₹ 10,25,990</span>
+              <span class="chip chip-mom-up">▲ 18.4%</span>
+            </div>
+            <!-- 21% of 20 = 4.2 → 4 filled -->
+            <div class="vd-dot-grid">
+              <div class="vd-dot filled"></div>
+              <div class="vd-dot filled"></div>
+              <div class="vd-dot filled"></div>
+              <div class="vd-dot filled"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+            </div>
+            <div class="vd-grid-footer">
+              <span class="vd-pct">21%</span>
+              <span class="vd-of">of buyer's total</span>
+              <span class="chip chip-rank">#4 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹32.6L ahead</span>
+            </div>
+          </div>
+
+          <div class="period-divider"></div>
+
+          <!-- YTD -->
+          <div class="vd-period">
+            <div class="vd-top-row">
+              <span class="vd-period-tag">YTD</span>
+              <span class="vd-amount">₹ 85,40,000</span>
+            </div>
+            <!-- 20% of 20 = 4 filled -->
+            <div class="vd-dot-grid">
+              <div class="vd-dot" style="background:#5c6bc0;border-radius:50%;"></div>
+              <div class="vd-dot" style="background:#5c6bc0;border-radius:50%;"></div>
+              <div class="vd-dot" style="background:#5c6bc0;border-radius:50%;"></div>
+              <div class="vd-dot" style="background:#5c6bc0;border-radius:50%;"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+              <div class="vd-dot empty"></div>
+            </div>
+            <div class="vd-grid-footer">
+              <span class="vd-pct" style="color:#5c6bc0;">20%</span>
+              <span class="vd-of">of buyer's total</span>
+              <span class="chip chip-rank">#3 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹1.2Cr ahead</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Difference from baseline:</strong> Dots make fractions tactile. 4 vs 4 dots for MTD 21% and YTD 20% still looks the same — this variant shines more when shares differ significantly (e.g. 5% vs 40%).
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════
+         VARIANT E — Arc Gauge
+         ═══════════════════════════ -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant E</div>
+        <div class="col-name">Arc Gauge</div>
+        <div class="col-desc">Semicircle gauge with % as the needle target. Dramatic and dashboard-like. Chips sit beside. Good for showing how far from 50% the share is.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Platform Stats — K C India Ltd</div>
+            <div class="card-sub">Your Share of Platform Financing</div>
+          </div>
+          <button class="close-btn">✕</button>
+        </div>
+        <div class="card-body">
+
+          <!-- MTD -->
+          <div class="ve-period">
+            <div class="ve-period-tag">MTD</div>
+            <div class="ve-inner">
+              <div class="ve-gauge">
+                <!--
+                  Semicircle arc: r=16, cx=20, cy=22
+                  Full half = π×16 ≈ 50.3
+                  21% of full circle arc = 0.21×(2π×16) = 21.1 of 100.5
+                  We draw from 180° to 0° (bottom to top left to right).
+                  stroke-dasharray: filled = 21% of 100.53 ≈ 21.1, gap = rest
+                -->
+                <svg width="80" height="46" viewBox="0 0 40 23">
+                  <!-- track -->
+                  <path d="M 4 21 A 16 16 0 0 1 36 21"
+                    fill="none" stroke="#e8eaf6" stroke-width="3.5" stroke-linecap="round"/>
+                  <!-- fill: 21% of 180° arc -->
+                  <path d="M 4 21 A 16 16 0 0 1 36 21"
+                    fill="none" stroke="#3949ab" stroke-width="3.5" stroke-linecap="round"
+                    stroke-dasharray="10.6 50.3" />
+                  <text x="20" y="20" text-anchor="middle" font-size="7" font-weight="800" fill="#3949ab">21%</text>
+                </svg>
+              </div>
+              <div class="ve-right">
+                <div class="ve-amount">₹ 10,25,990 <span class="chip chip-mom-up" style="font-size:9px;">▲ 18.4%</span></div>
+                <div class="ve-chip-row">
+                  <span class="chip chip-rank">#4 of financiers</span>
+                  <span class="chip chip-gap">#1 · ₹32.6L ahead</span>
+                </div>
+                <div class="ve-plat">All financiers · ₹ 48,50,000</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="period-divider"></div>
+
+          <!-- YTD -->
+          <div class="ve-period">
+            <div class="ve-period-tag">YTD</div>
+            <div class="ve-inner">
+              <div class="ve-gauge">
+                <svg width="80" height="46" viewBox="0 0 40 23">
+                  <path d="M 4 21 A 16 16 0 0 1 36 21"
+                    fill="none" stroke="#e8eaf6" stroke-width="3.5" stroke-linecap="round"/>
+                  <path d="M 4 21 A 16 16 0 0 1 36 21"
+                    fill="none" stroke="#5c6bc0" stroke-width="3.5" stroke-linecap="round"
+                    stroke-dasharray="10.1 50.3" />
+                  <text x="20" y="20" text-anchor="middle" font-size="7" font-weight="800" fill="#5c6bc0">20%</text>
+                </svg>
+              </div>
+              <div class="ve-right">
+                <div class="ve-amount">₹ 85,40,000</div>
+                <div class="ve-chip-row">
+                  <span class="chip chip-rank">#3 of financiers</span>
+                  <span class="chip chip-gap">#1 · ₹1.2Cr ahead</span>
+                </div>
+                <div class="ve-plat">All financiers · ₹ 4,22,00,000</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Difference from baseline:</strong> Semicircle gauge feels more "dashboard". The angular sweep makes even small % feel intentional — not just "a thin fill on a long bar". Takes more horizontal space than a donut ring.
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════
+         VARIANT F — Numbers First (no chart)
+         ═══════════════════════════ -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant F</div>
+        <div class="col-name">Numbers First · No chart</div>
+        <div class="col-desc">Pure typographic hierarchy. Your amount large, platform total smaller below, % as a badge. Chips inline. Zero visual noise.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Platform Stats — K C India Ltd</div>
+            <div class="card-sub">Your Share of Platform Financing</div>
+          </div>
+          <button class="close-btn">✕</button>
+        </div>
+        <div class="card-body">
+
+          <!-- MTD -->
+          <div style="margin-bottom:4px;">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#aaa;margin-bottom:5px;">MTD</div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <div>
+                <div style="font-size:20px;font-weight:900;color:#1a1a2e;line-height:1;">₹ 10,25,990</div>
+                <div style="font-size:10px;color:#aaa;margin-top:3px;">All financiers · ₹ 48,50,000</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:22px;font-weight:900;color:#3949ab;line-height:1;">21%</div>
+                <div style="font-size:9px;color:#aaa;margin-top:2px;">of buyer's total</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:7px;flex-wrap:wrap;">
+              <span class="chip chip-mom-up">▲ 18.4% MoM</span>
+              <span class="chip chip-rank">#4 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹32.6L ahead</span>
+            </div>
+          </div>
+
+          <div class="period-divider"></div>
+
+          <!-- YTD -->
+          <div>
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#aaa;margin-bottom:5px;">YTD</div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <div>
+                <div style="font-size:20px;font-weight:900;color:#1a1a2e;line-height:1;">₹ 85,40,000</div>
+                <div style="font-size:10px;color:#aaa;margin-top:3px;">All financiers · ₹ 4,22,00,000</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:22px;font-weight:900;color:#5c6bc0;line-height:1;">20%</div>
+                <div style="font-size:9px;color:#aaa;margin-top:2px;">of buyer's total</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:7px;flex-wrap:wrap;">
+              <span class="chip chip-rank">#3 of financiers</span>
+              <span class="chip chip-gap">#1 · ₹1.2Cr ahead</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Difference from baseline:</strong> No chart at all — % is typographically large (right-aligned), amount is the hero left-aligned. MTD vs YTD difference (21% vs 20%) is read as numbers, not visual length. Cleanest option; least scannable for ratio at a glance.
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
