@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QoQ Chart Variants — Payment Track Record</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 32px 24px;
+    }
+
+    .page-title {
+      font-size: 20px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px;
+    }
+    .page-subtitle {
+      font-size: 13px; color: #888; margin-bottom: 36px;
+    }
+
+    /* ── Section ─────────────────────────────────────── */
+    .section { margin-bottom: 48px; }
+    .section-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: #aaa;
+    }
+    .section-title {
+      font-size: 17px; font-weight: 800; color: #1a1a2e; margin: 4px 0 6px;
+    }
+    .section-desc {
+      font-size: 12px; color: #666; max-width: 560px; line-height: 1.5;
+    }
+    .ref-source {
+      font-size: 10px; color: #bbb; text-align: right;
+    }
+    .ref-source strong { color: #999; }
+
+    /* ── Card wrapper ─────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .card-title {
+      font-size: 12px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px;
+    }
+
+    /* ── Annotation ───────────────────────────────────── */
+    .annotation {
+      font-size: 11px; color: #999; margin-top: 14px; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825; border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+    /* ── Legend row ───────────────────────────────────── */
+    .legend-row {
+      display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 10px; color: #666;
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════════════════════════
+       VARIANT 1 — CIBIL-style DPD Monthly Dot Grid
+       Source pattern: TransUnion CIBIL report, Experian
+       ════════════════════════════════════════════════════ */
+    .dpd-grid {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .dpd-months-header {
+      display: flex; gap: 4px; padding-left: 56px;
+    }
+    .dpd-month-label {
+      width: 28px; font-size: 9px; color: #bbb; text-align: center; flex-shrink: 0;
+    }
+    .dpd-row {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .dpd-row-label {
+      width: 52px; font-size: 10px; color: #888; font-weight: 600; flex-shrink: 0;
+      text-align: right; padding-right: 4px;
+    }
+    .dpd-cell {
+      width: 28px; height: 28px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; flex-shrink: 0;
+      cursor: default;
+      position: relative;
+    }
+    .dpd-cell.ok      { background: #e6f4ea; color: #2e7d32; }
+    .dpd-cell.d30     { background: #fff8e1; color: #f57f17; }
+    .dpd-cell.d60     { background: #fff3e0; color: #e65100; }
+    .dpd-cell.d90     { background: #fde8e8; color: #c62828; }
+    .dpd-cell.default { background: #c62828; color: #fff; }
+    .dpd-cell.unknown { background: #f5f5f5; color: #ccc; }
+    .dpd-cell-tooltip {
+      position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+      background: #1a1a2e; color: #fff; font-size: 9px; white-space: nowrap;
+      padding: 4px 8px; border-radius: 4px; pointer-events: none;
+      opacity: 0; transition: opacity 0.15s; z-index: 10;
+    }
+    .dpd-cell:hover .dpd-cell-tooltip { opacity: 1; }
+
+    /* ════════════════════════════════════════════════════
+       VARIANT 2 — Stacked 100% Bar (what we have now)
+       Source pattern: Bloomberg, Tableau financial dashboards
+       ════════════════════════════════════════════════════ */
+    .stacked-chart {
+      display: flex; align-items: flex-end; gap: 16px; height: 140px;
+    }
+    .stacked-col {
+      display: flex; flex-direction: column; align-items: center; flex: 1;
+    }
+    .stacked-pct {
+      font-size: 11px; font-weight: 700; margin-bottom: 4px;
+    }
+    .stacked-bar {
+      width: 100%; border-radius: 5px 5px 0 0; overflow: hidden;
+      display: flex; flex-direction: column-reverse;
+    }
+    .stacked-seg { width: 100%; }
+    .seg-ok      { background: #2e7d32; }
+    .seg-other   { background: #cfd8dc; }
+    .seg-outside { background: #e65100; }
+    .seg-default { background: #c62828; }
+    .stacked-label {
+      font-size: 10px; color: #999; margin-top: 6px; text-align: center;
+    }
+
+    /* ════════════════════════════════════════════════════
+       VARIANT 3 — Line / Area Trend Chart
+       Source pattern: Mixpanel, Google Analytics retention
+       ════════════════════════════════════════════════════ */
+    .line-chart-wrap {
+      position: relative; height: 140px;
+    }
+    .line-chart-svg {
+      width: 100%; height: 100%;
+    }
+    .lc-axis-label {
+      font-size: 9px; fill: #bbb;
+    }
+    .lc-q-label {
+      font-size: 10px; fill: #888;
+    }
+    .lc-val-label {
+      font-size: 11px; font-weight: 700;
+    }
+
+    /* ════════════════════════════════════════════════════
+       VARIANT 4 — Lollipop / Dot Chart
+       Source pattern: The Economist data viz, FT charts
+       ════════════════════════════════════════════════════ */
+    .lollipop-chart {
+      display: flex; align-items: flex-end; gap: 24px; height: 140px;
+      padding-bottom: 24px; position: relative;
+    }
+    .lollipop-baseline {
+      position: absolute; bottom: 24px; left: 0; right: 0;
+      border-top: 1px solid #e8e8e8;
+    }
+    .lollipop-benchmark {
+      position: absolute; left: 0; right: 0;
+      border-top: 2px dashed #c5cae9;
+    }
+    .lollipop-benchmark-label {
+      position: absolute; right: 0;
+      font-size: 9px; color: #9fa8da; font-weight: 600;
+    }
+    .lollipop-col {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; position: relative; height: 100%;
+      justify-content: flex-end;
+    }
+    .lollipop-stick {
+      width: 2px; border-radius: 2px; flex-shrink: 0;
+    }
+    .lollipop-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative;
+    }
+    .lollipop-val {
+      font-size: 11px; font-weight: 700; text-align: center;
+      position: absolute; top: -18px; width: 40px; left: 50%; transform: translateX(-50%);
+    }
+    .lollipop-q {
+      font-size: 10px; color: #999; text-align: center;
+      position: absolute; bottom: -20px;
+    }
+
+    /* ════════════════════════════════════════════════════
+       VARIANT 5 — GitHub Contribution Heatmap
+       Source pattern: GitHub activity graph, WakaTime
+       ════════════════════════════════════════════════════ */
+    .heatmap-wrap {
+      overflow-x: auto;
+    }
+    .heatmap-grid {
+      display: flex; gap: 3px;
+    }
+    .heatmap-week {
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .heatmap-cell {
+      width: 14px; height: 14px; border-radius: 3px;
+      cursor: pointer; position: relative; flex-shrink: 0;
+      transition: opacity 0.1s;
+    }
+    .heatmap-cell:hover { opacity: 0.75; }
+    .hm-0  { background: #ebedf0; }
+    .hm-ok { background: #2e7d32; }
+    .hm-ok2{ background: #388e3c; }
+    .hm-ok3{ background: #1b5e20; }
+    .hm-d  { background: #c62828; }
+    .hm-out{ background: #e65100; }
+    .hm-30 { background: #f9a825; }
+    .heatmap-month-labels {
+      display: flex; gap: 3px; margin-bottom: 4px; padding-left: 0;
+    }
+    .hm-month-label {
+      font-size: 9px; color: #bbb; flex: 1; text-align: left;
+    }
+
+    /* ════════════════════════════════════════════════════
+       VARIANT 6 — Horizontal Bullet / Progress Bar
+       Source pattern: SAP Analytics Cloud, Stephen Few bullet charts
+       ════════════════════════════════════════════════════ */
+    .bullet-chart { display: flex; flex-direction: column; gap: 14px; }
+    .bullet-row { display: flex; align-items: center; gap: 12px; }
+    .bullet-label {
+      width: 52px; font-size: 10px; color: #888; font-weight: 600;
+      flex-shrink: 0; text-align: right;
+    }
+    .bullet-track-wrap { flex: 1; position: relative; }
+    .bullet-track {
+      height: 20px; background: #f0f0f0; border-radius: 4px;
+      overflow: visible; position: relative;
+    }
+    .bullet-range-good {
+      position: absolute; left: 0; top: 0; height: 100%;
+      background: #e6f4ea; border-radius: 4px;
+    }
+    .bullet-range-fair {
+      position: absolute; top: 0; height: 100%;
+      background: #fff8e1;
+    }
+    .bullet-range-poor {
+      position: absolute; top: 0; height: 100%;
+      background: #fde8e8; border-radius: 0 4px 4px 0;
+    }
+    .bullet-bar {
+      position: absolute; top: 4px; height: 12px; border-radius: 3px; z-index: 2;
+    }
+    .bullet-target {
+      position: absolute; top: -3px; width: 3px; height: 26px;
+      background: #1a1a2e; z-index: 3; border-radius: 2px;
+    }
+    .bullet-pct {
+      position: absolute; right: -36px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; font-weight: 700;
+    }
+    .bullet-axis {
+      display: flex; justify-content: space-between;
+      padding: 3px 0 0; font-size: 9px; color: #ccc;
+    }
+
+    /* ── Two-col layout for some sections ────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">QoQ Payment Track Record — Chart Variants</div>
+  <div class="page-subtitle">6 reference patterns from real products. Same data, different visual languages. Pick one to build into the drawer.</div>
+
+  <!-- ════════════════════════════════════════════════════
+       VARIANT 1 — CIBIL-style DPD Dot Grid
+       ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Variant 1</div>
+        <div class="section-title">DPD Dot Grid &nbsp;<span style="font-size:13px;font-weight:500;color:#999;">CIBIL / Experian style</span></div>
+        <div class="section-desc">One colored cell per month. 12 months across, one row per buyer account. Green = on time, yellow/orange/red = days past due, dark red = default. The full year's payment texture is visible in a single glance — you don't read it, you <em>feel</em> it.</div>
+      </div>
+      <div class="ref-source"><strong>Seen in:</strong><br>CIBIL Business Report<br>Experian CreditExpert<br>TransUnion SmartMove</div>
+    </div>
+
+    <div class="two-col">
+      <!-- Good buyer: K C India -->
+      <div class="card">
+        <div class="card-title">K C India Limited &nbsp;<span style="color:#2e7d32;font-size:11px;">96% on time</span></div>
+        <div class="dpd-grid">
+          <div class="dpd-months-header">
+            <div class="dpd-month-label">Jun</div><div class="dpd-month-label">Jul</div>
+            <div class="dpd-month-label">Aug</div><div class="dpd-month-label">Sep</div>
+            <div class="dpd-month-label">Oct</div><div class="dpd-month-label">Nov</div>
+            <div class="dpd-month-label">Dec</div><div class="dpd-month-label">Jan</div>
+            <div class="dpd-month-label">Feb</div><div class="dpd-month-label">Mar</div>
+            <div class="dpd-month-label">Apr</div><div class="dpd-month-label">May</div>
+          </div>
+          <div class="dpd-row">
+            <div class="dpd-row-label">FY25–26</div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Jun: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Jul: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Aug: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Sep: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Oct: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Nov: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Dec: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Jan: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Feb: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Mar: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Apr: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">May: Paid on time</div></div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#e6f4ea;border:1px solid #c8e6c9;"></div>000 — On time</div>
+        </div>
+      </div>
+
+      <!-- Bad buyer: Reliance -->
+      <div class="card">
+        <div class="card-title">Reliance Retail Ltd &nbsp;<span style="color:#c62828;font-size:11px;">30% on time (Q4)</span></div>
+        <div class="dpd-grid">
+          <div class="dpd-months-header">
+            <div class="dpd-month-label">Jun</div><div class="dpd-month-label">Jul</div>
+            <div class="dpd-month-label">Aug</div><div class="dpd-month-label">Sep</div>
+            <div class="dpd-month-label">Oct</div><div class="dpd-month-label">Nov</div>
+            <div class="dpd-month-label">Dec</div><div class="dpd-month-label">Jan</div>
+            <div class="dpd-month-label">Feb</div><div class="dpd-month-label">Mar</div>
+            <div class="dpd-month-label">Apr</div><div class="dpd-month-label">May</div>
+          </div>
+          <div class="dpd-row">
+            <div class="dpd-row-label">FY25–26</div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Jun: Paid on time</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Jul: Paid on time</div></div>
+            <div class="dpd-cell d30">030<div class="dpd-cell-tooltip">Aug: 30 days late</div></div>
+            <div class="dpd-cell ok">000<div class="dpd-cell-tooltip">Sep: Paid on time</div></div>
+            <div class="dpd-cell d60">060<div class="dpd-cell-tooltip">Oct: 60 days late</div></div>
+            <div class="dpd-cell d30">030<div class="dpd-cell-tooltip">Nov: 30 days late</div></div>
+            <div class="dpd-cell default">DFT<div class="dpd-cell-tooltip">Dec: Default</div></div>
+            <div class="dpd-cell default">DFT<div class="dpd-cell-tooltip">Jan: Default</div></div>
+            <div class="dpd-cell d90">090<div class="dpd-cell-tooltip">Feb: 90 days late</div></div>
+            <div class="dpd-cell default">DFT<div class="dpd-cell-tooltip">Mar: Default</div></div>
+            <div class="dpd-cell default">DFT<div class="dpd-cell-tooltip">Apr: Default</div></div>
+            <div class="dpd-cell d60">060<div class="dpd-cell-tooltip">May: 60 days late</div></div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#e6f4ea;border:1px solid #c8e6c9;"></div>000 On time</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fff8e1;border:1px solid #ffe082;"></div>030 DPD</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fff3e0;border:1px solid #ffcc80;"></div>060 DPD</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fde8e8;border:1px solid #ef9a9a;"></div>090 DPD</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>DFT Default</div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      <strong>Best for:</strong> Month-level granularity. The color pattern is instantly readable — a row of red cells is viscerally alarming. Hover for exact DPD value.
+      <strong>Trade-off:</strong> Needs invoice-level payment dates per month to build; currently we only have QoQ totals.
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       VARIANT 2 — Stacked 100% Bar (current)
+       ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Variant 2 &nbsp;·&nbsp; Currently built</div>
+        <div class="section-title">Stacked 100% Bar &nbsp;<span style="font-size:13px;font-weight:500;color:#999;">Bloomberg / Tableau style</span></div>
+        <div class="section-desc">Each quarter = one full-height bar, split into on-time / other / outside TREDS / default segments. The proportion of red/orange growing over time shows deterioration pattern. Already live in the drawer.</div>
+      </div>
+      <div class="ref-source"><strong>Seen in:</strong><br>Bloomberg Terminal<br>Tableau Finance Dashboards<br>Salesforce Analytics</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">K C India — stable, healthy</div>
+        <div style="display:flex;align-items:flex-end;gap:12px;height:120px;">
+          <!-- Q1-Q4, all mostly green -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:4px;">95%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:95%;"></div>
+              <div class="stacked-seg seg-other"  style="height:3%;"></div>
+              <div class="stacked-seg seg-outside"style="height:2%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q1</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:4px;">97%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:97%;"></div>
+              <div class="stacked-seg seg-outside"style="height:3%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q2</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:4px;">97%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:97%;"></div>
+              <div class="stacked-seg seg-outside"style="height:3%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q3</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:4px;">96%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:96%;"></div>
+              <div class="stacked-seg seg-outside"style="height:4%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q4</div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div>On time</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e65100;"></div>Outside TREDS</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Defaults</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#cfd8dc;"></div>Other delays</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Reliance Retail — severe deterioration</div>
+        <div style="display:flex;align-items:flex-end;gap:12px;height:120px;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:4px;">85%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:85%;"></div>
+              <div class="stacked-seg seg-outside"style="height:1%;"></div>
+              <div class="stacked-seg seg-default"style="height:1%;"></div>
+              <div class="stacked-seg seg-other"  style="height:13%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q1</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#f57f17;margin-bottom:4px;">69%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:69%;"></div>
+              <div class="stacked-seg seg-outside"style="height:4%;"></div>
+              <div class="stacked-seg seg-default"style="height:6%;"></div>
+              <div class="stacked-seg seg-other"  style="height:21%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q2</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#c62828;margin-bottom:4px;">48%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:48%;"></div>
+              <div class="stacked-seg seg-outside"style="height:12%;"></div>
+              <div class="stacked-seg seg-default"style="height:15%;"></div>
+              <div class="stacked-seg seg-other"  style="height:25%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q3</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:#c62828;margin-bottom:4px;">30%</div>
+            <div style="width:100%;height:95px;border-radius:4px 4px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;">
+              <div class="stacked-seg seg-ok"     style="height:30%;"></div>
+              <div class="stacked-seg seg-outside"style="height:20%;"></div>
+              <div class="stacked-seg seg-default"style="height:31%;"></div>
+              <div class="stacked-seg seg-other"  style="height:19%;"></div>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:5px;">Q4</div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div>On time</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e65100;"></div>Outside TREDS</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Defaults</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#cfd8dc;"></div>Other delays</div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      <strong>Best for:</strong> Seeing the composition change over time — how much of the bar is red is intuitively bad.
+      <strong>Trade-off:</strong> If on-time rate is always 90%+, the bars all look identical (mostly green). Low variation buyers look the same as perfect buyers.
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       VARIANT 3 — Line / Area Trend Chart
+       ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Variant 3</div>
+        <div class="section-title">Line + Area Trend &nbsp;<span style="font-size:13px;font-weight:500;color:#999;">Mixpanel / Amplitude / Google Analytics style</span></div>
+        <div class="section-desc">On-time % plotted as a line over quarters, with a green/red area fill below. The slope of the line is the story — flat is fine, dropping is alarming. Benchmark line (e.g. platform avg 78%) gives instant comparison context.</div>
+      </div>
+      <div class="ref-source"><strong>Seen in:</strong><br>Mixpanel Retention<br>Amplitude Charts<br>Stripe Dashboard</div>
+    </div>
+
+    <div class="two-col">
+      <!-- Good buyer -->
+      <div class="card">
+        <div class="card-title">K C India — flat, healthy</div>
+        <svg viewBox="0 0 260 120" style="width:100%;height:120px;">
+          <defs>
+            <linearGradient id="grad-good" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2e7d32" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#2e7d32" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Y axis grid lines -->
+          <line x1="36" y1="10"  x2="250" y2="10"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="35"  x2="250" y2="35"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="60"  x2="250" y2="60"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="85"  x2="250" y2="85"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="105" x2="250" y2="105" stroke="#e0e0e0" stroke-width="1"/>
+          <!-- Y labels -->
+          <text x="30" y="13"  text-anchor="end" class="lc-axis-label">100%</text>
+          <text x="30" y="38"  text-anchor="end" class="lc-axis-label">75%</text>
+          <text x="30" y="63"  text-anchor="end" class="lc-axis-label">50%</text>
+          <text x="30" y="88"  text-anchor="end" class="lc-axis-label">25%</text>
+          <!-- Benchmark line 78% -->
+          <line x1="36" y1="47" x2="250" y2="47" stroke="#c5cae9" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <text x="252" y="50" class="lc-axis-label" fill="#9fa8da">78% avg</text>
+          <!-- Area: Q1=95%, Q2=97%, Q3=97%, Q4=96%
+               Y = 105 - (pct/100)*95   (0%=105, 100%=10) -->
+          <!-- Q1 x=68, Q2 x=126, Q3 x=184, Q4 x=242 -->
+          <!-- 95% → y=15.25, 97% → y=13.35, 96% → y=14.2 -->
+          <polygon points="68,15 126,13 184,13 242,14 242,105 68,105" fill="url(#grad-good)"/>
+          <polyline points="68,15 126,13 184,13 242,14" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <!-- Dots -->
+          <circle cx="68"  cy="15" r="4" fill="#2e7d32"/>
+          <circle cx="126" cy="13" r="4" fill="#2e7d32"/>
+          <circle cx="184" cy="13" r="4" fill="#2e7d32"/>
+          <circle cx="242" cy="14" r="4" fill="#2e7d32"/>
+          <!-- Value labels -->
+          <text x="68"  y="8"  text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">95%</text>
+          <text x="126" y="6"  text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">97%</text>
+          <text x="184" y="6"  text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">97%</text>
+          <text x="242" y="7"  text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">96%</text>
+          <!-- Q labels -->
+          <text x="68"  y="117" text-anchor="middle" class="lc-q-label">Q1</text>
+          <text x="126" y="117" text-anchor="middle" class="lc-q-label">Q2</text>
+          <text x="184" y="117" text-anchor="middle" class="lc-q-label">Q3</text>
+          <text x="242" y="117" text-anchor="middle" class="lc-q-label">Q4</text>
+        </svg>
+      </div>
+
+      <!-- Bad buyer -->
+      <div class="card">
+        <div class="card-title">Reliance — sharp decline</div>
+        <svg viewBox="0 0 260 120" style="width:100%;height:120px;">
+          <defs>
+            <linearGradient id="grad-bad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#c62828" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#c62828" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="36" y1="10"  x2="250" y2="10"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="35"  x2="250" y2="35"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="60"  x2="250" y2="60"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="85"  x2="250" y2="85"  stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="105" x2="250" y2="105" stroke="#e0e0e0" stroke-width="1"/>
+          <text x="30" y="13"  text-anchor="end" class="lc-axis-label">100%</text>
+          <text x="30" y="38"  text-anchor="end" class="lc-axis-label">75%</text>
+          <text x="30" y="63"  text-anchor="end" class="lc-axis-label">50%</text>
+          <text x="30" y="88"  text-anchor="end" class="lc-axis-label">25%</text>
+          <!-- Benchmark -->
+          <line x1="36" y1="47" x2="250" y2="47" stroke="#c5cae9" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <text x="252" y="50" class="lc-axis-label" fill="#9fa8da">78% avg</text>
+          <!-- Q1=85%→y=24.25, Q2=69%→y=39.45, Q3=48%→y=59.4, Q4=30%→y=76.5 -->
+          <polygon points="68,24 126,39 184,59 242,77 242,105 68,105" fill="url(#grad-bad)"/>
+          <polyline points="68,24 126,39 184,59 242,77" fill="none" stroke="#c62828" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="68"  cy="24" r="4" fill="#2e7d32"/>
+          <circle cx="126" cy="39" r="4" fill="#f57f17"/>
+          <circle cx="184" cy="59" r="4" fill="#c62828"/>
+          <circle cx="242" cy="77" r="4" fill="#c62828"/>
+          <text x="68"  y="17" text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">85%</text>
+          <text x="126" y="32" text-anchor="middle" font-size="10" font-weight="700" fill="#f57f17">69%</text>
+          <text x="184" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="#c62828">48%</text>
+          <text x="242" y="70" text-anchor="middle" font-size="10" font-weight="700" fill="#c62828">30%</text>
+          <text x="68"  y="117" text-anchor="middle" class="lc-q-label">Q1</text>
+          <text x="126" y="117" text-anchor="middle" class="lc-q-label">Q2</text>
+          <text x="184" y="117" text-anchor="middle" class="lc-q-label">Q3</text>
+          <text x="242" y="117" text-anchor="middle" class="lc-q-label">Q4</text>
+        </svg>
+      </div>
+    </div>
+    <div class="annotation">
+      <strong>Best for:</strong> Showing trend direction — the slope of the line is immediately readable. Benchmark line adds comparative context without another dataset.
+      <strong>Trade-off:</strong> Doesn't show the <em>composition</em> of failures (defaults vs outside TREDS vs other delays). You see that it dropped, not what drove it.
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       VARIANT 4 — Lollipop / Dot Plot
+       ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Variant 4</div>
+        <div class="section-title">Lollipop / Dot Plot &nbsp;<span style="font-size:13px;font-weight:500;color:#999;">The Economist / FT style</span></div>
+        <div class="section-desc">Each quarter = one dot positioned at the on-time %. A thin line connects them to a baseline. Cleaner than a bar chart because you're comparing a single value per period — no segment noise. Color of dot = tier (green/amber/red). Dashed line = benchmark.</div>
+      </div>
+      <div class="ref-source"><strong>Seen in:</strong><br>The Economist Data<br>Financial Times Charts<br>Our World in Data</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">K C India — consistent high</div>
+        <!-- Lollipop: Q1=95%, Q2=97%, Q3=97%, Q4=96% -->
+        <!-- Container height 140px. Usable area: 20px top 20px bottom = 100px range
+             y = 110 - (pct/100)*90 -->
+        <svg viewBox="0 0 260 140" style="width:100%;height:140px;">
+          <!-- Y grid -->
+          <line x1="36" y1="20" x2="250" y2="20" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="43" x2="250" y2="43" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="65" x2="250" y2="65" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="88" x2="250" y2="88" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="110" x2="250" y2="110" stroke="#e0e0e0" stroke-width="1.5"/>
+          <text x="30" y="23" text-anchor="end" class="lc-axis-label">100%</text>
+          <text x="30" y="46" text-anchor="end" class="lc-axis-label">75%</text>
+          <text x="30" y="68" text-anchor="end" class="lc-axis-label">50%</text>
+          <text x="30" y="91" text-anchor="end" class="lc-axis-label">25%</text>
+          <!-- Benchmark 78% → y = 110 - 0.78*90 = 39.8 -->
+          <line x1="36" y1="40" x2="250" y2="40" stroke="#c5cae9" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <text x="252" y="43" class="lc-axis-label" fill="#9fa8da">78%</text>
+          <!-- Lollipop sticks and dots: Q1=68, Q2=126, Q3=184, Q4=242 -->
+          <!-- 95%→y=24.5, 97%→y=22.7, 96%→y=23.6 -->
+          <line x1="68"  y1="110" x2="68"  y2="25" stroke="#c8e6c9" stroke-width="2"/>
+          <line x1="126" y1="110" x2="126" y2="23" stroke="#c8e6c9" stroke-width="2"/>
+          <line x1="184" y1="110" x2="184" y2="23" stroke="#c8e6c9" stroke-width="2"/>
+          <line x1="242" y1="110" x2="242" y2="24" stroke="#c8e6c9" stroke-width="2"/>
+          <!-- Connector line between dots -->
+          <polyline points="68,25 126,23 184,23 242,24" fill="none" stroke="#a5d6a7" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <!-- Dots -->
+          <circle cx="68"  cy="25" r="7" fill="#2e7d32"/>
+          <circle cx="126" cy="23" r="7" fill="#2e7d32"/>
+          <circle cx="184" cy="23" r="7" fill="#2e7d32"/>
+          <circle cx="242" cy="24" r="7" fill="#2e7d32"/>
+          <!-- Values inside dots or above -->
+          <text x="68"  y="14" text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">95%</text>
+          <text x="126" y="12" text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">97%</text>
+          <text x="184" y="12" text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">97%</text>
+          <text x="242" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">96%</text>
+          <!-- Q labels -->
+          <text x="68"  y="126" text-anchor="middle" class="lc-q-label">Q1</text>
+          <text x="126" y="126" text-anchor="middle" class="lc-q-label">Q2</text>
+          <text x="184" y="126" text-anchor="middle" class="lc-q-label">Q3</text>
+          <text x="242" y="126" text-anchor="middle" class="lc-q-label">Q4</text>
+        </svg>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Reliance — falling dots</div>
+        <!-- 85%→y=34.5, 69%→y=48.9, 48%→y=67.2, 30%→y=83 -->
+        <svg viewBox="0 0 260 140" style="width:100%;height:140px;">
+          <line x1="36" y1="20" x2="250" y2="20" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="43" x2="250" y2="43" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="65" x2="250" y2="65" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="88" x2="250" y2="88" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="36" y1="110" x2="250" y2="110" stroke="#e0e0e0" stroke-width="1.5"/>
+          <text x="30" y="23" text-anchor="end" class="lc-axis-label">100%</text>
+          <text x="30" y="46" text-anchor="end" class="lc-axis-label">75%</text>
+          <text x="30" y="68" text-anchor="end" class="lc-axis-label">50%</text>
+          <text x="30" y="91" text-anchor="end" class="lc-axis-label">25%</text>
+          <line x1="36" y1="40" x2="250" y2="40" stroke="#c5cae9" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <text x="252" y="43" class="lc-axis-label" fill="#9fa8da">78%</text>
+          <!-- Sticks -->
+          <line x1="68"  y1="110" x2="68"  y2="34" stroke="#ffcdd2" stroke-width="2"/>
+          <line x1="126" y1="110" x2="126" y2="49" stroke="#ffcdd2" stroke-width="2"/>
+          <line x1="184" y1="110" x2="184" y2="67" stroke="#ffcdd2" stroke-width="2"/>
+          <line x1="242" y1="110" x2="242" y2="83" stroke="#ffcdd2" stroke-width="2"/>
+          <!-- Connector line -->
+          <polyline points="68,34 126,49 184,67 242,83" fill="none" stroke="#ef9a9a" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <!-- Dots -->
+          <circle cx="68"  cy="34" r="7" fill="#2e7d32"/>
+          <circle cx="126" cy="49" r="7" fill="#f57f17"/>
+          <circle cx="184" cy="67" r="7" fill="#c62828"/>
+          <circle cx="242" cy="83" r="7" fill="#c62828"/>
+          <!-- Values -->
+          <text x="68"  y="22" text-anchor="middle" font-size="10" font-weight="700" fill="#2e7d32">85%</text>
+          <text x="126" y="38" text-anchor="middle" font-size="10" font-weight="700" fill="#f57f17">69%</text>
+          <text x="184" y="56" text-anchor="middle" font-size="10" font-weight="700" fill="#c62828">48%</text>
+          <text x="242" y="72" text-anchor="middle" font-size="10" font-weight="700" fill="#c62828">30%</text>
+          <text x="68"  y="126" text-anchor="middle" class="lc-q-label">Q1</text>
+          <text x="126" y="126" text-anchor="middle" class="lc-q-label">Q2</text>
+          <text x="184" y="126" text-anchor="middle" class="lc-q-label">Q3</text>
+          <text x="242" y="126" text-anchor="middle" class="lc-q-label">Q4</text>
+        </svg>
+      </div>
+    </div>
+    <div class="annotation">
+      <strong>Best for:</strong> Clean, minimal. The falling dots are visually very readable. Great when you need to show 6–8 periods and don't want the chart to feel heavy.
+      <strong>Trade-off:</strong> Same as line chart — no composition breakdown.
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       VARIANT 5 — GitHub Contribution Heatmap
+       ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Variant 5</div>
+        <div class="section-title">Calendar Heatmap &nbsp;<span style="font-size:13px;font-weight:500;color:#999;">GitHub Activity / WakaTime style</span></div>
+        <div class="section-desc">Each cell = one invoice. Arranged in a grid of weeks (columns) × slots (rows). Green shades = paid on time, red = default, orange = outside TREDS, yellow = late. At a glance you see the density and cluster of problems. A cluster of red = a bad patch; isolated dots = one-offs.</div>
+      </div>
+      <div class="ref-source"><strong>Seen in:</strong><br>GitHub Activity Graph<br>WakaTime Coding Stats<br>Salesforce CRM Analytics</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">K C India — dense green, no clusters</div>
+        <div id="heatmap-kc" style="overflow-x:auto;"></div>
+        <div class="legend-row" style="margin-top:10px;">
+          <div class="legend-item"><div class="legend-dot" style="background:#ebedf0;border:1px solid #ddd;"></div>No invoice</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div>On time</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e65100;"></div>Outside TREDS</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Default</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Reliance — green → red cluster visible</div>
+        <div id="heatmap-rel" style="overflow-x:auto;"></div>
+        <div class="legend-row" style="margin-top:10px;">
+          <div class="legend-item"><div class="legend-dot" style="background:#ebedf0;border:1px solid #ddd;"></div>No invoice</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div>On time</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f9a825;"></div>Late (DPD)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e65100;"></div>Outside TREDS</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Default</div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      <strong>Best for:</strong> Invoice-level history. You can see if problems cluster in one quarter or are spread across the year.
+      <strong>Trade-off:</strong> Needs invoice-level data (one cell = one invoice). With only QoQ totals, you'd need to approximate. Also gets wide if you show 12 months × 5 invoices/week.
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       VARIANT 6 — Horizontal Bullet Chart
+       ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Variant 6</div>
+        <div class="section-title">Horizontal Bullet Chart &nbsp;<span style="font-size:13px;font-weight:500;color:#999;">SAP Analytics / Stephen Few style</span></div>
+        <div class="section-desc">Each quarter = one horizontal bar. The bar length = on-time %. Background zones mark good/fair/poor ranges. A vertical tick marks the benchmark (platform avg). Lets you compare all 4 quarters on a shared axis at once — no scrolling, no stacking.</div>
+      </div>
+      <div class="ref-source"><strong>Seen in:</strong><br>SAP Analytics Cloud<br>Tableau Bullet Charts<br>Microsoft Power BI</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">K C India — all bars in green zone</div>
+        <div class="bullet-chart">
+          <!-- Q1 = 95% -->
+          <div class="bullet-row">
+            <div class="bullet-label">Q1</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:95%;background:#2e7d32;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+              <div class="bullet-axis">
+                <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#2e7d32;">95%</span>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label">Q2</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:97%;background:#2e7d32;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#2e7d32;">97%</span>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label">Q3</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:97%;background:#2e7d32;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#2e7d32;">97%</span>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label">Q4</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:96%;background:#2e7d32;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#2e7d32;">96%</span>
+          </div>
+        </div>
+        <div class="legend-row" style="margin-top:8px;">
+          <div class="legend-item"><div class="legend-dot" style="background:#fde8e8;border:1px solid #ef9a9a;"></div>Poor &lt;60%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fff8e1;border:1px solid #ffe082;"></div>Fair 60-80%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e6f4ea;border:1px solid #c8e6c9;"></div>Good &gt;80%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1a1a2e;width:3px;height:14px;border-radius:2px;"></div>78% platform avg</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Reliance — bars shrinking into red zone</div>
+        <div class="bullet-chart">
+          <div class="bullet-row">
+            <div class="bullet-label">Q1</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:85%;background:#2e7d32;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+              <div class="bullet-axis">
+                <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#2e7d32;">85%</span>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label">Q2</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:69%;background:#f57f17;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#f57f17;">69%</span>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label">Q3</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:48%;background:#c62828;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#c62828;">48%</span>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label">Q4</div>
+            <div class="bullet-track-wrap">
+              <div class="bullet-track">
+                <div class="bullet-range-poor"   style="left:0;width:100%;"></div>
+                <div class="bullet-range-fair"   style="left:60%;width:25%;"></div>
+                <div class="bullet-range-good"   style="left:80%;width:20%;"></div>
+                <div class="bullet-bar" style="width:30%;background:#c62828;left:0;"></div>
+                <div class="bullet-target" style="left:78%;"></div>
+              </div>
+            </div>
+            <span class="bullet-pct" style="color:#c62828;">30%</span>
+          </div>
+        </div>
+        <div class="legend-row" style="margin-top:8px;">
+          <div class="legend-item"><div class="legend-dot" style="background:#fde8e8;border:1px solid #ef9a9a;"></div>Poor &lt;60%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fff8e1;border:1px solid #ffe082;"></div>Fair 60-80%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e6f4ea;border:1px solid #c8e6c9;"></div>Good &gt;80%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1a1a2e;width:3px;height:14px;border-radius:2px;"></div>78% platform avg</div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      <strong>Best for:</strong> Comparing all quarters on a shared baseline. The background zones (good/fair/poor) do the grading automatically — bar colour and zone position tell the same story twice. Platform benchmark tick is powerful.
+      <strong>Trade-off:</strong> Horizontal layout takes more vertical space than a single bar or dot. 4 rows × all-buyers = scroll.
+    </div>
+  </div>
+
+
+  <!-- ── Summary table ────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Decision guide</div>
+        <div class="section-title">Which one to pick?</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#f9fafb;">
+            <th style="padding:10px 14px;text-align:left;font-size:10px;color:#555;border-bottom:1px solid #e8e8e8;">Variant</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;color:#555;border-bottom:1px solid #e8e8e8;">Shows composition?</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;color:#555;border-bottom:1px solid #e8e8e8;">Shows trend?</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;color:#555;border-bottom:1px solid #e8e8e8;">Data needed</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;color:#555;border-bottom:1px solid #e8e8e8;">Drawer fits?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:10px 14px;font-weight:600;">1 · DPD Dot Grid</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ per month</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ pattern visible</td>
+            <td style="padding:10px 14px;color:#888;">Monthly DPD per invoice</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ compact</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:10px 14px;font-weight:600;">2 · Stacked Bar <span style="color:#3949ab;font-size:10px;">(current)</span></td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ all 4 types</td>
+            <td style="padding:10px 14px;color:#f57f17;">~ harder to read</td>
+            <td style="padding:10px 14px;color:#2e7d32;">QoQ totals ✓</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:10px 14px;font-weight:600;">3 · Line / Area</td>
+            <td style="padding:10px 14px;color:#c62828;">✗ on-time % only</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ clearest slope</td>
+            <td style="padding:10px 14px;color:#2e7d32;">QoQ totals ✓</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:10px 14px;font-weight:600;">4 · Lollipop / Dot</td>
+            <td style="padding:10px 14px;color:#c62828;">✗ on-time % only</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ clean &amp; minimal</td>
+            <td style="padding:10px 14px;color:#2e7d32;">QoQ totals ✓</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ most compact</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:10px 14px;font-weight:600;">5 · Heatmap</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ per invoice</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ cluster pattern</td>
+            <td style="padding:10px 14px;color:#c62828;">Invoice-level dates needed</td>
+            <td style="padding:10px 14px;color:#f57f17;">~ can be wide</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 14px;font-weight:600;">6 · Bullet Chart</td>
+            <td style="padding:10px 14px;color:#c62828;">✗ on-time % only</td>
+            <td style="padding:10px 14px;color:#2e7d32;">✓ benchmark context</td>
+            <td style="padding:10px 14px;color:#2e7d32;">QoQ totals ✓</td>
+            <td style="padding:10px 14px;color:#f57f17;">~ 4 rows = tall</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation" style="margin-top:12px;">
+      <strong>Recommendation:</strong> Combine 3 (Line chart — shows trend clearly) with the existing breakdown cards (defaults + outside TREDS count). Line = where is it going. Cards = what drove it. Together they answer both questions.
+    </div>
+  </div>
+
+
+  <script>
+    /* ── Build heatmap grids ─────────────────────────── */
+
+    // KC India: mostly green, a few orange (outside TREDS), no red
+    function buildHeatmap(containerId, pattern) {
+      const container = document.getElementById(containerId);
+      const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+      // pattern: 13 columns, 5 rows each = 65 cells
+      // pattern values: 0=empty, 1=on-time, 2=late, 3=outside, 4=default
+
+      const monthLabelRow = document.createElement('div');
+      monthLabelRow.className = 'heatmap-month-labels';
+      monthLabelRow.style.paddingLeft = '0';
+      months.forEach(m => {
+        const lbl = document.createElement('div');
+        lbl.className = 'hm-month-label';
+        lbl.textContent = m;
+        lbl.style.minWidth = '34px';
+        lbl.style.flex = '0 0 34px';
+        monthLabelRow.appendChild(lbl);
+      });
+      container.appendChild(monthLabelRow);
+
+      const grid = document.createElement('div');
+      grid.className = 'heatmap-grid';
+      grid.style.flexWrap = 'wrap';
+      grid.style.gap = '2px';
+
+      // Lay out as 12 months × 6 cells per month
+      for (let m = 0; m < 12; m++) {
+        const col = document.createElement('div');
+        col.style.display = 'flex';
+        col.style.flexDirection = 'column';
+        col.style.gap = '2px';
+        col.style.minWidth = '30px';
+        col.style.flex = '1';
+
+        for (let r = 0; r < 6; r++) {
+          const idx = m * 6 + r;
+          const cell = document.createElement('div');
+          cell.className = 'heatmap-cell';
+          cell.style.width = '100%';
+          cell.style.height = '12px';
+          cell.style.borderRadius = '2px';
+          const val = idx < pattern.length ? pattern[idx] : 0;
+          if      (val === 0) cell.style.background = '#ebedf0';
+          else if (val === 1) cell.style.background = '#2e7d32';
+          else if (val === 2) cell.style.background = '#f9a825';
+          else if (val === 3) cell.style.background = '#e65100';
+          else if (val === 4) cell.style.background = '#c62828';
+          col.appendChild(cell);
+        }
+        grid.appendChild(col);
+      }
+      container.appendChild(grid);
+    }
+
+    // KC India pattern: 72 cells, mostly 1s, a few 3s
+    const kcPattern = [
+      1,1,1,1,1,0,  // Apr
+      1,1,1,1,1,1,  // May
+      1,1,1,1,3,1,  // Jun
+      1,1,1,1,1,1,  // Jul
+      1,1,1,1,1,1,  // Aug
+      1,1,3,1,1,1,  // Sep
+      1,1,1,1,1,1,  // Oct
+      1,1,1,1,1,0,  // Nov
+      1,1,1,3,1,1,  // Dec
+      1,1,1,1,1,1,  // Jan
+      1,1,1,1,1,1,  // Feb
+      1,1,3,1,0,0,  // Mar
+    ];
+
+    // Reliance pattern: starts green, deteriorates badly
+    const relPattern = [
+      1,1,1,1,1,0,  // Apr – Q1 good
+      1,1,1,1,1,1,
+      1,1,1,1,1,1,
+      1,2,1,1,3,1,  // Jul – Q2 starts slipping
+      1,1,2,1,1,2,
+      1,3,1,2,1,1,
+      1,2,4,1,2,3,  // Oct – Q3 getting bad
+      4,1,2,3,2,1,
+      1,4,2,3,1,4,
+      4,4,3,2,4,2,  // Jan – Q4 mostly red
+      4,3,4,4,2,4,
+      4,4,3,2,0,0,
+    ];
+
+    buildHeatmap('heatmap-kc', kcPattern);
+    buildHeatmap('heatmap-rel', relPattern);
+  </script>
+
+</body>
+</html>
