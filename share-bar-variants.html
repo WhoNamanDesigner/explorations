@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Share Bar — Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 32px 24px;
+    }
+
+    .page-title   { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub     { font-size: 13px; color: #888; margin-bottom: 36px; }
+
+    /* buyer selector */
+    .buyer-nav {
+      display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap;
+    }
+    .buyer-btn {
+      padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid #ddd; background: #fff; cursor: pointer; color: #555;
+      transition: all 0.15s;
+    }
+    .buyer-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+    /* section */
+    .section { margin-bottom: 40px; }
+    .section-tag  { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #aaa; margin-bottom: 4px; }
+    .section-title{ font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+    .section-desc { font-size: 12px; color: #666; margin-bottom: 16px; line-height: 1.5; }
+
+    /* card */
+    .card {
+      background: #fff; border: 1px solid #e8e8e8;
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 12px;
+    }
+
+    /* kpi row — matches screenshot */
+    .kpi-row {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0; border: 1px solid #e8e8e8; border-radius: 10px;
+      overflow: hidden; margin-bottom: 16px;
+    }
+    .kpi-cell {
+      padding: 14px 18px;
+    }
+    .kpi-cell:first-child { border-right: 1px solid #e8e8e8; }
+    .kpi-cell-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+    .kpi-cell-amount { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+    .kpi-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #f0f0f0; border-radius: 20px;
+      padding: 3px 10px; font-size: 11px; color: #555; font-weight: 500;
+    }
+    .kpi-tag.up   { background: #e6f4ea; color: #2e7d32; }
+    .kpi-tag.down { background: #fde8e8; color: #c62828; }
+
+    /* share section heading */
+    .share-heading {
+      font-size: 13px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* base progress bar */
+    .bar-track {
+      width: 100%; height: 8px; background: #e8f5e9;
+      border-radius: 20px; overflow: hidden; position: relative;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 20px;
+      background: #2e7d32;
+      transition: width 0.4s ease;
+    }
+    .bar-pct {
+      font-size: 13px; font-weight: 700; color: #1a1a2e;
+      text-align: right; margin-top: 6px;
+    }
+
+    /* chips */
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .chip.rank    { background: #e8eaf6; color: #3949ab; }
+    .chip.up      { background: #e6f4ea; color: #2e7d32; }
+    .chip.down    { background: #fde8e8; color: #c62828; }
+    .chip.top     { background: #fff8e1; color: #e65100; }
+    .chip.neutral { background: #f0f0f0; color: #555; }
+
+    /* benchmark tick on bar */
+    .bar-wrap { position: relative; }
+    .bench-tick {
+      position: absolute; top: -4px;
+      width: 2px; height: 16px;
+      background: #1a1a2e; border-radius: 2px;
+      z-index: 2;
+    }
+    .bench-label {
+      position: absolute; top: 16px;
+      font-size: 9px; color: #888; white-space: nowrap;
+      transform: translateX(-50%);
+    }
+
+    /* segmented bar (variant C) */
+    .seg-bar-track {
+      width: 100%; height: 8px; background: #e8e8e8;
+      border-radius: 20px; overflow: hidden;
+      display: flex;
+    }
+    .seg { height: 100%; }
+    .seg.me    { background: #1a237e; }
+    .seg.p2    { background: #3949ab; }
+    .seg.p3    { background: #7986cb; }
+    .seg.p4    { background: #c5cae9; }
+    .seg.rest  { background: #e8eaf6; }
+    .seg-legend {
+      display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
+    }
+    .seg-legend-item {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 10px; color: #666;
+    }
+    .seg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+    /* annotation */
+    .annotation {
+      font-size: 11px; color: #999; margin-top: 12px; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825; border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:680px){ .two-col { grid-template-columns: 1fr; } }
+
+    .variant-label {
+      font-size: 10px; font-weight: 700; color: #3949ab;
+      letter-spacing: 0.5px; margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">Your Share of Platform — Progress Bar Variants</div>
+  <div class="page-sub">4 options for what to show below the share bar. Switch buyer to see how it behaves with different data.</div>
+
+  <!-- Buyer switcher -->
+  <div class="buyer-nav">
+    <button class="buyer-btn active" onclick="setBuyer('kc')">K C India &nbsp;<span style="color:#2e7d32;">21% · #2</span></button>
+    <button class="buyer-btn" onclick="setBuyer('tata')">Tata Motors &nbsp;<span style="color:#2e7d32;">18% · #3</span></button>
+    <button class="buyer-btn" onclick="setBuyer('hul')">HUL &nbsp;<span style="color:#f57f17;">6% · #5</span></button>
+    <button class="buyer-btn" onclick="setBuyer('reliance')">Reliance &nbsp;<span style="color:#c62828;">3% · #6</span></button>
+  </div>
+
+  <!-- ── Variant A — Chips below bar ──────────────── -->
+  <div class="section">
+    <div class="section-tag">Option A</div>
+    <div class="section-title">Chips below the bar</div>
+    <div class="section-desc">Rank, momentum, and #1 context as small scannable chips under the bar. Read only what you need.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="variant-label">MTD</div>
+        <div class="card">
+          <div id="kpi-a-mtd"></div>
+          <div class="share-heading">Your Share of Platform MTD</div>
+          <div class="bar-wrap">
+            <div class="bar-track"><div class="bar-fill" id="bar-a-mtd"></div></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+            <span class="bar-pct" id="pct-a-mtd"></span>
+          </div>
+          <div class="chip-row" id="chips-a-mtd"></div>
+        </div>
+      </div>
+      <div>
+        <div class="variant-label">YTD</div>
+        <div class="card">
+          <div id="kpi-a-ytd"></div>
+          <div class="share-heading">Your Share of Platform YTD</div>
+          <div class="bar-wrap">
+            <div class="bar-track"><div class="bar-fill" id="bar-a-ytd"></div></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+            <span class="bar-pct" id="pct-a-ytd"></span>
+          </div>
+          <div class="chip-row" id="chips-a-ytd"></div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Best for:</strong> Clean at rest — chips don't crowd the bar. Each chip is independent — rank, momentum, context are separate pieces of info.</div>
+  </div>
+
+  <!-- ── Variant B — Benchmark tick on bar ────────── -->
+  <div class="section">
+    <div class="section-tag">Option B</div>
+    <div class="section-title">Benchmark tick on the bar</div>
+    <div class="section-desc">A vertical tick on the bar shows where the platform average sits. You see immediately if you're above or below average — no reading needed.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="variant-label">MTD</div>
+        <div class="card">
+          <div id="kpi-b-mtd"></div>
+          <div class="share-heading">Your Share of Platform MTD</div>
+          <div class="bar-wrap" style="padding-bottom:20px;">
+            <div class="bar-track" style="overflow:visible;">
+              <div class="bar-fill" id="bar-b-mtd"></div>
+            </div>
+            <div class="bench-tick" id="tick-b-mtd"></div>
+            <div class="bench-label" id="tick-label-b-mtd"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <div class="chip-row" id="chips-b-mtd"></div>
+            <span class="bar-pct" id="pct-b-mtd"></span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="variant-label">YTD</div>
+        <div class="card">
+          <div id="kpi-b-ytd"></div>
+          <div class="share-heading">Your Share of Platform YTD</div>
+          <div class="bar-wrap" style="padding-bottom:20px;">
+            <div class="bar-track" style="overflow:visible;">
+              <div class="bar-fill" id="bar-b-ytd"></div>
+            </div>
+            <div class="bench-tick" id="tick-b-ytd"></div>
+            <div class="bench-label" id="tick-label-b-ytd"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <div class="chip-row" id="chips-b-ytd"></div>
+            <span class="bar-pct" id="pct-b-ytd"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Best for:</strong> Immediate visual judgment — bar fill vs tick position is pre-attentive. You feel whether you're above or below average before reading any number.</div>
+  </div>
+
+  <!-- ── Variant C — Segmented bar (all financiers) ── -->
+  <div class="section">
+    <div class="section-tag">Option C</div>
+    <div class="section-title">Segmented bar — all financiers visible</div>
+    <div class="section-desc">Bar is split into segments — one per financier. Your segment is darkest. See who else is on this buyer and how much they hold.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="variant-label">MTD</div>
+        <div class="card">
+          <div id="kpi-c-mtd"></div>
+          <div class="share-heading">Your Share of Platform MTD</div>
+          <div class="seg-bar-track" id="seg-c-mtd"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <div class="seg-legend" id="legend-c-mtd"></div>
+            <span class="bar-pct" id="pct-c-mtd"></span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="variant-label">YTD</div>
+        <div class="card">
+          <div id="kpi-c-ytd"></div>
+          <div class="share-heading">Your Share of Platform YTD</div>
+          <div class="seg-bar-track" id="seg-c-ytd"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <div class="seg-legend" id="legend-c-ytd"></div>
+            <span class="bar-pct" id="pct-c-ytd"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Best for:</strong> Competitive context — you can see exactly who else is financing this buyer. Works best when there are 3–6 active financiers. Gets noisy with 10+.</div>
+  </div>
+
+  <!-- ── Variant D — Inline with % ────────────────── -->
+  <div class="section">
+    <div class="section-tag">Option D</div>
+    <div class="section-title">Everything in one line with %</div>
+    <div class="section-desc">Most compact. % + rank + momentum all on one line after the bar. Zero extra vertical space.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="variant-label">MTD</div>
+        <div class="card">
+          <div id="kpi-d-mtd"></div>
+          <div class="share-heading">Your Share of Platform MTD</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="bar-track" style="flex:1;">
+              <div class="bar-fill" id="bar-d-mtd"></div>
+            </div>
+            <span class="bar-pct" id="pct-d-mtd" style="white-space:nowrap;min-width:28px;"></span>
+            <div class="chip-row" id="chips-d-mtd" style="margin-top:0;flex-wrap:nowrap;"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="variant-label">YTD</div>
+        <div class="card">
+          <div id="kpi-d-ytd"></div>
+          <div class="share-heading">Your Share of Platform YTD</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="bar-track" style="flex:1;">
+              <div class="bar-fill" id="bar-d-ytd"></div>
+            </div>
+            <span class="bar-pct" id="pct-d-ytd" style="white-space:nowrap;min-width:28px;"></span>
+            <div class="chip-row" id="chips-d-ytd" style="margin-top:0;flex-wrap:nowrap;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation"><strong>Best for:</strong> Tight drawer space. Everything in one row — no extra height. Works when there are only 2–3 chips to show.</div>
+  </div>
+
+
+  <script>
+    const buyers = {
+      kc: {
+        name: 'K C India Limited',
+        myMTD: '₹ 10,25,990', platMTD: '₹ 48,50,000', shareMTD: 21,
+        myYTD: '₹ 80,04,000', platYTD: '₹ 3,20,00,000', shareYTD: 25,
+        momMTD: '+18.4', momUp: true,
+        rankMTD: 2, topShareMTD: 28, avgShare: 18,
+        rankYTD: 2, topShareYTD: 30,
+        financiers: [
+          { label: 'You', cls: 'me',   pct: 21 },
+          { label: '#2',  cls: 'p2',   pct: 28 },
+          { label: '#3',  cls: 'p3',   pct: 19 },
+          { label: '#4',  cls: 'p4',   pct: 14 },
+          { label: 'Rest',cls: 'rest', pct: 18 },
+        ]
+      },
+      tata: {
+        name: 'Tata Motors Limited',
+        myMTD: '₹ 22,00,000', platMTD: '₹ 1,20,50,000', shareMTD: 18,
+        myYTD: '₹ 1,80,00,000', platYTD: '₹ 9,60,00,000', shareYTD: 19,
+        momMTD: '+9.2', momUp: true,
+        rankMTD: 3, topShareMTD: 34, avgShare: 20,
+        rankYTD: 3, topShareYTD: 36,
+        financiers: [
+          { label: 'You', cls: 'me',   pct: 18 },
+          { label: '#1',  cls: 'p2',   pct: 34 },
+          { label: '#2',  cls: 'p3',   pct: 22 },
+          { label: '#4',  cls: 'p4',   pct: 12 },
+          { label: 'Rest',cls: 'rest', pct: 14 },
+        ]
+      },
+      hul: {
+        name: 'Hindustan Unilever',
+        myMTD: '₹ 3,20,000', platMTD: '₹ 52,00,000', shareMTD: 6,
+        myYTD: '₹ 28,00,000', platYTD: '₹ 4,80,00,000', shareYTD: 6,
+        momMTD: '-8.2', momUp: false,
+        rankMTD: 5, topShareMTD: 41, avgShare: 20,
+        rankYTD: 5, topShareYTD: 38,
+        financiers: [
+          { label: 'You', cls: 'me',   pct: 6  },
+          { label: '#1',  cls: 'p2',   pct: 41 },
+          { label: '#2',  cls: 'p3',   pct: 25 },
+          { label: '#3',  cls: 'p4',   pct: 16 },
+          { label: 'Rest',cls: 'rest', pct: 12 },
+        ]
+      },
+      reliance: {
+        name: 'Reliance Retail',
+        myMTD: '₹ 1,00,000', platMTD: '₹ 38,00,000', shareMTD: 3,
+        myYTD: '₹ 9,00,000', platYTD: '₹ 2,90,00,000', shareYTD: 3,
+        momMTD: '-62.0', momUp: false,
+        rankMTD: 6, topShareMTD: 45, avgShare: 17,
+        rankYTD: 6, topShareYTD: 42,
+        financiers: [
+          { label: 'You', cls: 'me',   pct: 3  },
+          { label: '#1',  cls: 'p2',   pct: 45 },
+          { label: '#2',  cls: 'p3',   pct: 28 },
+          { label: '#3',  cls: 'p4',   pct: 14 },
+          { label: 'Rest',cls: 'rest', pct: 10 },
+        ]
+      }
+    };
+
+    function kpiHtml(myAmt, platAmt, momVal, momUp) {
+      const momCls = momUp ? 'up' : 'down';
+      const momArrow = momUp ? '▲' : '▼';
+      return `
+        <div class="kpi-row" style="margin-bottom:14px;">
+          <div class="kpi-cell">
+            <div class="kpi-cell-label">Platform Financed</div>
+            <div class="kpi-cell-amount">${platAmt}</div>
+            <span class="kpi-tag">All Financiers Combined</span>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-cell-label">Your Financed</div>
+            <div class="kpi-cell-amount">${myAmt}</div>
+            <span class="kpi-tag ${momCls}">${momArrow} ${Math.abs(parseFloat(momVal))}% vs last month</span>
+          </div>
+        </div>`;
+    }
+
+    function rankChip(rank) {
+      return `<span class="chip rank">#${rank} financier</span>`;
+    }
+    function momChip(val, up) {
+      const cls   = up ? 'up' : 'down';
+      const arrow = up ? '↑' : '↓';
+      return `<span class="chip ${cls}">${arrow} ${Math.abs(parseFloat(val))}% MoM</span>`;
+    }
+    function topChip(topPct) {
+      return `<span class="chip top">#1 holds ${topPct}%</span>`;
+    }
+
+    function render(key) {
+      const d = buyers[key];
+
+      // ── Variant A ──
+      ['mtd','ytd'].forEach(period => {
+        const share   = period === 'mtd' ? d.shareMTD   : d.shareYTD;
+        const myAmt   = period === 'mtd' ? d.myMTD      : d.myYTD;
+        const platAmt = period === 'mtd' ? d.platMTD    : d.platYTD;
+        const rank    = period === 'mtd' ? d.rankMTD    : d.rankYTD;
+        const topShr  = period === 'mtd' ? d.topShareMTD: d.topShareYTD;
+
+        document.getElementById(`kpi-a-${period}`).innerHTML = kpiHtml(myAmt, platAmt, d.momMTD, d.momUp);
+        document.getElementById(`bar-a-${period}`).style.width  = share + '%';
+        document.getElementById(`pct-a-${period}`).textContent  = share + '%';
+        document.getElementById(`chips-a-${period}`).innerHTML  =
+          rankChip(rank) + momChip(d.momMTD, d.momUp) + topChip(topShr);
+
+        // ── Variant B ──
+        document.getElementById(`kpi-b-${period}`).innerHTML = kpiHtml(myAmt, platAmt, d.momMTD, d.momUp);
+        document.getElementById(`bar-b-${period}`).style.width  = share + '%';
+        document.getElementById(`pct-b-${period}`).textContent  = share + '%';
+        document.getElementById(`chips-b-${period}`).innerHTML  = rankChip(rank);
+        const tick = document.getElementById(`tick-b-${period}`);
+        const tickLabel = document.getElementById(`tick-label-b-${period}`);
+        tick.style.left = d.avgShare + '%';
+        tickLabel.style.left = d.avgShare + '%';
+        tickLabel.textContent = `Avg ${d.avgShare}%`;
+
+        // ── Variant C ──
+        document.getElementById(`kpi-c-${period}`).innerHTML = kpiHtml(myAmt, platAmt, d.momMTD, d.momUp);
+        document.getElementById(`pct-c-${period}`).textContent = share + '%';
+        const segBar = document.getElementById(`seg-c-${period}`);
+        segBar.innerHTML = d.financiers.map(f =>
+          `<div class="seg ${f.cls}" style="width:${f.pct}%;" title="${f.label}: ${f.pct}%"></div>`
+        ).join('');
+        const legend = document.getElementById(`legend-c-${period}`);
+        const colors = { me:'#1a237e', p2:'#3949ab', p3:'#7986cb', p4:'#c5cae9', rest:'#e8eaf6' };
+        legend.innerHTML = d.financiers.map(f =>
+          `<div class="seg-legend-item">
+            <div class="seg-dot" style="background:${colors[f.cls]};"></div>
+            ${f.label} ${f.pct}%
+          </div>`
+        ).join('');
+
+        // ── Variant D ──
+        document.getElementById(`kpi-d-${period}`).innerHTML = kpiHtml(myAmt, platAmt, d.momMTD, d.momUp);
+        document.getElementById(`bar-d-${period}`).style.width  = share + '%';
+        document.getElementById(`pct-d-${period}`).textContent  = share + '%';
+        document.getElementById(`chips-d-${period}`).innerHTML  =
+          rankChip(rank) + momChip(d.momMTD, d.momUp);
+      });
+    }
+
+    function setBuyer(key) {
+      document.querySelectorAll('.buyer-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      render(key);
+    }
+
+    render('kc');
+  </script>
+</body>
+</html>
