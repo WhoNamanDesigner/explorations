@@ -358,6 +358,123 @@
 
     /* ─── Limit expiry warning ───────────────────────── */
     .expiry-warn { font-size: 11px; color: #e65100; font-weight: 600; margin-top: 1px; }
+
+    /* ─── Payment Track Record accordion ────────────── */
+    .accordion {
+      border: 1px solid #efefef;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .accordion-header {
+      background: #f9fafb;
+      padding: 11px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .accordion-header:hover { background: #f0f2ff; }
+    .accordion-left { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .accordion-title-row { display: flex; align-items: center; gap: 8px; }
+    .accordion-title { font-size: 12px; font-weight: 600; color: #1a1a2e; }
+    .acc-amount { font-size: 11px; color: #888; }
+
+    /* On-time ratio — the key metric */
+    .ratio-row { display: flex; align-items: center; gap: 8px; }
+    .ratio-fraction {
+      font-size: 13px; font-weight: 700;
+    }
+    .ratio-fraction .numerator   { color: #2e7d32; }
+    .ratio-fraction .denominator { color: #888; font-weight: 500; }
+    .ratio-label { font-size: 10px; color: #888; }
+    .ratio-bar-track {
+      flex: 1; height: 5px; background: #e8e8e8;
+      border-radius: 4px; overflow: hidden; max-width: 80px;
+    }
+    .ratio-bar-fill { height: 100%; border-radius: 4px; }
+    .ratio-bar-fill.good { background: #2e7d32; }
+    .ratio-bar-fill.fair { background: #f57f17; }
+    .ratio-bar-fill.poor { background: #c62828; }
+    .ratio-pct {
+      font-size: 11px; font-weight: 700;
+    }
+    .ratio-pct.good { color: #2e7d32; }
+    .ratio-pct.fair { color: #f57f17; }
+    .ratio-pct.poor { color: #c62828; }
+
+    .accordion-chevron {
+      font-size: 12px; color: #aaa;
+      transition: transform 0.2s;
+      flex-shrink: 0; margin-left: 8px;
+    }
+    .accordion.open .accordion-chevron { transform: rotate(90deg); }
+
+    .accordion-body {
+      display: none;
+      padding: 12px 14px;
+      border-top: 1px solid #f0f0f0;
+      background: #fff;
+    }
+    .accordion.open .accordion-body { display: block; }
+
+    /* Breakdown summary */
+    .breakdown-row {
+      display: flex; gap: 10px; margin-bottom: 12px;
+    }
+    .breakdown-card {
+      flex: 1; background: #f9fafb; border: 1px solid #efefef;
+      border-radius: 6px; padding: 8px 10px; text-align: center;
+    }
+    .breakdown-num { font-size: 18px; font-weight: 800; }
+    .breakdown-num.defaults { color: #c62828; }
+    .breakdown-num.outside  { color: #e65100; }
+    .breakdown-label { font-size: 10px; color: #888; margin-top: 2px; line-height: 1.3; }
+
+    /* QoQ table */
+    .qoq-label {
+      font-size: 10px; font-weight: 700; color: #aaa;
+      letter-spacing: 0.6px; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .qoq-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .qoq-table thead th {
+      font-size: 10px; font-weight: 600; color: #aaa;
+      text-align: right; padding: 4px 6px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .qoq-table thead th:first-child { text-align: left; }
+    .qoq-table tbody td {
+      padding: 6px 6px; text-align: right;
+      border-bottom: 1px solid #f8f8f8; color: #555;
+    }
+    .qoq-table tbody td:first-child { text-align: left; font-weight: 600; color: #1a1a2e; }
+    .qoq-table tbody tr:last-child td { border-bottom: none; }
+    .qoq-ontime { font-weight: 600; }
+    .qoq-ontime.good { color: #2e7d32; }
+    .qoq-ontime.fair { color: #f57f17; }
+    .qoq-ontime.poor { color: #c62828; }
+    .qoq-trend { font-size: 10px; }
+    .qoq-trend.up   { color: #2e7d32; }
+    .qoq-trend.down { color: #c62828; }
+
+    /* ─── Suggested additions (dashed placeholder) ─── */
+    .suggestion-card {
+      border: 1.5px dashed #d0d5e8;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .suggestion-icon {
+      font-size: 16px; flex-shrink: 0; margin-top: 1px;
+    }
+    .suggestion-title { font-size: 11px; font-weight: 700; color: #3949ab; margin-bottom: 2px; }
+    .suggestion-desc  { font-size: 10px; color: #888; line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -498,8 +615,7 @@
               <span class="lchip drawer">Platform MTD</span>
               <span class="lchip drawer">Platform YTD</span>
               <span class="lchip drawer">My Share %</span>
-              <span class="lchip drawer">Past Defaults</span>
-              <span class="lchip drawer">Outside TREDS Settlement %</span>
+              <span class="lchip drawer">Payment Track Record</span>
               <span class="lchip drawer">+ future fields</span>
             </div>
           </div>
@@ -672,8 +788,18 @@
           tags: [{label:'Approved', cls:'approved'}],
           myMTD: '₹ 10,25,990', platMTD: '₹ 48,50,000', shareMTD: '21', momMTD: '+18.4', momUp: true,
           myYTD: '₹ 80,04,000', platYTD: '₹ 3,20,00,000', shareYTD: '25',
-          defaults: 0, extSettle: null, expiry: 'Jul 31, 2026',
-          suppliers: 5
+          expiry: 'Jul 31, 2026', suppliers: 5,
+          paymentTrack: {
+            ytdAmount: '₹ 80,04,000',
+            onTime: 250, total: 260,
+            defaults: 0, outsideTREDS: 10,
+            qoq: [
+              { q: 'Q4 FY25', onTime: 65, total: 68, pct: 96, defaults: 0, outside: 3, trend: 'neutral' },
+              { q: 'Q3 FY25', onTime: 63, total: 65, pct: 97, defaults: 0, outside: 2, trend: 'up' },
+              { q: 'Q2 FY25', onTime: 62, total: 64, pct: 97, defaults: 0, outside: 3, trend: 'neutral' },
+              { q: 'Q1 FY25', onTime: 60, total: 63, pct: 95, defaults: 0, outside: 2, trend: 'up' }
+            ]
+          }
         },
         hul: {
           name: 'Hindustan Unilever Ltd',
@@ -681,8 +807,18 @@
           tags: [{label:'Approved', cls:'approved'}],
           myMTD: '₹ 3,20,000', platMTD: '₹ 62,00,000', shareMTD: '5', momMTD: '-18.4', momUp: false,
           myYTD: '₹ 28,00,000', platYTD: '₹ 4,80,00,000', shareYTD: '6',
-          defaults: 1, extSettle: '40%', expiry: 'Mar 15, 2026',
-          suppliers: 8
+          expiry: 'Mar 15, 2026', suppliers: 8,
+          paymentTrack: {
+            ytdAmount: '₹ 28,00,000',
+            onTime: 210, total: 280,
+            defaults: 4, outsideTREDS: 21,
+            qoq: [
+              { q: 'Q4 FY25', onTime: 47, total: 72, pct: 65, defaults: 2, outside: 8, trend: 'down' },
+              { q: 'Q3 FY25', onTime: 55, total: 70, pct: 79, defaults: 1, outside: 6, trend: 'down' },
+              { q: 'Q2 FY25', onTime: 58, total: 68, pct: 85, defaults: 1, outside: 5, trend: 'down' },
+              { q: 'Q1 FY25', onTime: 50, total: 70, pct: 71, defaults: 0, outside: 2, trend: 'up' }
+            ]
+          }
         },
         reliance: {
           name: 'Reliance Retail Ltd',
@@ -690,8 +826,18 @@
           tags: [{label:'Under Default', cls:'default'}],
           myMTD: '₹ 1,00,000', platMTD: '₹ 38,00,000', shareMTD: '3', momMTD: '-62.0', momUp: false,
           myYTD: '₹ 9,00,000', platYTD: '₹ 2,90,00,000', shareYTD: '3',
-          defaults: 2, extSettle: '80%', expiry: 'Jan 10, 2026',
-          suppliers: 3
+          expiry: 'Jan 10, 2026', suppliers: 3,
+          paymentTrack: {
+            ytdAmount: '₹ 9,00,000',
+            onTime: 187, total: 323,
+            defaults: 89, outsideTREDS: 47,
+            qoq: [
+              { q: 'Q4 FY25', onTime: 24, total: 81, pct: 30, defaults: 25, outside: 16, trend: 'down' },
+              { q: 'Q3 FY25', onTime: 38, total: 80, pct: 48, defaults: 12, outside: 10, trend: 'down' },
+              { q: 'Q2 FY25', onTime: 55, total: 80, pct: 69, defaults: 5,  outside: 3,  trend: 'down' },
+              { q: 'Q1 FY25', onTime: 70, total: 82, pct: 85, defaults: 1,  outside: 1,  trend: 'neutral' }
+            ]
+          }
         },
         tata: {
           name: 'Tata Motors Limited',
@@ -699,8 +845,18 @@
           tags: [{label:'Approved', cls:'approved'}],
           myMTD: '₹ 22,00,000', platMTD: '₹ 1,20,50,000', shareMTD: '18', momMTD: '+9.2', momUp: true,
           myYTD: '₹ 1,80,00,000', platYTD: '₹ 9,60,00,000', shareYTD: '19',
-          defaults: 0, extSettle: null, expiry: 'Dec 31, 2026',
-          suppliers: 12
+          expiry: 'Dec 31, 2026', suppliers: 12,
+          paymentTrack: {
+            ytdAmount: '₹ 1,80,00,000',
+            onTime: 295, total: 310,
+            defaults: 0, outsideTREDS: 5,
+            qoq: [
+              { q: 'Q4 FY25', onTime: 74, total: 78, pct: 95, defaults: 0, outside: 1, trend: 'neutral' },
+              { q: 'Q3 FY25', onTime: 75, total: 78, pct: 96, defaults: 0, outside: 2, trend: 'up' },
+              { q: 'Q2 FY25', onTime: 73, total: 77, pct: 95, defaults: 0, outside: 1, trend: 'neutral' },
+              { q: 'Q1 FY25', onTime: 73, total: 77, pct: 95, defaults: 0, outside: 1, trend: 'neutral' }
+            ]
+          }
         }
       }
     };
@@ -768,9 +924,6 @@
 
       if (tab === 'my') {
         const shareClass = parseInt(data.shareMTD) < 15 ? 'low' : '';
-        const riskLevel = data.defaults === 0 ? 'green' : data.defaults === 1 ? 'amber' : 'red';
-        const riskLabel = data.defaults === 0 ? 'No defaults' : `${data.defaults} default${data.defaults > 1 ? 's' : ''}`;
-        const settleLabel = data.extSettle ? data.extSettle + ' settled outside TREDS' : 'All settled via TREDS';
 
         bodyHtml += `
           <div class="drawer-section">
@@ -841,15 +994,8 @@
           <div class="drawer-divider"></div>
 
           <div class="drawer-section">
-            <div class="drawer-section-title">Risk Profile</div>
-            <div class="risk-row">
-              <span class="risk-row-label">Past Defaults</span>
-              <span class="risk-badge ${riskLevel}">${riskLabel}</span>
-            </div>
-            <div class="risk-row">
-              <span class="risk-row-label">Outside TREDS Settlement</span>
-              <span class="risk-badge ${data.extSettle ? (parseFloat(data.extSettle) > 50 ? 'red' : 'amber') : 'green'}">${settleLabel}</span>
-            </div>
+            <div class="drawer-section-title">Payment Track Record</div>
+            ${buildPaymentAccordion(data.paymentTrack)}
           </div>
 
           <div class="drawer-divider"></div>
@@ -867,6 +1013,40 @@
               </div>
             </div>
           </div>
+
+          <div class="drawer-divider"></div>
+
+          <div class="drawer-section">
+            <div class="drawer-section-title" style="margin-bottom:10px;">What else could go here</div>
+            <div class="suggestion-card">
+              <div class="suggestion-icon">📋</div>
+              <div>
+                <div class="suggestion-title">Invoice Aging Breakdown</div>
+                <div class="suggestion-desc">0–30 / 31–60 / 60+ days buckets for outstanding invoices. Helps spot if payments are slipping before they become defaults.</div>
+              </div>
+            </div>
+            <div class="suggestion-card">
+              <div class="suggestion-icon">🏭</div>
+              <div>
+                <div class="suggestion-title">Supplier-wise Discounting Split</div>
+                <div class="suggestion-desc">Which suppliers drive the most discounting volume for this buyer? Useful to double-down on active supply chains.</div>
+              </div>
+            </div>
+            <div class="suggestion-card">
+              <div class="suggestion-icon">📈</div>
+              <div>
+                <div class="suggestion-title">Limit Utilisation Trend (12-month)</div>
+                <div class="suggestion-desc">Sparkline of monthly utilisation %. Reveals seasonal dips or a sustained high-water mark before limit renewal.</div>
+              </div>
+            </div>
+            <div class="suggestion-card">
+              <div class="suggestion-icon">🧾</div>
+              <div>
+                <div class="suggestion-title">Average Invoice Size &amp; Tenor</div>
+                <div class="suggestion-desc">Mean ticket size and days to maturity. Large invoices with long tenors = more capital tied up; factor into limit sizing.</div>
+              </div>
+            </div>
+          </div>
         `;
       }
 
@@ -876,6 +1056,91 @@
       document.getElementById('drawer').classList.add('open');
       document.getElementById('tablePane').classList.add('drawer-open');
       currentRow = key;
+    }
+
+    /* ─── Payment Track Record accordion builder ────── */
+    function tierClass(pct) {
+      return pct >= 85 ? 'good' : pct >= 70 ? 'fair' : 'poor';
+    }
+
+    function buildPaymentAccordion(pt) {
+      const pct = Math.round((pt.onTime / pt.total) * 100);
+      const tier = tierClass(pct);
+      const barW = pct;
+
+      const qoqRows = pt.qoq.map(row => {
+        const t = tierClass(row.pct);
+        const arrow = row.trend === 'up' ? '↑' : row.trend === 'down' ? '↓' : '–';
+        const arrowCls = row.trend === 'up' ? 'up' : row.trend === 'down' ? 'down' : '';
+        return `
+          <tr>
+            <td>${row.q}</td>
+            <td><span class="qoq-ontime ${t}">${row.onTime}/${row.total}</span></td>
+            <td><span class="qoq-ontime ${t}">${row.pct}%</span></td>
+            <td class="breakdown-num defaults" style="font-size:12px;font-weight:700;">${row.defaults}</td>
+            <td class="breakdown-num outside" style="font-size:12px;font-weight:700;">${row.outside}</td>
+            <td><span class="qoq-trend ${arrowCls}">${arrow}</span></td>
+          </tr>`;
+      }).join('');
+
+      return `
+        <div class="accordion" id="acc-payment">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <div class="accordion-left">
+              <div class="accordion-title-row">
+                <span class="accordion-title">Paid on Time — Last FY</span>
+                <span class="acc-amount">${pt.ytdAmount} discounted</span>
+              </div>
+              <div class="ratio-row">
+                <span class="ratio-fraction">
+                  <span class="numerator">${pt.onTime}</span>
+                  <span class="denominator" style="font-size:11px;">/${pt.total} invoices</span>
+                </span>
+                <div class="ratio-bar-track">
+                  <div class="ratio-bar-fill ${tier}" style="width:${barW}%;"></div>
+                </div>
+                <span class="ratio-pct ${tier}">${pct}%</span>
+                <span class="ratio-label">on time</span>
+              </div>
+            </div>
+            <span class="accordion-chevron">›</span>
+          </div>
+          <div class="accordion-body">
+            <div class="breakdown-row">
+              <div class="breakdown-card">
+                <div class="breakdown-num defaults">${pt.defaults}</div>
+                <div class="breakdown-label">Payment<br>Defaults</div>
+              </div>
+              <div class="breakdown-card">
+                <div class="breakdown-num outside">${pt.outsideTREDS}</div>
+                <div class="breakdown-label">Settled<br>Outside TREDS</div>
+              </div>
+              <div class="breakdown-card">
+                <div class="breakdown-num" style="color:#1a1a2e;">${pt.total - pt.onTime - pt.defaults - pt.outsideTREDS > 0 ? pt.total - pt.onTime - pt.defaults - pt.outsideTREDS : 0}</div>
+                <div class="breakdown-label">Other<br>Delays</div>
+              </div>
+            </div>
+            <div class="qoq-label">Quarter-by-Quarter</div>
+            <table class="qoq-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th>On Time</th>
+                  <th>Rate</th>
+                  <th>Defaults</th>
+                  <th>Outside TREDS</th>
+                  <th>Trend</th>
+                </tr>
+              </thead>
+              <tbody>${qoqRows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    /* ─── Accordion toggle ───────────────────────────── */
+    function toggleAccordion(headerEl) {
+      headerEl.closest('.accordion').classList.toggle('open');
     }
 
     /* ─── Close drawer ───────────────────────────────── */
