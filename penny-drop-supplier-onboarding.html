@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Penny Drop — Supplier Onboarding States</title>
+  <style>
+    /* ─── Reset & base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 40px 32px;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 40px; }
+
+    /* ─── Section label ─────────────────────────────── */
+    .section { margin-bottom: 56px; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1.5px solid #e0e0e0;
+      padding-bottom: 8px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+    .section-desc   { font-size: 12px; color: #888; }
+    .badge-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #e8eaf6;
+      color: #3949ab;
+      letter-spacing: 0.5px;
+    }
+    .badge-tag.success { background: #e6f4ea; color: #2e7d32; }
+    .badge-tag.warn    { background: #fff8e1; color: #f57f17; }
+
+    /* ─── Annotation ────────────────────────────────── */
+    .annotation {
+      font-size: 11px;
+      color: #999;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #fffde7;
+      border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+    /* ─── Form card ─────────────────────────────────── */
+    .form-card {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      padding: 24px;
+    }
+
+    /* ─── Card header ───────────────────────────────── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .card-title { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+    .card-header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .icon-delete {
+      width: 20px;
+      height: 20px;
+      color: #999;
+      cursor: pointer;
+    }
+    .toggle-label { font-size: 12px; color: #555; display: flex; align-items: center; gap: 8px; }
+    .toggle {
+      width: 36px;
+      height: 20px;
+      background: #ccc;
+      border-radius: 20px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: left 0.15s;
+    }
+
+    /* ─── Field grid ────────────────────────────────── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+    .field input {
+      height: 44px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 13px;
+      color: #1a1a2e;
+      background: #fff;
+      outline: none;
+      font-family: inherit;
+    }
+    .field input::placeholder { color: #bbb; }
+    .field input:disabled {
+      background: #f5f5f5;
+      color: #aaa;
+      cursor: not-allowed;
+      border-color: #e8e8e8;
+    }
+    .field input.success {
+      background: #f0faf1;
+      border-color: #a5d6a7;
+      color: #2e7d32;
+    }
+
+    /* ─── Verify row ────────────────────────────────── */
+    .verify-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .verify-field-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .verify-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .verify-input-wrap input {
+      width: 280px;
+      height: 44px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 13px;
+      color: #1a1a2e;
+      background: #f5f5f5;
+      outline: none;
+      font-family: inherit;
+    }
+    .verify-input-wrap input::placeholder { color: #bbb; }
+    .verify-input-wrap input:disabled {
+      background: #f5f5f5;
+      color: #aaa;
+      cursor: not-allowed;
+      border-color: #e8e8e8;
+    }
+    .verify-input-wrap input.active {
+      background: #fff;
+      border-color: #1a1a2e;
+      color: #1a1a2e;
+    }
+    .verify-input-wrap input.success {
+      background: #f0faf1;
+      border-color: #a5d6a7;
+      color: #2e7d32;
+    }
+    .verify-tick {
+      position: absolute;
+      right: 12px;
+      color: #2e7d32;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .verify-status-note {
+      font-size: 11px;
+      color: #888;
+    }
+    .verify-status-note.success-note { color: #2e7d32; font-weight: 500; }
+
+    /* ─── CTAs ──────────────────────────────────────── */
+    .cta-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding-top: 2px;
+    }
+    .btn-cta {
+      height: 44px;
+      padding: 0 22px;
+      border-radius: 22px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-cta.primary {
+      background: #1a1a2e;
+      color: #fff;
+    }
+    .btn-cta.primary:disabled {
+      background: #ccc;
+      color: #fff;
+      cursor: not-allowed;
+    }
+    .btn-cta.verified {
+      background: #e6f4ea;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+      cursor: default;
+    }
+    .resend-link {
+      font-size: 12px;
+      color: #1976d2;
+      text-decoration: none;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .resend-link:hover { text-decoration: underline; }
+
+    /* ─── Add bank account link ─────────────────────── */
+    .add-account-link {
+      display: inline-block;
+      margin-top: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #2e7d32;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* ─── Card footer ───────────────────────────────── */
+    .card-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .btn-exit {
+      height: 44px;
+      padding: 0 28px;
+      border-radius: 22px;
+      border: 1.5px solid #1a1a2e;
+      background: #fff;
+      color: #1a1a2e;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-save {
+      height: 44px;
+      padding: 0 28px;
+      border-radius: 22px;
+      border: none;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-save:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .btn-save.enabled { background: #1a1a2e; }
+  </style>
+</head>
+<body>
+
+  <h1>Penny Drop — Supplier Onboarding: State Variants</h1>
+  <p class="subtitle">Only the verify row (field + CTA) changes across states. Bank detail fields and card structure remain identical.</p>
+
+
+  <!-- ══════════════════════════════════════════════
+       STATE 1 — DEFAULT (Penny not yet dropped)
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">State 1 — Default</span>
+      <span class="badge-tag">INITIAL</span>
+      <span class="section-desc">Admin fills bank details. Verify Amount field is locked. CTA initiates penny drop.</span>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-title">Settlement Bank Account #1</span>
+        <div class="card-header-right">
+          <svg class="icon-delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+          <span class="toggle-label">Set as Primary Account <span class="toggle"></span></span>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field"><input type="text" placeholder="Account Number*" /></div>
+        <div class="field"><input type="text" placeholder="Account Holder as per Bank Account*" /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" placeholder="IFSC Code*" /></div>
+        <div class="field"><input type="text" placeholder="Bank Name*" /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" placeholder="Branch Name*" /></div>
+        <div class="field"><input type="text" placeholder="Branch Address*" /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" placeholder="Branch Telephone/Mobile Number" /></div>
+        <div class="field"><input type="text" placeholder="Branch Email" /></div>
+      </div>
+
+      <!-- Verify row -->
+      <div class="verify-row">
+        <div class="verify-field-wrap">
+          <div class="verify-input-wrap">
+            <input type="text" placeholder="Verify Amount*" disabled />
+          </div>
+        </div>
+        <div class="cta-wrap">
+          <button class="btn-cta primary">Verify Account</button>
+        </div>
+      </div>
+
+      <a class="add-account-link">+ Add Bank Account</a>
+
+      <div class="card-footer">
+        <button class="btn-exit">Exit</button>
+        <button class="btn-save" disabled>Save &amp; Continue</button>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>State 1 behaviour:</strong> Verify Amount field is disabled — admin cannot interact with it yet. "Verify Account" CTA is enabled and independent of Save &amp; Continue. Clicking it triggers the penny drop (₹1 credit to supplier's account). Save &amp; Continue remains locked until account is verified.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       STATE 2 — PENNY DROPPED (Awaiting confirmation)
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">State 2 — Penny Dropped</span>
+      <span class="badge-tag warn">PENDING</span>
+      <span class="section-desc">₹1 has been sent. Admin asks supplier for the credited amount and enters it here to confirm.</span>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-title">Settlement Bank Account #1</span>
+        <div class="card-header-right">
+          <svg class="icon-delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+          <span class="toggle-label">Set as Primary Account <span class="toggle"></span></span>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field"><input type="text" value="0042 6700 0012 3456" disabled /></div>
+        <div class="field"><input type="text" value="Ramesh Kumar Enterprises" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="HDFC0001234" disabled /></div>
+        <div class="field"><input type="text" value="HDFC Bank" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="Andheri West" disabled /></div>
+        <div class="field"><input type="text" value="Link Road, Mumbai - 400053" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="022-26732100" disabled /></div>
+        <div class="field"><input type="text" value="andheriwest@hdfcbank.com" disabled /></div>
+      </div>
+
+      <!-- Verify row -->
+      <div class="verify-row">
+        <div class="verify-field-wrap">
+          <div class="verify-input-wrap">
+            <input class="active" type="text" placeholder="Enter amount supplier received*" />
+          </div>
+          <span class="verify-status-note">₹1 sent on 14 May, 2:30 PM — ask supplier to check their account</span>
+        </div>
+        <div class="cta-wrap">
+          <button class="btn-cta primary">Confirm Amount</button>
+          <a class="resend-link">Not received? Resend</a>
+        </div>
+      </div>
+
+      <a class="add-account-link">+ Add Bank Account</a>
+
+      <div class="card-footer">
+        <button class="btn-exit">Exit</button>
+        <button class="btn-save" disabled>Save &amp; Continue</button>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>State 2 behaviour:</strong> Admin returns after dropping penny. Bank detail fields are locked (read-only). Verify Amount field is now active — admin types the amount the supplier tells them. CTA changes to "Confirm Amount". Below the CTA, a "Not received? Resend" text link handles the retry case without adding a second full CTA. Status note anchors context for the admin. Save &amp; Continue remains locked.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       STATE 3a — VERIFIED (Success)
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">State 3a — Verified</span>
+      <span class="badge-tag success">SUCCESS</span>
+      <span class="section-desc">Amount confirmed. Account is active. Admin can now proceed with onboarding.</span>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-title">Settlement Bank Account #1</span>
+        <div class="card-header-right">
+          <svg class="icon-delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+          <span class="toggle-label">Set as Primary Account <span class="toggle"></span></span>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field"><input type="text" value="0042 6700 0012 3456" disabled /></div>
+        <div class="field"><input type="text" value="Ramesh Kumar Enterprises" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="HDFC0001234" disabled /></div>
+        <div class="field"><input type="text" value="HDFC Bank" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="Andheri West" disabled /></div>
+        <div class="field"><input type="text" value="Link Road, Mumbai - 400053" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="022-26732100" disabled /></div>
+        <div class="field"><input type="text" value="andheriwest@hdfcbank.com" disabled /></div>
+      </div>
+
+      <!-- Verify row -->
+      <div class="verify-row">
+        <div class="verify-field-wrap">
+          <div class="verify-input-wrap">
+            <input class="success" type="text" value="1.00" disabled />
+            <span class="verify-tick">✓</span>
+          </div>
+          <span class="verify-status-note success-note">Account verified successfully</span>
+        </div>
+        <div class="cta-wrap">
+          <button class="btn-cta verified" disabled>Verified ✓</button>
+        </div>
+      </div>
+
+      <a class="add-account-link">+ Add Bank Account</a>
+
+      <div class="card-footer">
+        <button class="btn-exit">Exit</button>
+        <button class="btn-save enabled">Save &amp; Continue</button>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>State 3a behaviour:</strong> Backend confirms the amount entered matches what was credited. Field turns green with a tick. CTA becomes "Verified ✓" in a green non-interactive state — no action needed. Save &amp; Continue unlocks. Admin can now proceed to the next onboarding step.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       STATE 3b — RESEND (Supplier didn't receive)
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">State 3b — Resend Penny</span>
+      <span class="badge-tag warn">RETRY</span>
+      <span class="section-desc">Supplier reports no amount received. Admin resends the penny drop and waits again.</span>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-title">Settlement Bank Account #1</span>
+        <div class="card-header-right">
+          <svg class="icon-delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+          <span class="toggle-label">Set as Primary Account <span class="toggle"></span></span>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field"><input type="text" value="0042 6700 0012 3456" disabled /></div>
+        <div class="field"><input type="text" value="Ramesh Kumar Enterprises" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="HDFC0001234" disabled /></div>
+        <div class="field"><input type="text" value="HDFC Bank" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="Andheri West" disabled /></div>
+        <div class="field"><input type="text" value="Link Road, Mumbai - 400053" disabled /></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><input type="text" value="022-26732100" disabled /></div>
+        <div class="field"><input type="text" value="andheriwest@hdfcbank.com" disabled /></div>
+      </div>
+
+      <!-- Verify row -->
+      <div class="verify-row">
+        <div class="verify-field-wrap">
+          <div class="verify-input-wrap">
+            <input type="text" placeholder="Verify Amount*" disabled />
+          </div>
+          <span class="verify-status-note">Previous attempt: 14 May, 2:30 PM — resending now</span>
+        </div>
+        <div class="cta-wrap">
+          <button class="btn-cta primary">Verify Account</button>
+        </div>
+      </div>
+
+      <a class="add-account-link">+ Add Bank Account</a>
+
+      <div class="card-footer">
+        <button class="btn-exit">Exit</button>
+        <button class="btn-save" disabled>Save &amp; Continue</button>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <strong>State 3b behaviour:</strong> Admin clicks "Not received? Resend" from State 2. Field clears and goes back to disabled. CTA resets to "Verify Account" (same as State 1). A status note records the previous attempt time so the admin has context. This flows back into State 2 once the new penny drop is initiated. Save &amp; Continue remains locked.
+    </div>
+  </div>
+
+</body>
+</html>
