@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fin. MTD & YTD — Clickable Amount + Pill Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5; color: #1a1a2e; padding: 32px 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub   { font-size: 13px; color: #888; margin-bottom: 36px; }
+
+    /* ── section wrapper ── */
+    .section { margin-bottom: 40px; }
+    .section-header {
+      display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;
+    }
+    .section-tag  {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: #bbb;
+    }
+    .section-name { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+    .section-desc { font-size: 12px; color: #888; margin-bottom: 12px; line-height: 1.5; }
+
+    .annotation {
+      font-size: 11px; color: #777; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0; margin-top: 10px; line-height: 1.5;
+    }
+    .annotation strong { color: #444; }
+
+    /* ── table shell ── */
+    .table-wrap {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      padding: 10px 14px; text-align: left;
+      font-size: 11px; font-weight: 700; color: #888;
+      border-bottom: 1px solid #f0f0f0; white-space: nowrap;
+      background: #fafafa;
+    }
+    tbody tr { border-bottom: 1px solid #f8f8f8; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbff; }
+    tbody td { padding: 12px 14px; vertical-align: middle; }
+
+    /* buyer cell */
+    .buyer-name { font-weight: 700; color: #3949ab; font-size: 13px; }
+    .buyer-tag  {
+      display: inline-block; font-size: 10px; color: #888;
+      background: #f5f5f5; border-radius: 4px; padding: 1px 5px; margin-left: 4px;
+    }
+    .buyer-status {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; color: #c62828; margin-top: 2px; font-weight: 600;
+    }
+
+    /* status chip */
+    .status-chip {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      border: 1.5px solid #2e7d32; color: #2e7d32;
+    }
+
+    /* view btn */
+    .btn-view {
+      background: #1a1a2e; color: #fff; border: none;
+      padding: 7px 16px; border-radius: 20px; font-size: 12px;
+      font-weight: 700; cursor: pointer; white-space: nowrap;
+    }
+
+    /* ════════════════════════════════════════
+       VARIANT 1 — Pill below, appearance only
+       ════════════════════════════════════════ */
+    .v1-amount {
+      font-weight: 700; color: #1565c0; font-size: 14px;
+      text-decoration: none; cursor: pointer;
+      display: inline-block;
+    }
+    .v1-amount:hover { text-decoration: underline; }
+    .v1-pill {
+      display: inline-block; margin-top: 4px;
+      font-size: 10px; color: #777; background: #f0f0f0;
+      border-radius: 20px; padding: 2px 8px;
+      cursor: default; /* explicitly not clickable */
+    }
+
+    /* ════════════════════════════════════════
+       VARIANT 2 — Inline right (same line)
+       ════════════════════════════════════════ */
+    .v2-cell { display: flex; align-items: baseline; gap: 6px; }
+    .v2-amount {
+      font-weight: 700; color: #1565c0; font-size: 14px;
+      text-decoration: none; cursor: pointer;
+    }
+    .v2-amount:hover { text-decoration: underline; }
+    .v2-inline {
+      font-size: 10px; color: #aaa; font-weight: 500; white-space: nowrap;
+    }
+
+    /* ════════════════════════════════════════
+       VARIANT 3 — Tooltip on hover (ⓘ)
+       ════════════════════════════════════════ */
+    .v3-cell { display: flex; align-items: center; gap: 6px; }
+    .v3-amount {
+      font-weight: 700; color: #1565c0; font-size: 14px;
+      text-decoration: none; cursor: pointer;
+    }
+    .v3-amount:hover { text-decoration: underline; }
+    .v3-info-wrap { position: relative; display: inline-flex; }
+    .v3-info-icon {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #e8eaf6; color: #3949ab;
+      font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: default; flex-shrink: 0;
+    }
+    .v3-tooltip {
+      display: none;
+      position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e; color: #fff;
+      font-size: 11px; padding: 6px 10px; border-radius: 7px;
+      white-space: nowrap; pointer-events: none; z-index: 10;
+      line-height: 1.5;
+    }
+    .v3-tooltip::after {
+      content: ''; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: #1a1a2e;
+    }
+    .v3-info-wrap:hover .v3-tooltip { display: block; }
+
+    /* ════════════════════════════════════════
+       VARIANT 4 — Separator rule
+       ════════════════════════════════════════ */
+    .v4-stack { display: flex; flex-direction: column; gap: 0; }
+    .v4-amount {
+      font-weight: 700; color: #1565c0; font-size: 14px;
+      text-decoration: none; cursor: pointer; padding-bottom: 5px;
+    }
+    .v4-amount:hover { text-decoration: underline; }
+    .v4-rule { height: 1px; background: #efefef; margin-bottom: 5px; }
+    .v4-sub { font-size: 10px; color: #aaa; cursor: default; }
+
+    /* ════════════════════════════════════════
+       VARIANT 5 — Pill in column sub-header
+       ════════════════════════════════════════ */
+    .v5-col-header {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .v5-col-main { font-size: 11px; font-weight: 700; color: #888; }
+    .v5-col-sub  {
+      font-size: 9px; color: #bbb; font-weight: 500;
+    }
+    .v5-amount {
+      font-weight: 700; color: #1565c0; font-size: 14px;
+      text-decoration: none; cursor: pointer; display: block;
+    }
+    .v5-amount:hover { text-decoration: underline; }
+    /* per-row % moves to a muted inline badge, not a pill */
+    .v5-pct {
+      font-size: 10px; color: #bbb; font-weight: 500; display: block; margin-top: 2px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="page-title">Fin. MTD & YTD — Clickable Amount + Pill Variants</div>
+<div class="page-sub">5 approaches to making the amount a hyperlink while keeping the contextual pill unambiguous.</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     VARIANT 1 — Pill below, appearance only
+     ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-tag">Variant 1</span>
+    <span class="section-name">Pill below · Appearance only</span>
+  </div>
+  <div class="section-desc">Amount is blue + underlines on hover. Pill stays below but gets a rounded grey tag shape with <code>cursor:default</code> — no pointer, no hover state. Same placement, clearer affordance split.</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Buyer</th>
+          <th>Total Supplier</th>
+          <th>Exposure Limit</th>
+          <th>Utilisation</th>
+          <th>Limit Expiry</th>
+          <th>Fin. MTD ↓</th>
+          <th>Fin. YTD ↓</th>
+          <th>Checker Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td>
+          <td>₹ 10,25,990</td>
+          <td>₹ 8,00,400</td>
+          <td>July 31st, 2026</td>
+          <td>
+            <a class="v1-amount" href="#">₹ 18,00,400</a><br>
+            <span class="v1-pill">Buyer MTD · 1.43 Cr</span>
+          </td>
+          <td>
+            <a class="v1-amount" href="#">₹ 18,00,400</a><br>
+            <span class="v1-pill">Buyer YTD · 22.93 Cr</span>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td>
+          <td>₹ 10,25,990</td>
+          <td>₹ 8,00,400</td>
+          <td>July 31st, 2026</td>
+          <td>
+            <a class="v1-amount" href="#">₹ 10,25,990</a><br>
+            <span class="v1-pill">12% of buyer's total</span>
+          </td>
+          <td>
+            <a class="v1-amount" href="#">₹ 18,00,400</a><br>
+            <span class="v1-pill">2% of buyer's total</span>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span>
+            <div class="buyer-status">⊘ Under Default</div>
+          </td>
+          <td>5</td>
+          <td>₹ 10,25,990</td>
+          <td>₹ 8,00,400</td>
+          <td>July 31st, 2026</td>
+          <td>
+            <a class="v1-amount" href="#">₹ 10,25,990</a><br>
+            <span class="v1-pill">12% of buyer's total</span>
+          </td>
+          <td>
+            <a class="v1-amount" href="#">₹ 18,00,400</a><br>
+            <span class="v1-pill">2% of buyer's total</span>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="annotation">
+    <strong>Works because:</strong> Pill has rounded corners + grey background — reads as a tag, not a link. Cursor stays arrow over pill, pointer only over amount. Simple to implement. <strong>Risk:</strong> proximity still causes slight ambiguity for first-time users.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     VARIANT 2 — Inline right (same line)
+     ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-tag">Variant 2</span>
+    <span class="section-name">Annotation inline · Same line</span>
+  </div>
+  <div class="section-desc">Amount and annotation sit on the same line. Amount is blue + hover-underline. The muted grey text after the dot is clearly not interactive — no background, no affordance. Row height reduces.</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Buyer</th>
+          <th>Total Supplier</th>
+          <th>Exposure Limit</th>
+          <th>Utilisation</th>
+          <th>Limit Expiry</th>
+          <th>Fin. MTD ↓</th>
+          <th>Fin. YTD ↓</th>
+          <th>Checker Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v2-cell">
+              <a class="v2-amount" href="#">₹ 18,00,400</a>
+              <span class="v2-inline">· 1.43 Cr total</span>
+            </div>
+          </td>
+          <td>
+            <div class="v2-cell">
+              <a class="v2-amount" href="#">₹ 18,00,400</a>
+              <span class="v2-inline">· 22.93 Cr total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v2-cell">
+              <a class="v2-amount" href="#">₹ 10,25,990</a>
+              <span class="v2-inline">· 12%</span>
+            </div>
+          </td>
+          <td>
+            <div class="v2-cell">
+              <a class="v2-amount" href="#">₹ 18,00,400</a>
+              <span class="v2-inline">· 2%</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span>
+            <div class="buyer-status">⊘ Under Default</div>
+          </td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v2-cell">
+              <a class="v2-amount" href="#">₹ 10,25,990</a>
+              <span class="v2-inline">· 12%</span>
+            </div>
+          </td>
+          <td>
+            <div class="v2-cell">
+              <a class="v2-amount" href="#">₹ 18,00,400</a>
+              <span class="v2-inline">· 2%</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="annotation">
+    <strong>Works because:</strong> Single line = single interaction. No stacking confusion. Annotation has no background, no hover — reads as plain text. Compact rows. <strong>Best for dense tables.</strong>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     VARIANT 3 — Tooltip on ⓘ hover
+     ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-tag">Variant 3</span>
+    <span class="section-name">Tooltip on ⓘ · Cleanest cell</span>
+  </div>
+  <div class="section-desc">Amount is the only thing in the cell — click it to open the report. A small ⓘ icon next to the amount reveals context on hover. Zero ambiguity between click and info.</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Buyer</th>
+          <th>Total Supplier</th>
+          <th>Exposure Limit</th>
+          <th>Utilisation</th>
+          <th>Limit Expiry</th>
+          <th>Fin. MTD ↓</th>
+          <th>Fin. YTD ↓</th>
+          <th>Checker Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v3-cell">
+              <a class="v3-amount" href="#">₹ 18,00,400</a>
+              <div class="v3-info-wrap">
+                <div class="v3-info-icon">i</div>
+                <div class="v3-tooltip">Buyer MTD total · ₹1.43 Cr<br>Your share: 12%</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="v3-cell">
+              <a class="v3-amount" href="#">₹ 18,00,400</a>
+              <div class="v3-info-wrap">
+                <div class="v3-info-icon">i</div>
+                <div class="v3-tooltip">Buyer YTD total · ₹22.93 Cr<br>Your share: 2%</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v3-cell">
+              <a class="v3-amount" href="#">₹ 10,25,990</a>
+              <div class="v3-info-wrap">
+                <div class="v3-info-icon">i</div>
+                <div class="v3-tooltip">Buyer MTD total · ₹1.43 Cr<br>Your share: 12%</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="v3-cell">
+              <a class="v3-amount" href="#">₹ 18,00,400</a>
+              <div class="v3-info-wrap">
+                <div class="v3-info-icon">i</div>
+                <div class="v3-tooltip">Buyer YTD total · ₹22.93 Cr<br>Your share: 2%</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span>
+            <div class="buyer-status">⊘ Under Default</div>
+          </td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v3-cell">
+              <a class="v3-amount" href="#">₹ 10,25,990</a>
+              <div class="v3-info-wrap">
+                <div class="v3-info-icon">i</div>
+                <div class="v3-tooltip">Buyer MTD total · ₹1.43 Cr<br>Your share: 12%</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="v3-cell">
+              <a class="v3-amount" href="#">₹ 18,00,400</a>
+              <div class="v3-info-wrap">
+                <div class="v3-info-icon">i</div>
+                <div class="v3-tooltip">Buyer YTD total · ₹22.93 Cr<br>Your share: 2%</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="annotation">
+    <strong>Works because:</strong> Hover ⓘ to read context, click amount to navigate — two distinct interactions, zero overlap. Cleanest cells in the table. <strong>Hover the ⓘ icon to see tooltip.</strong> Downside: info is hidden until hover — not touch-friendly.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     VARIANT 4 — Thin rule separator
+     ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-tag">Variant 4</span>
+    <span class="section-name">Separator rule · Zone split</span>
+  </div>
+  <div class="section-desc">A 1px line between the amount and the annotation creates two visual zones in the cell — above line is interactive, below line is informational. Pill always visible, no confusion.</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Buyer</th>
+          <th>Total Supplier</th>
+          <th>Exposure Limit</th>
+          <th>Utilisation</th>
+          <th>Limit Expiry</th>
+          <th>Fin. MTD ↓</th>
+          <th>Fin. YTD ↓</th>
+          <th>Checker Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v4-stack">
+              <a class="v4-amount" href="#">₹ 18,00,400</a>
+              <div class="v4-rule"></div>
+              <span class="v4-sub">Buyer MTD · 1.43 Cr</span>
+            </div>
+          </td>
+          <td>
+            <div class="v4-stack">
+              <a class="v4-amount" href="#">₹ 18,00,400</a>
+              <div class="v4-rule"></div>
+              <span class="v4-sub">Buyer YTD · 22.93 Cr</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v4-stack">
+              <a class="v4-amount" href="#">₹ 10,25,990</a>
+              <div class="v4-rule"></div>
+              <span class="v4-sub">12% of buyer's total</span>
+            </div>
+          </td>
+          <td>
+            <div class="v4-stack">
+              <a class="v4-amount" href="#">₹ 18,00,400</a>
+              <div class="v4-rule"></div>
+              <span class="v4-sub">2% of buyer's total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span>
+            <div class="buyer-status">⊘ Under Default</div>
+          </td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <div class="v4-stack">
+              <a class="v4-amount" href="#">₹ 10,25,990</a>
+              <div class="v4-rule"></div>
+              <span class="v4-sub">12% of buyer's total</span>
+            </div>
+          </td>
+          <td>
+            <div class="v4-stack">
+              <a class="v4-amount" href="#">₹ 18,00,400</a>
+              <div class="v4-rule"></div>
+              <span class="v4-sub">2% of buyer's total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="annotation">
+    <strong>Works because:</strong> The rule is a visual boundary — users unconsciously read "above = action, below = context." Info is always visible, no hover needed. Works on touch. <strong>Best when pill must always be shown.</strong>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     VARIANT 5 — Pill in column sub-header
+     ═══════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-tag">Variant 5</span>
+    <span class="section-name">Context in column header · Cleanest rows</span>
+  </div>
+  <div class="section-desc">The "buyer's total" context moves to the column sub-header. Each row only shows the amount (clickable) + a tiny muted % with no interactive affordance. Rows become the cleanest.</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Buyer</th>
+          <th>Total Supplier</th>
+          <th>Exposure Limit</th>
+          <th>Utilisation</th>
+          <th>Limit Expiry</th>
+          <th>
+            <div class="v5-col-header">
+              <span class="v5-col-main">Fin. MTD ↓</span>
+              <span class="v5-col-sub">% = share of buyer's total</span>
+            </div>
+          </th>
+          <th>
+            <div class="v5-col-header">
+              <span class="v5-col-main">Fin. YTD ↓</span>
+              <span class="v5-col-sub">% = share of buyer's total</span>
+            </div>
+          </th>
+          <th>Checker Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <a class="v5-amount" href="#">₹ 18,00,400</a>
+            <span class="v5-pct">12% · 1.43 Cr total</span>
+          </td>
+          <td>
+            <a class="v5-amount" href="#">₹ 18,00,400</a>
+            <span class="v5-pct">2% · 22.93 Cr total</span>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <a class="v5-amount" href="#">₹ 10,25,990</a>
+            <span class="v5-pct">12% · 1.43 Cr total</span>
+          </td>
+          <td>
+            <a class="v5-amount" href="#">₹ 18,00,400</a>
+            <span class="v5-pct">2% · 22.93 Cr total</span>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span>
+            <div class="buyer-status">⊘ Under Default</div>
+          </td>
+          <td>5</td><td>₹ 10,25,990</td><td>₹ 8,00,400</td><td>July 31st, 2026</td>
+          <td>
+            <a class="v5-amount" href="#">₹ 10,25,990</a>
+            <span class="v5-pct">12% · 1.43 Cr total</span>
+          </td>
+          <td>
+            <a class="v5-amount" href="#">₹ 18,00,400</a>
+            <span class="v5-pct">2% · 22.93 Cr total</span>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="annotation">
+    <strong>Works because:</strong> Column header explains the % once — rows don't repeat "of buyer's total" every row. Cleanest rows, least repetition. % + total inline keeps it one line. <strong>Best for tables with many rows.</strong>
+  </div>
+</div>
+
+</body>
+</html>
