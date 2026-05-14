@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legal Entities — CKYC Verification Display Variants</title>
+  <style>
+    /* ─── Reset & base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      padding: 40px 32px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 40px; line-height: 1.6; }
+
+    /* ─── Section label ─────────────────────────────── */
+    .section { margin-bottom: 56px; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1.5px solid #e0e0e0;
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+    .section-desc { font-size: 12px; color: #888; }
+    .badge-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #e8eaf6;
+      color: #3949ab;
+      letter-spacing: 0.5px;
+    }
+    .badge-tag.recommended { background: #e6f4ea; color: #2e7d32; }
+    .badge-tag.existing    { background: #f3e5f5; color: #6a1b9a; }
+
+    /* ─── Table wrapper ─────────────────────────────── */
+    .table-wrap {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #f9fafb;
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: 1px solid #e8e8e8;
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* shared atoms */
+    .entity-name { font-weight: 600; font-size: 13px; color: #1a1a2e; }
+    .entity-type { font-size: 11px; color: #888; margin-top: 1px; }
+    .pan-text    { font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; color: #444; letter-spacing: 0.5px; }
+    .btn-action {
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .btn-primary { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .btn-ghost   { background: #fff; color: #1a1a2e; border-color: #c8c8d8; }
+    .btn-danger  { background: #fff; color: #c62828; border-color: #ffcdd2; }
+
+    /* ─────────────────────────────────────────────────
+       ANNOTATION
+    ───────────────────────────────────────────────── */
+    .annotation {
+      font-size: 11px;
+      color: #999;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #fffde7;
+      border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.6;
+    }
+    .annotation strong { color: #555; }
+    .annotation.info { background: #e3f2fd; border-left-color: #1565c0; }
+    .annotation.info strong { color: #1565c0; }
+
+    /* ─────────────────────────────────────────────────
+       V0 — BASELINE: plain text status
+    ───────────────────────────────────────────────── */
+    .v0-status { font-size: 12px; color: #555; }
+
+    /* ─────────────────────────────────────────────────
+       V1 — STATUS PILL
+    ───────────────────────────────────────────────── */
+    .ckyc-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .ckyc-pill .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pill-verified  { background: #e6f4ea; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .pill-verified .dot  { background: #2e7d32; }
+    .pill-pending   { background: #fff8e1; color: #e65100; border: 1px solid #ffe0b2; }
+    .pill-pending .dot   { background: #e65100; }
+    .pill-not-found { background: #fde8e8; color: #c62828; border: 1px solid #ffcdd2; }
+    .pill-not-found .dot { background: #c62828; }
+    .pill-mismatch  { background: #fff3e0; color: #bf360c; border: 1px solid #ffccbc; }
+    .pill-mismatch .dot  { background: #bf360c; }
+    .pill-na        { background: #f5f5f5; color: #757575; border: 1px solid #e0e0e0; }
+    .pill-na .dot        { background: #9e9e9e; }
+    .ckyc-number {
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #666;
+      margin-top: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─────────────────────────────────────────────────
+       V2 — INLINE VERIFICATION CARD
+       Card inside TD showing fetched vs submitted data
+    ───────────────────────────────────────────────── */
+    .ckyc-card {
+      background: #f9fafb;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 10px 12px;
+      min-width: 240px;
+    }
+    .ckyc-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .ckyc-card-title { font-size: 11px; font-weight: 700; color: #444; letter-spacing: 0.3px; text-transform: uppercase; }
+    .ckyc-card-rows { display: flex; flex-direction: column; gap: 4px; }
+    .ckyc-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .ckyc-row-label { color: #888; min-width: 80px; flex-shrink: 0; }
+    .ckyc-row-value { color: #1a1a2e; font-weight: 500; }
+    .ckyc-row-value.match   { color: #2e7d32; }
+    .ckyc-row-value.mismatch-val { color: #c62828; }
+    .ckyc-match-icon { font-size: 12px; }
+
+    /* ─────────────────────────────────────────────────
+       V3 — ACTION STATE ROW
+       Shows fetch button → loading → result inline
+    ───────────────────────────────────────────────── */
+    .v3-state-wrap { display: flex; align-items: center; gap: 8px; }
+    .v3-fetch-btn {
+      background: #e8eaf6;
+      color: #3949ab;
+      border: 1px solid #c5cae9;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .v3-loading {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #888;
+    }
+    .spinner {
+      width: 12px; height: 12px;
+      border: 2px solid #e0e0e0;
+      border-top-color: #3949ab;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .v3-result {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .v3-ckyc-id {
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-weight: 600;
+      color: #1a1a2e;
+      letter-spacing: 0.5px;
+    }
+    .v3-verified-at { font-size: 10px; color: #888; }
+
+    /* ─────────────────────────────────────────────────
+       V4 — EXPANDABLE ROW PANEL
+    ───────────────────────────────────────────────── */
+    .v4-row-detail {
+      background: #f0f7ff;
+      border-top: 1px solid #bbdefb;
+    }
+    .v4-detail-inner {
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .v4-field { display: flex; flex-direction: column; gap: 3px; }
+    .v4-field-label { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.4px; }
+    .v4-field-value { font-size: 12px; font-weight: 500; color: #1a1a2e; }
+    .v4-field-value.ok  { color: #2e7d32; }
+    .v4-field-value.err { color: #c62828; }
+    .v4-toggle {
+      font-size: 11px;
+      color: #1565c0;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+
+    /* ─────────────────────────────────────────────────
+       V5 — NOT FOUND / MISMATCH ERROR STATES
+    ───────────────────────────────────────────────── */
+    .v5-error-card {
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .v5-error-card.not-found {
+      background: #fff5f5;
+      border: 1px solid #ffcdd2;
+    }
+    .v5-error-card.mismatch {
+      background: #fff8f0;
+      border: 1px solid #ffccbc;
+    }
+    .v5-error-title { font-weight: 700; margin-bottom: 3px; }
+    .v5-error-card.not-found .v5-error-title { color: #c62828; }
+    .v5-error-card.mismatch  .v5-error-title { color: #bf360c; }
+    .v5-error-desc { color: #666; }
+    .v5-error-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+    /* ─────────────────────────────────────────────────
+       V6 — ENTITY TYPE MATRIX
+       Different CKYC requirements per type
+    ───────────────────────────────────────────────── */
+    .v6-type-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .type-pvt-ltd  { background: #e8eaf6; color: #283593; }
+    .type-pub-ltd  { background: #e3f2fd; color: #0d47a1; }
+    .type-llp      { background: #f3e5f5; color: #6a1b9a; }
+    .type-partner  { background: #e0f2f1; color: #00695c; }
+    .type-prop     { background: #fff8e1; color: #e65100; }
+    .v6-ckyc-required {
+      font-size: 11px;
+      color: #2e7d32;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .v6-ckyc-optional {
+      font-size: 11px;
+      color: #888;
+      font-style: italic;
+    }
+    .v6-doc-list { font-size: 11px; color: #555; margin-top: 4px; line-height: 1.6; }
+
+  </style>
+</head>
+<body>
+
+  <h1>Legal Entities — CKYC Verification: Display Variants</h1>
+  <p class="subtitle">
+    All variants explore how CKYC (Central KYC) status is surfaced in the entity onboarding admin view on C2treds.<br>
+    CKYC is a CERSAI-operated registry. TReDS platforms must verify it for all legal entity participants (Buyers, Suppliers, Financiers).<br>
+    Each variant changes only the CKYC column/cell treatment — entity identity columns remain constant.
+  </p>
+
+  <!-- ══════════════════════════════════════════════
+       V0 — BASELINE: plain text
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 0 — Baseline (text only)</span>
+      <span class="badge-tag existing">EXISTING</span>
+      <span class="section-desc">CKYC status rendered as a plain text label. No visual hierarchy between states.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Entity Name</th>
+            <th>Entity Type</th>
+            <th>PAN</th>
+            <th>CIN / LLPIN</th>
+            <th>CKYC Status</th>
+            <th>CKYC Number</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="entity-name">Rajesh Steels Pvt. Ltd.</div>
+            </td>
+            <td>Private Limited</td>
+            <td><span class="pan-text">AABCR1234M</span></td>
+            <td><span class="pan-text">U27100MH2010PTC201234</span></td>
+            <td><span class="v0-status">Verified</span></td>
+            <td><span class="pan-text">10012345678901</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Priya Textiles LLP</div>
+            </td>
+            <td>LLP</td>
+            <td><span class="pan-text">AAHFP5678K</span></td>
+            <td><span class="pan-text">AAP-1234</span></td>
+            <td><span class="v0-status">Not Found</span></td>
+            <td><span class="pan-text">—</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Vikram Auto Components Ltd.</div>
+            </td>
+            <td>Public Limited</td>
+            <td><span class="pan-text">AABCV9012P</span></td>
+            <td><span class="pan-text">L34100DL2005PLC138765</span></td>
+            <td><span class="v0-status">Mismatch</span></td>
+            <td><span class="pan-text">10098765432100</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Anand Trading Co.</div>
+            </td>
+            <td>Partnership Firm</td>
+            <td><span class="pan-text">AAAFA3456Q</span></td>
+            <td><span class="pan-text">—</span></td>
+            <td><span class="v0-status">Not Initiated</span></td>
+            <td><span class="pan-text">—</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Problem:</strong> All four states look identical — Verified and Mismatch carry the same visual weight. An admin scanning the list has no pre-attentive signal for critical issues. CKYC number as a separate column adds width with low decision value.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V1 — STATUS PILL + CKYC NUMBER INLINE
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 1 — Status Pill</span>
+      <span class="badge-tag">COMPACT</span>
+      <span class="section-desc">Colour-coded pill per state. CKYC number moved inline below pill. Saves a column.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Entity Name</th>
+            <th>Entity Type</th>
+            <th>PAN</th>
+            <th>CIN / LLPIN</th>
+            <th>CKYC Verification</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="entity-name">Rajesh Steels Pvt. Ltd.</div>
+            </td>
+            <td>Private Limited</td>
+            <td><span class="pan-text">AABCR1234M</span></td>
+            <td><span class="pan-text">U27100MH2010PTC201234</span></td>
+            <td>
+              <span class="ckyc-pill pill-verified"><span class="dot"></span>Verified</span>
+              <div class="ckyc-number">10012345678901</div>
+            </td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Priya Textiles LLP</div>
+            </td>
+            <td>LLP</td>
+            <td><span class="pan-text">AAHFP5678K</span></td>
+            <td><span class="pan-text">AAP-1234</span></td>
+            <td>
+              <span class="ckyc-pill pill-not-found"><span class="dot"></span>Not Found</span>
+            </td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Vikram Auto Components Ltd.</div>
+            </td>
+            <td>Public Limited</td>
+            <td><span class="pan-text">AABCV9012P</span></td>
+            <td><span class="pan-text">L34100DL2005PLC138765</span></td>
+            <td>
+              <span class="ckyc-pill pill-mismatch"><span class="dot"></span>Mismatch</span>
+              <div class="ckyc-number">10098765432100</div>
+            </td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Anand Trading Co.</div>
+            </td>
+            <td>Partnership Firm</td>
+            <td><span class="pan-text">AAAFA3456Q</span></td>
+            <td><span class="pan-text">—</span></td>
+            <td>
+              <span class="ckyc-pill pill-pending"><span class="dot"></span>Pending Fetch</span>
+            </td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Suresh Pharma Ltd.</div>
+            </td>
+            <td>Private Limited</td>
+            <td><span class="pan-text">AABCS2222N</span></td>
+            <td><span class="pan-text">U24230GJ2015PTC084321</span></td>
+            <td>
+              <span class="ckyc-pill pill-na"><span class="dot"></span>Not Applicable</span>
+            </td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Improvement:</strong> Pre-attentive colour separation — red rows demand attention immediately, green confirms safety. CKYC number rendered inline saves a full column. <strong>Gap:</strong> Pill alone doesn't tell the admin what to do next for Not Found / Mismatch states.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V2 — INLINE VERIFICATION CARD
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 2 — Inline Verification Card</span>
+      <span class="badge-tag recommended">RECOMMENDED</span>
+      <span class="section-desc">Shows fetched CKYC data alongside submitted data inline. Match/mismatch fields highlighted at field level.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Entity Name</th>
+            <th>Entity Type</th>
+            <th>PAN</th>
+            <th>CKYC Verification</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Verified — all match -->
+          <tr>
+            <td>
+              <div class="entity-name">Rajesh Steels Pvt. Ltd.</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>Private Limited</td>
+            <td><span class="pan-text">AABCR1234M</span></td>
+            <td>
+              <div class="ckyc-card">
+                <div class="ckyc-card-header">
+                  <span class="ckyc-card-title">CKYC Registry</span>
+                  <span class="ckyc-pill pill-verified" style="font-size:10px; padding: 2px 8px;"><span class="dot"></span>Verified</span>
+                </div>
+                <div class="ckyc-card-rows">
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">CKYC No.</span>
+                    <span class="ckyc-row-value" style="font-family: monospace;">10012345678901</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">Name</span>
+                    <span class="ckyc-row-value match">✓ Rajesh Steels Private Limited</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">PAN</span>
+                    <span class="ckyc-row-value match">✓ AABCR1234M</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">Fetched on</span>
+                    <span class="ckyc-row-value">12 May 2025, 10:42 AM</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <!-- Mismatch — name doesn't match -->
+          <tr>
+            <td>
+              <div class="entity-name">Vikram Auto Components Ltd.</div>
+              <div class="entity-type">Buyer</div>
+            </td>
+            <td>Public Limited</td>
+            <td><span class="pan-text">AABCV9012P</span></td>
+            <td>
+              <div class="ckyc-card">
+                <div class="ckyc-card-header">
+                  <span class="ckyc-card-title">CKYC Registry</span>
+                  <span class="ckyc-pill pill-mismatch" style="font-size:10px; padding: 2px 8px;"><span class="dot"></span>Mismatch</span>
+                </div>
+                <div class="ckyc-card-rows">
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">CKYC No.</span>
+                    <span class="ckyc-row-value" style="font-family: monospace;">10098765432100</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">Registry name</span>
+                    <span class="ckyc-row-value mismatch-val">✗ Vikram Automotive Comp. Ltd</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">Submitted as</span>
+                    <span class="ckyc-row-value">Vikram Auto Components Ltd.</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">PAN</span>
+                    <span class="ckyc-row-value match">✓ AABCV9012P</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <button class="btn-action btn-primary">Review</button>
+                <button class="btn-action btn-danger">Reject</button>
+              </div>
+            </td>
+          </tr>
+          <!-- Not Found -->
+          <tr>
+            <td>
+              <div class="entity-name">Priya Textiles LLP</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>LLP</td>
+            <td><span class="pan-text">AAHFP5678K</span></td>
+            <td>
+              <div class="ckyc-card">
+                <div class="ckyc-card-header">
+                  <span class="ckyc-card-title">CKYC Registry</span>
+                  <span class="ckyc-pill pill-not-found" style="font-size:10px; padding: 2px 8px;"><span class="dot"></span>Not Found</span>
+                </div>
+                <div class="ckyc-card-rows">
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">PAN queried</span>
+                    <span class="ckyc-row-value" style="font-family: monospace;">AAHFP5678K</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">Result</span>
+                    <span class="ckyc-row-value mismatch-val">No CKYC record found</span>
+                  </div>
+                  <div class="ckyc-row">
+                    <span class="ckyc-row-label">Last checked</span>
+                    <span class="ckyc-row-value">13 May 2025, 3:10 PM</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <button class="btn-action btn-ghost">Retry Fetch</button>
+                <button class="btn-action btn-ghost">Override</button>
+              </div>
+            </td>
+          </tr>
+          <!-- Pending fetch -->
+          <tr>
+            <td>
+              <div class="entity-name">Anand Trading Co.</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>Partnership Firm</td>
+            <td><span class="pan-text">AAAFA3456Q</span></td>
+            <td>
+              <div class="v3-state-wrap">
+                <span class="ckyc-pill pill-pending"><span class="dot"></span>Awaiting Fetch</span>
+                <button class="btn-action btn-ghost" style="font-size:11px; padding: 5px 10px;">Fetch Now</button>
+              </div>
+            </td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Why this works:</strong> The mismatch is resolved at field level — the admin sees exactly which field failed (name vs PAN) without opening a detail page. The action column becomes context-aware (Review/Reject for mismatch, Retry/Override for not-found). <strong>Trade-off:</strong> The CKYC cell is wider; acceptable on a detail/admin page, not suitable for a compact summary table.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V3 — ACTION STATE PROGRESSION
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 3 — Action State Progression</span>
+      <span class="badge-tag">PROCESS-ORIENTED</span>
+      <span class="section-desc">Shows the CKYC cell as a live action state: Not Initiated → Fetching → Result. Useful when fetch is manual/triggered by admin.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Entity Name</th>
+            <th>Entity Type</th>
+            <th>PAN</th>
+            <th>CKYC Verification</th>
+            <th>Onboarding Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- State 1: Not initiated -->
+          <tr>
+            <td>
+              <div class="entity-name">Anand Trading Co.</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>Partnership Firm</td>
+            <td><span class="pan-text">AAAFA3456Q</span></td>
+            <td>
+              <div class="v3-state-wrap">
+                <span class="ckyc-pill pill-na" style="font-size:11px;"><span class="dot"></span>Not Initiated</span>
+                <button class="v3-fetch-btn">Fetch CKYC</button>
+              </div>
+            </td>
+            <td><span class="ckyc-pill pill-pending" style="font-size:11px;"><span class="dot"></span>Docs Pending</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <!-- State 2: Fetching (in progress) -->
+          <tr>
+            <td>
+              <div class="entity-name">Neha Exports Pvt. Ltd.</div>
+              <div class="entity-type">Buyer</div>
+            </td>
+            <td>Private Limited</td>
+            <td><span class="pan-text">AABCN3344S</span></td>
+            <td>
+              <div class="v3-state-wrap">
+                <span class="v3-loading">
+                  <span class="spinner"></span>
+                  Fetching from CERSAI…
+                </span>
+              </div>
+            </td>
+            <td><span class="ckyc-pill pill-pending" style="font-size:11px;"><span class="dot"></span>Under Review</span></td>
+            <td><button class="btn-action btn-ghost" disabled style="opacity:0.4;">View</button></td>
+          </tr>
+          <!-- State 3: Verified result -->
+          <tr>
+            <td>
+              <div class="entity-name">Rajesh Steels Pvt. Ltd.</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>Private Limited</td>
+            <td><span class="pan-text">AABCR1234M</span></td>
+            <td>
+              <div class="v3-state-wrap">
+                <span class="ckyc-pill pill-verified"><span class="dot"></span>Verified</span>
+                <div class="v3-result">
+                  <span class="v3-ckyc-id">10012345678901</span>
+                  <span class="v3-verified-at">Fetched 12 May 2025</span>
+                </div>
+              </div>
+            </td>
+            <td><span class="ckyc-pill pill-verified" style="font-size:11px;"><span class="dot"></span>Approved</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+          <!-- State 4: Not found -->
+          <tr>
+            <td>
+              <div class="entity-name">Priya Textiles LLP</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>LLP</td>
+            <td><span class="pan-text">AAHFP5678K</span></td>
+            <td>
+              <div class="v3-state-wrap" style="flex-wrap: wrap; gap:6px;">
+                <span class="ckyc-pill pill-not-found"><span class="dot"></span>Not Found</span>
+                <button class="v3-fetch-btn">Retry</button>
+              </div>
+            </td>
+            <td><span class="ckyc-pill pill-not-found" style="font-size:11px;"><span class="dot"></span>Blocked</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Use case:</strong> Admin-driven CKYC fetching (vs. automated background fetch). The Fetching state makes the async operation visible — prevents double-clicks and false "nothing happened" assumptions. The CKYC number appears inline only after a successful fetch. <strong>Gap:</strong> Loading state is not persisted across page reload; backend polling or websocket needed.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V4 — EXPANDABLE DETAIL PANEL
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 4 — Expandable Detail Panel</span>
+      <span class="badge-tag">DETAIL-ON-DEMAND</span>
+      <span class="section-desc">Compact pill in the main row; clicking "Details" expands an inline panel with full CKYC data comparison. Zero column-width cost.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Entity Name</th>
+            <th>Entity Type</th>
+            <th>PAN</th>
+            <th>CKYC</th>
+            <th>Onboarding Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1: verified — collapsed -->
+          <tr>
+            <td>
+              <div class="entity-name">Rajesh Steels Pvt. Ltd.</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>Private Limited</td>
+            <td><span class="pan-text">AABCR1234M</span></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="ckyc-pill pill-verified"><span class="dot"></span>Verified</span>
+                <button class="v4-toggle">Details ↓</button>
+              </div>
+            </td>
+            <td><span class="ckyc-pill pill-verified" style="font-size:11px;"><span class="dot"></span>Approved</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+
+          <!-- Row 1: expanded detail panel -->
+          <tr class="v4-row-detail">
+            <td colspan="6">
+              <div class="v4-detail-inner">
+                <div class="v4-field">
+                  <span class="v4-field-label">CKYC Number</span>
+                  <span class="v4-field-value" style="font-family:monospace;">10012345678901</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Registered Name</span>
+                  <span class="v4-field-value ok">✓ Rajesh Steels Pvt Ltd</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">PAN</span>
+                  <span class="v4-field-value ok">✓ AABCR1234M</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Incorporation Date</span>
+                  <span class="v4-field-value ok">✓ 15 Apr 2010</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Registered Address</span>
+                  <span class="v4-field-value ok">✓ Mumbai, Maharashtra</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Entity Category</span>
+                  <span class="v4-field-value">Private Limited Company</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Fetched on</span>
+                  <span class="v4-field-value">12 May 2025, 10:42 AM</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Valid Until</span>
+                  <span class="v4-field-value ok">12 May 2027</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2: mismatch — expanded -->
+          <tr>
+            <td>
+              <div class="entity-name">Vikram Auto Components Ltd.</div>
+              <div class="entity-type">Buyer</div>
+            </td>
+            <td>Public Limited</td>
+            <td><span class="pan-text">AABCV9012P</span></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="ckyc-pill pill-mismatch"><span class="dot"></span>Mismatch</span>
+                <button class="v4-toggle">Details ↓</button>
+              </div>
+            </td>
+            <td><span class="ckyc-pill pill-pending" style="font-size:11px;"><span class="dot"></span>Under Review</span></td>
+            <td>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-action btn-primary">Review</button>
+                <button class="btn-action btn-ghost">View</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2: mismatch expanded detail -->
+          <tr class="v4-row-detail">
+            <td colspan="6">
+              <div class="v4-detail-inner">
+                <div class="v4-field">
+                  <span class="v4-field-label">CKYC Number</span>
+                  <span class="v4-field-value" style="font-family:monospace;">10098765432100</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Registry Name</span>
+                  <span class="v4-field-value err">✗ Vikram Automotive Comp. Ltd</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Submitted Name</span>
+                  <span class="v4-field-value">Vikram Auto Components Ltd.</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">PAN</span>
+                  <span class="v4-field-value ok">✓ AABCV9012P</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Mismatch Field</span>
+                  <span class="v4-field-value err">Entity Name</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Fetched on</span>
+                  <span class="v4-field-value">11 May 2025, 2:18 PM</span>
+                </div>
+                <div class="v4-field">
+                  <span class="v4-field-label">Suggested Action</span>
+                  <span class="v4-field-value">Request amended documents or manual override</span>
+                </div>
+                <div class="v4-field"></div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3: not initiated — collapsed -->
+          <tr>
+            <td>
+              <div class="entity-name">Anand Trading Co.</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>Partnership Firm</td>
+            <td><span class="pan-text">AAAFA3456Q</span></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="ckyc-pill pill-na"><span class="dot"></span>Not Initiated</span>
+              </div>
+            </td>
+            <td><span class="ckyc-pill pill-pending" style="font-size:11px;"><span class="dot"></span>Docs Pending</span></td>
+            <td><button class="btn-action btn-ghost">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Why this works:</strong> The main table stays scannable — only status pills visible. The detail panel expands inline without a page transition. The mismatch expanded row immediately shows which exact field failed and what the expected vs. registry values are. <strong>Trade-off:</strong> Expanded rows disrupt visual scan order. Best used when most rows are in a resolved state (Verified/NA) and only 1–2 need inspection.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V5 — NOT FOUND / MISMATCH ERROR STATE CARDS
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 5 — Error State Detail Cards</span>
+      <span class="badge-tag">ERROR-FOCUSED</span>
+      <span class="section-desc">Focused view of the two failure scenarios — Not Found and Mismatch — with clear next-action guidance embedded in the cell.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Entity Name</th>
+            <th>Entity Type</th>
+            <th>PAN</th>
+            <th>CKYC Verification</th>
+            <th>Suggested Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="entity-name">Priya Textiles LLP</div>
+              <div class="entity-type">Supplier</div>
+            </td>
+            <td>LLP</td>
+            <td><span class="pan-text">AAHFP5678K</span></td>
+            <td>
+              <div class="v5-error-card not-found">
+                <div class="v5-error-title">CKYC Not Found</div>
+                <div class="v5-error-desc">No record in CERSAI registry for PAN AAHFP5678K. This could mean the entity hasn't completed CKYC with any regulated intermediary.</div>
+                <div class="v5-error-actions">
+                  <button class="btn-action btn-ghost" style="font-size:11px; padding:4px 10px;">Retry Fetch</button>
+                  <button class="btn-action btn-ghost" style="font-size:11px; padding:4px 10px;">Manual Override</button>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:12px; color:#555; line-height:1.6;">
+              Ask entity to complete CKYC with their bank first, or accept physical KYC documents as an override.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="entity-name">Vikram Auto Components Ltd.</div>
+              <div class="entity-type">Buyer</div>
+            </td>
+            <td>Public Limited</td>
+            <td><span class="pan-text">AABCV9012P</span></td>
+            <td>
+              <div class="v5-error-card mismatch">
+                <div class="v5-error-title">Name Mismatch</div>
+                <div class="v5-error-desc">
+                  Registry: <strong>Vikram Automotive Comp. Ltd</strong><br>
+                  Submitted: Vikram Auto Components Ltd.<br>
+                  PAN matched. Only entity name differs.
+                </div>
+                <div class="v5-error-actions">
+                  <button class="btn-action btn-primary" style="font-size:11px; padding:4px 10px;">Approve Anyway</button>
+                  <button class="btn-action btn-danger" style="font-size:11px; padding:4px 10px;">Reject</button>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:12px; color:#555; line-height:1.6;">
+              Name abbreviation difference — likely the same entity. Admin can approve with a documented override, or request a corrected incorporation certificate.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation">
+      <strong>Design principle:</strong> The error message tells the admin <em>what</em> failed, <em>why</em> it matters, and <em>what to do next</em> — all in one cell. Avoids sending the admin to a separate detail page for the most actionable states. <strong>Trade-off:</strong> These cards are too verbose for a list of 50+ entities; best suited for a filtered "Requires Attention" view.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       V6 — ENTITY TYPE MATRIX
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Variant 6 — Entity Type × CKYC Requirement Matrix</span>
+      <span class="badge-tag">CONTEXT-AWARE</span>
+      <span class="section-desc">CKYC requirements differ per entity type in India. This variant makes the platform aware of that — it only requires CKYC where mandated.</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Entity Type</th>
+            <th>CKYC Required?</th>
+            <th>Key Identifiers</th>
+            <th>CKYC Fetch Logic</th>
+            <th>If Not Found</th>
+            <th>Example Status Display</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="v6-type-tag type-pvt-ltd">Pvt. Ltd.</span></td>
+            <td><span class="v6-ckyc-required">✓ Required</span></td>
+            <td><span class="pan-text">PAN + CIN</span></td>
+            <td style="font-size:12px; color:#555;">Auto-fetch on PAN submission. Retry after 24h if failed.</td>
+            <td style="font-size:12px; color:#555;">Block onboarding until resolved or manual override approved.</td>
+            <td><span class="ckyc-pill pill-verified"><span class="dot"></span>Verified</span></td>
+          </tr>
+          <tr>
+            <td><span class="v6-type-tag type-pub-ltd">Pub. Ltd.</span></td>
+            <td><span class="v6-ckyc-required">✓ Required</span></td>
+            <td><span class="pan-text">PAN + CIN</span></td>
+            <td style="font-size:12px; color:#555;">Auto-fetch on PAN submission. Additional directors' KYC may be required by financiers.</td>
+            <td style="font-size:12px; color:#555;">Block onboarding until resolved or manual override approved.</td>
+            <td><span class="ckyc-pill pill-mismatch"><span class="dot"></span>Mismatch</span></td>
+          </tr>
+          <tr>
+            <td><span class="v6-type-tag type-llp">LLP</span></td>
+            <td><span class="v6-ckyc-required">✓ Required</span></td>
+            <td><span class="pan-text">PAN + LLPIN</span></td>
+            <td style="font-size:12px; color:#555;">Fetch by PAN. LLPIN used for secondary verification of designated partners.</td>
+            <td style="font-size:12px; color:#555;">Block onboarding. LLPs are newer entities; CKYC gaps are more common — escalate to compliance team.</td>
+            <td><span class="ckyc-pill pill-not-found"><span class="dot"></span>Not Found</span></td>
+          </tr>
+          <tr>
+            <td><span class="v6-type-tag type-partner">Partnership</span></td>
+            <td><span class="v6-ckyc-required">✓ Required</span><div class="v6-doc-list">Partners' individual CKYC also required</div></td>
+            <td><span class="pan-text">Firm PAN + Partner PANs</span></td>
+            <td style="font-size:12px; color:#555;">Fetch firm CKYC + each partner's CKYC. All must be Verified to proceed.</td>
+            <td style="font-size:12px; color:#555;">Partial block — if firm CKYC found but a partner's CKYC is missing, flag the specific partner.</td>
+            <td><span class="ckyc-pill pill-pending"><span class="dot"></span>Partial</span></td>
+          </tr>
+          <tr>
+            <td><span class="v6-type-tag type-prop">Proprietorship</span></td>
+            <td><span class="v6-ckyc-required">✓ Required</span><div class="v6-doc-list">Individual CKYC of proprietor</div></td>
+            <td><span class="pan-text">Proprietor PAN</span></td>
+            <td style="font-size:12px; color:#555;">Fetch individual CKYC for proprietor. No separate firm CKYC entity in registry.</td>
+            <td style="font-size:12px; color:#555;">Proprietors often lack CKYC. Fallback: accept Aadhaar-based eKYC or physical KYC documents.</td>
+            <td><span class="ckyc-pill pill-na"><span class="dot"></span">Fallback KYC</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annotation info">
+      <strong>Design principle:</strong> The CKYC column meaning changes by entity type. A "Not Found" for an LLP is a compliance blocker requiring escalation. A "Not Found" for a proprietorship triggers a different fallback flow (eKYC/physical KYC). The platform should encode this logic so the admin sees the right action, not just the status. This matrix is the decision tree behind all the preceding variants.
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       DECISION GUIDE
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Decision Guide — Which Variant to Use Where</span>
+      <span class="badge-tag existing">SUMMARY</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Context</th>
+            <th>Recommended Variant</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600; font-size:13px;">Entity list (50+ rows, all statuses)</td>
+            <td><span class="ckyc-pill pill-verified" style="font-size:11px;"><span class="dot"></span>V1 — Pill</span></td>
+            <td style="font-size:12px; color:#555;">Compact. Pre-attentive colour. Filter by status to drill down.</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; font-size:13px;">Entity detail page (single entity review)</td>
+            <td><span class="ckyc-pill pill-verified" style="font-size:11px;"><span class="dot"></span>V2 — Verification Card</span></td>
+            <td style="font-size:12px; color:#555;">Full field-level comparison visible. Admin can act without switching context.</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; font-size:13px;">Onboarding queue (admin-triggered fetch)</td>
+            <td><span class="ckyc-pill pill-verified" style="font-size:11px;"><span class="dot"></span>V3 — Action State</span></td>
+            <td style="font-size:12px; color:#555;">Makes the async fetch operation visible. Fetch button + loading state prevents confusion.</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; font-size:13px;">Mixed list (most Verified, few flagged)</td>
+            <td><span class="ckyc-pill pill-verified" style="font-size:11px;"><span class="dot"></span>V4 — Expandable</span></td>
+            <td style="font-size:12px; color:#555;">Compact scan for the majority; rich detail on demand for flagged rows only.</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; font-size:13px;">"Requires Attention" filtered view</td>
+            <td><span class="ckyc-pill pill-not-found" style="font-size:11px;"><span class="dot"></span>V5 — Error Cards</span></td>
+            <td style="font-size:12px; color:#555;">Every row is a problem; contextual guidance embedded means admin can resolve without help docs.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</body>
+</html>
