@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fin. MTD & YTD — Color Treatments</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5; color: #1a1a2e; padding: 32px 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub   { font-size: 13px; color: #888; margin-bottom: 24px; }
+
+    /* ── toggle strip ── */
+    .toggle-strip {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .toggle-btn {
+      padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid #ddd; background: #fff; color: #888;
+      cursor: pointer; transition: all .15s;
+    }
+    .toggle-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+    /* ── legend ── */
+    .legend {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 10px 14px; background: #fff;
+      border-radius: 10px; margin-bottom: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      font-size: 11px; color: #666;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot  { width: 10px; height: 10px; border-radius: 3px; }
+
+    /* ── table shell ── */
+    .table-wrap {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      padding: 10px 14px; text-align: left;
+      font-size: 11px; font-weight: 700; color: #888;
+      border-bottom: 1px solid #f0f0f0; white-space: nowrap;
+      background: #fafafa;
+    }
+    tbody tr { border-bottom: 1px solid #f8f8f8; transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbff; }
+    tbody td { padding: 12px 14px; vertical-align: middle; }
+
+    .buyer-name { font-weight: 700; color: #3949ab; font-size: 13px; }
+    .buyer-tag  {
+      display: inline-block; font-size: 10px; color: #888;
+      background: #f5f5f5; border-radius: 4px; padding: 1px 5px; margin-left: 4px;
+    }
+    .buyer-status {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; color: #c62828; margin-top: 2px; font-weight: 600;
+    }
+    .status-chip {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      border: 1.5px solid #2e7d32; color: #2e7d32;
+    }
+    .btn-view {
+      background: #1a1a2e; color: #fff; border: none;
+      padding: 7px 16px; border-radius: 20px; font-size: 12px;
+      font-weight: 700; cursor: pointer;
+    }
+
+    /* ── amount cell base ── */
+    .amt-cell { display: flex; flex-direction: column; gap: 4px; }
+    .amt-link {
+      font-size: 14px; font-weight: 700;
+      text-decoration: none; cursor: pointer;
+      display: inline-block; transition: all .15s;
+    }
+    .amt-link:hover { text-decoration: underline; }
+
+    /* ── pill base ── */
+    .pill {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
+      transition: all .2s;
+    }
+
+    /* ══════════════════════════════════
+       MODE 0 — No color (baseline)
+       ══════════════════════════════════ */
+    body.mode-0 .amt-link           { color: #1565c0; }
+    body.mode-0 .pill               { background: #f0f0f0; color: #777; }
+    body.mode-0 .cell-border        { border-left: none; }
+
+    /* ══════════════════════════════════
+       MODE 1 — Colored % in pill only
+       ══════════════════════════════════ */
+    body.mode-1 .amt-link            { color: #1565c0; }
+    /* pill color set via data-tier on each pill */
+    body.mode-1 .pill[data-tier="high"]   { background: #e6f4ea; color: #2e7d32; }
+    body.mode-1 .pill[data-tier="medium"] { background: #fff8e1; color: #e65100; }
+    body.mode-1 .pill[data-tier="low"]    { background: #fde8e8; color: #c62828; }
+
+    /* ══════════════════════════════════
+       MODE 2 — Colored amount by MoM
+       ══════════════════════════════════ */
+    body.mode-2 .pill               { background: #f0f0f0; color: #777; }
+    body.mode-2 .amt-link[data-mom="up"]   { color: #2e7d32; }
+    body.mode-2 .amt-link[data-mom="down"] { color: #c62828; }
+    body.mode-2 .amt-link[data-mom="flat"] { color: #888; }
+
+    /* ══════════════════════════════════
+       MODE 3 — Left cell border accent
+       ══════════════════════════════════ */
+    body.mode-3 .amt-link           { color: #1565c0; }
+    body.mode-3 .pill               { background: #f0f0f0; color: #777; }
+    body.mode-3 td.fin-cell[data-mom="up"]   { border-left: 3px solid #2e7d32; padding-left: 11px; }
+    body.mode-3 td.fin-cell[data-mom="down"] { border-left: 3px solid #c62828; padding-left: 11px; }
+    body.mode-3 td.fin-cell[data-mom="flat"] { border-left: 3px solid #e0e0e0; padding-left: 11px; }
+
+    /* ══════════════════════════════════
+       MODE 4 — All combined
+       ══════════════════════════════════ */
+    body.mode-4 .amt-link[data-mom="up"]   { color: #2e7d32; }
+    body.mode-4 .amt-link[data-mom="down"] { color: #c62828; }
+    body.mode-4 .amt-link[data-mom="flat"] { color: #888; }
+    body.mode-4 .pill[data-tier="high"]    { background: #e6f4ea; color: #2e7d32; }
+    body.mode-4 .pill[data-tier="medium"]  { background: #fff8e1; color: #e65100; }
+    body.mode-4 .pill[data-tier="low"]     { background: #fde8e8; color: #c62828; }
+    body.mode-4 td.fin-cell[data-mom="up"]   { border-left: 3px solid #2e7d32; padding-left: 11px; }
+    body.mode-4 td.fin-cell[data-mom="down"] { border-left: 3px solid #c62828; padding-left: 11px; }
+    body.mode-4 td.fin-cell[data-mom="flat"] { border-left: 3px solid #e0e0e0; padding-left: 11px; }
+
+    /* annotation bar */
+    .info-bar {
+      margin-top: 12px; padding: 10px 14px;
+      background: #fffde7; border-left: 3px solid #f9a825;
+      border-radius: 0 6px 6px 0; font-size: 11px; color: #666; line-height: 1.6;
+    }
+    .info-bar strong { color: #333; }
+  </style>
+</head>
+<body class="mode-0">
+
+  <div class="page-title">Fin. MTD & YTD — Color Treatments</div>
+  <div class="page-sub">Toggle between 5 color modes to see how each changes the table. Same data, different signal.</div>
+
+  <!-- Toggle strip -->
+  <div class="toggle-strip">
+    <button class="toggle-btn active" onclick="setMode(0,this)">No Color · Baseline</button>
+    <button class="toggle-btn" onclick="setMode(1,this)">Colored Pill · Share %</button>
+    <button class="toggle-btn" onclick="setMode(2,this)">Colored Amount · MoM</button>
+    <button class="toggle-btn" onclick="setMode(3,this)">Left Border · MoM</button>
+    <button class="toggle-btn" onclick="setMode(4,this)">All Combined</button>
+  </div>
+
+  <!-- Dynamic legend -->
+  <div class="legend" id="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#ccc;"></div>No color signals — amount is always blue link</div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Buyer</th>
+          <th>Total Supplier</th>
+          <th>Exposure Limit</th>
+          <th>Utilisation</th>
+          <th>Limit Expiry</th>
+          <th>Fin. MTD ↓</th>
+          <th>Fin. YTD ↓</th>
+          <th>Checker Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Row 1: High share, MoM up -->
+        <tr>
+          <td><span class="buyer-name">K C India Limited</span><span class="buyer-tag">AAA+</span></td>
+          <td>5</td>
+          <td>₹ 10,25,990</td>
+          <td>₹ 8,00,400</td>
+          <td>July 31, 2026</td>
+          <td class="fin-cell" data-mom="up">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="up" href="#">₹ 18,00,400</a>
+              <span class="pill" data-tier="high">35% of buyer's total</span>
+            </div>
+          </td>
+          <td class="fin-cell" data-mom="up">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="up" href="#">₹ 1,22,00,000</a>
+              <span class="pill" data-tier="high">38% of buyer's total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+
+        <!-- Row 2: Medium share, MoM up -->
+        <tr>
+          <td><span class="buyer-name">HUL</span><span class="buyer-tag">AA</span></td>
+          <td>12</td>
+          <td>₹ 42,00,000</td>
+          <td>₹ 28,00,000</td>
+          <td>Oct 15, 2026</td>
+          <td class="fin-cell" data-mom="up">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="up" href="#">₹ 10,25,990</a>
+              <span class="pill" data-tier="medium">12% of buyer's total</span>
+            </div>
+          </td>
+          <td class="fin-cell" data-mom="up">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="up" href="#">₹ 68,00,000</a>
+              <span class="pill" data-tier="medium">14% of buyer's total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+
+        <!-- Row 3: Low share, MoM down -->
+        <tr>
+          <td><span class="buyer-name">Tata Motors</span><span class="buyer-tag">A+</span></td>
+          <td>8</td>
+          <td>₹ 18,00,000</td>
+          <td>₹ 15,40,000</td>
+          <td>Mar 31, 2026</td>
+          <td class="fin-cell" data-mom="down">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="down" href="#">₹ 3,40,000</a>
+              <span class="pill" data-tier="low">2% of buyer's total</span>
+            </div>
+          </td>
+          <td class="fin-cell" data-mom="down">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="down" href="#">₹ 18,00,400</a>
+              <span class="pill" data-tier="low">3% of buyer's total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+
+        <!-- Row 4: Medium share, MoM flat -->
+        <tr>
+          <td><span class="buyer-name">Reliance Retail</span><span class="buyer-tag">AAA</span></td>
+          <td>20</td>
+          <td>₹ 95,00,000</td>
+          <td>₹ 61,00,000</td>
+          <td>Dec 31, 2026</td>
+          <td class="fin-cell" data-mom="flat">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="flat" href="#">₹ 22,00,000</a>
+              <span class="pill" data-tier="medium">18% of buyer's total</span>
+            </div>
+          </td>
+          <td class="fin-cell" data-mom="flat">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="flat" href="#">₹ 1,80,00,000</a>
+              <span class="pill" data-tier="medium">19% of buyer's total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+
+        <!-- Row 5: Low share, MoM down, Under Default -->
+        <tr>
+          <td>
+            <span class="buyer-name">Infosys Ltd</span><span class="buyer-tag">BBB</span>
+            <div class="buyer-status">⊘ Under Default</div>
+          </td>
+          <td>3</td>
+          <td>₹ 8,00,000</td>
+          <td>₹ 7,20,000</td>
+          <td>Feb 28, 2026</td>
+          <td class="fin-cell" data-mom="down">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="down" href="#">₹ 1,80,400</a>
+              <span class="pill" data-tier="low">4% of buyer's total</span>
+            </div>
+          </td>
+          <td class="fin-cell" data-mom="down">
+            <div class="amt-cell">
+              <a class="amt-link" data-mom="down" href="#">₹ 9,20,000</a>
+              <span class="pill" data-tier="low">5% of buyer's total</span>
+            </div>
+          </td>
+          <td><span class="status-chip">Approved</span></td>
+          <td><button class="btn-view">VIEW</button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-bar" id="info-bar">
+    <strong>Mode 0 — No Color (Baseline):</strong> Amount is always blue — standard link colour. Pill is plain grey. No data signal from colour. Use this to compare against all other modes.
+  </div>
+
+  <script>
+    const modes = {
+      0: {
+        legend: `<div class="legend-item"><div class="legend-dot" style="background:#ccc;"></div>No colour signals — amount is a blue link, pill is grey</div>`,
+        info: `<strong>Mode 0 — No Colour (Baseline):</strong> Amount is always blue — standard link colour. Pill is plain grey. No data signal from colour. Use this as the reference.`
+      },
+      1: {
+        legend: `
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div>Pill green · Share &gt;30% (strong)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e65100;"></div>Pill amber · Share 10–30% (moderate)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Pill red · Share &lt;10% (low — opportunity to grow)</div>`,
+        info: `<strong>Mode 1 — Coloured Pill by Share %:</strong> Amount stays blue. Only the pill changes colour based on your share of that buyer's financing. Green = you're the dominant financier. Red = low share — either grow or investigate why.`
+      },
+      2: {
+        legend: `
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div>Amount green · MTD up vs last month</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Amount red · MTD down vs last month</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#888;"></div>Amount grey · No change</div>`,
+        info: `<strong>Mode 2 — Coloured Amount by MoM Trend:</strong> Pill stays grey. The amount colour tells you the month-on-month direction — green is growing, red is declining. You read the trend before you read the number.`
+      },
+      3: {
+        legend: `
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;border-radius:0;"></div>Green left border · MTD up</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;border-radius:0;"></div>Red left border · MTD down</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e0e0e0;border-radius:0;"></div>Grey left border · No change</div>`,
+        info: `<strong>Mode 3 — Left Border Accent by MoM:</strong> Amount and pill colours unchanged. A 3px stripe on the left of each Fin. MTD / YTD cell signals the trend. Subtle — doesn't distort the amount or pill readability.`
+      },
+      4: {
+        legend: `
+          <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div>Green amount + green pill + green border · Up &amp; high share</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e65100;"></div>Amber pill · Medium share</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c62828;"></div>Red amount + red pill + red border · Down &amp; low share</div>`,
+        info: `<strong>Mode 4 — All Combined:</strong> Amount colour = MoM trend. Pill colour = share tier. Left border = MoM accent. Three signals layered — dense but information-rich. Best for power users who scan many rows quickly.`
+      }
+    };
+
+    function setMode(n, btn) {
+      document.body.className = 'mode-' + n;
+      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('legend').innerHTML = modes[n].legend;
+      document.getElementById('info-bar').innerHTML = modes[n].info;
+    }
+  </script>
+
+</body>
+</html>
