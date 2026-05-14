@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Utilisation % — Display Variants</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5; color: #1a1a2e; padding: 32px 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub   { font-size: 13px; color: #888; margin-bottom: 32px; }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 24px;
+    }
+    @media(max-width:700px){ .grid { grid-template-columns: 1fr; } }
+
+    .col { display: flex; flex-direction: column; gap: 10px; }
+    .col-tag  { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #bbb; }
+    .col-name { font-size: 15px; font-weight: 800; color: #1a1a2e; }
+
+    /* summary card shell */
+    .summary-card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .summary-head {
+      padding: 12px 18px; font-size: 13px; font-weight: 700;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .summary-body {
+      display: flex; align-items: stretch;
+    }
+    .kpi {
+      flex: 1; padding: 16px 14px; text-align: center;
+      border-right: 1px solid #f0f0f0;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+    }
+    .kpi:last-child { border-right: none; }
+    .kpi-label { font-size: 11px; color: #aaa; line-height: 1.3; }
+    .kpi-value { font-size: 20px; font-weight: 800; color: #1a1a2e; }
+
+    .annotation {
+      font-size: 11px; color: #999; padding: 8px 12px;
+      background: #fffde7; border-left: 3px solid #f9a825;
+      border-radius: 0 4px 4px 0;
+    }
+    .annotation strong { color: #555; }
+
+    /* ── VARIANT 1 — Coloured chip ── */
+    .chip-util {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+    }
+    .chip-high   { background: #fde8e8; color: #c62828; }
+    .chip-medium { background: #fff3e0; color: #e65100; }
+    .chip-low    { background: #e6f4ea; color: #2e7d32; }
+
+    /* ── VARIANT 2 — Mini bar under amount ── */
+    .bar-wrap { width: 100%; }
+    .bar-track {
+      width: 100%; height: 5px; background: #f0f0f0;
+      border-radius: 20px; overflow: hidden; margin-top: 2px;
+    }
+    .bar-fill { height: 100%; border-radius: 20px; }
+    .bar-fill.high   { background: #c62828; }
+    .bar-fill.medium { background: #e65100; }
+    .bar-fill.low    { background: #2e7d32; }
+    .bar-pct {
+      font-size: 10px; font-weight: 700; margin-top: 3px;
+      text-align: right;
+    }
+    .bar-pct.high   { color: #c62828; }
+    .bar-pct.medium { color: #e65100; }
+    .bar-pct.low    { color: #2e7d32; }
+
+    /* ── VARIANT 3 — Coloured % inline with amount ── */
+    .inline-pct {
+      font-size: 13px; font-weight: 700; margin-left: 4px;
+    }
+    .inline-pct.high   { color: #c62828; }
+    .inline-pct.medium { color: #e65100; }
+    .inline-pct.low    { color: #2e7d32; }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">Limit Utilisation — Display Variants</div>
+  <div class="page-sub">3 ways to show 86% utilisation. Only the % display changes — nothing else.</div>
+
+  <div class="grid">
+
+    <!-- VARIANT 1 — Coloured chip -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant 1</div>
+        <div class="col-name">Coloured Chip</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-head">Summary</div>
+        <div class="summary-body">
+          <div class="kpi">
+            <div class="kpi-label">Total Limit (Cr)</div>
+            <div class="kpi-value">₹10.40 Cr</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Limit Utilized (Cr)</div>
+            <div class="kpi-value">₹8.60 Cr</div>
+            <span class="chip-util chip-high">86% utilized</span>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Logic:</strong> &lt;60% = green · 60–80% = amber · &gt;80% = red. Chip colour signals urgency — 86% reads as "almost full, act soon."
+      </div>
+    </div>
+
+    <!-- VARIANT 2 — Mini bar -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant 2</div>
+        <div class="col-name">Mini Bar</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-head">Summary</div>
+        <div class="summary-body">
+          <div class="kpi">
+            <div class="kpi-label">Total Limit (Cr)</div>
+            <div class="kpi-value">₹10.40 Cr</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Limit Utilized (Cr)</div>
+            <div class="kpi-value">₹8.60 Cr</div>
+            <div class="bar-wrap">
+              <div class="bar-track">
+                <div class="bar-fill high" style="width:86%;"></div>
+              </div>
+              <div class="bar-pct high">86%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Logic:</strong> Bar fill shows how close to the limit visually. 86% fill on a red bar immediately reads "nearly full." No text label needed — bar + % is enough.
+      </div>
+    </div>
+
+    <!-- VARIANT 3 — Inline coloured % -->
+    <div class="col">
+      <div>
+        <div class="col-tag">Variant 3</div>
+        <div class="col-name">Inline Coloured %</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-head">Summary</div>
+        <div class="summary-body">
+          <div class="kpi">
+            <div class="kpi-label">Total Limit (Cr)</div>
+            <div class="kpi-value">₹10.40 Cr</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Limit Utilized (Cr)</div>
+            <div class="kpi-value">
+              ₹8.60 Cr <span class="inline-pct high">86%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Logic:</strong> % sits inline with the amount — same line, smaller, coloured. Closest to current design. Least change, most subtle — good if you don't want the card to feel alarming.
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
