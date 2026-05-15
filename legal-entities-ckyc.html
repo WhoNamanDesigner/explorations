@@ -365,6 +365,151 @@
       display: none; align-items: center; gap: 8px; z-index: 999;
     }
     .toast.show { display: flex; }
+
+    /* ── Doc compare modal ────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 8px;
+      width: 880px; max-width: 95vw;
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .modal-title { font-size: 14px; font-weight: 700; color: var(--t1); }
+    .modal-sub   { font-size: 11px; color: var(--t3); margin-top: 2px; }
+    .modal-close {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #EBEBEB; border: 1px solid var(--border-md);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; color: var(--t2);
+      flex-shrink: 0;
+    }
+
+    .modal-match-bar {
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0; font-size: 12px;
+    }
+    .match-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; border: 1.5px solid;
+    }
+    .match-tag.same    { background: #F0F0F0; color: var(--t2); border-color: var(--border-md); }
+    .match-tag.differs { background: #EBEBEB; color: var(--fill); border-color: var(--border-md); }
+
+    .modal-cols {
+      display: grid; grid-template-columns: 1fr 1fr;
+      flex: 1; overflow: hidden;
+    }
+    .modal-col {
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-col + .modal-col { border-left: 1px solid var(--border); }
+
+    .col-head {
+      padding: 10px 16px;
+      background: #F5F5F5;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .col-head-title { font-size: 11px; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: 0.4px; }
+    .col-head-meta  { font-size: 11px; color: var(--t3); margin-top: 2px; }
+
+    .col-doc-area {
+      flex: 1; overflow-y: auto;
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* Image placeholder */
+    .doc-preview-img {
+      width: 100%; aspect-ratio: 1.58;
+      background: #E8E8E8;
+      border: 1px solid var(--border-md);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px;
+      color: var(--t3); font-size: 11px;
+    }
+    .doc-preview-img .icon { font-size: 36px; }
+    .doc-preview-img .lbl { font-size: 11px; color: var(--t3); }
+
+    /* PDF preview placeholder */
+    .doc-preview-pdf {
+      width: 100%;
+      background: #F0F0F0;
+      border: 1px solid var(--border-md);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .pdf-page {
+      background: #fff;
+      margin: 12px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .pdf-line {
+      height: 8px; background: #E0E0E0; border-radius: 2px;
+    }
+    .pdf-line.w80 { width: 80%; }
+    .pdf-line.w60 { width: 60%; }
+    .pdf-line.w90 { width: 90%; }
+    .pdf-line.w40 { width: 40%; }
+    .pdf-line.w70 { width: 70%; }
+    .pdf-stamp {
+      width: 64px; height: 64px;
+      border: 3px solid #C0C0C0;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #C0C0C0; font-size: 9px; font-weight: 700;
+      text-align: center; align-self: flex-end; margin-top: 8px;
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+
+    .doc-meta-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .doc-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .doc-meta-lbl { font-size: 10px; color: var(--t3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+    .doc-meta-val { font-size: 12px; color: var(--t1); font-weight: 500; }
+
+    .diff-callout {
+      padding: 8px 12px;
+      background: #F0F0F0;
+      border: 1px solid var(--border-md);
+      border-radius: 4px;
+      font-size: 11px; color: var(--t2); line-height: 1.6;
+    }
+    .diff-callout strong { color: var(--t1); }
+
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0; background: #F9F9F9;
+    }
+    .modal-footer-note { font-size: 11px; color: var(--t3); }
+    .modal-footer-acts { display: flex; gap: 8px; }
   </style>
 </head>
 <body>
@@ -659,7 +804,7 @@
                 <div>
                   <div class="doc-nm">COI_O2H_Corp.pdf</div>
                   <div class="doc-sz">348 KB</div>
-                  <div class="doc-vw">View</div>
+                  <div class="doc-vw" onclick="openDocModal('coi')">Compare side-by-side ↗</div>
                 </div>
               </div>
               <div class="doc-status">✓ File hash matches platform</div>
@@ -670,7 +815,7 @@
                 <div>
                   <div class="doc-nm">COI_O2H_Corp.pdf</div>
                   <div class="doc-sz">348 KB</div>
-                  <div class="doc-vw">View</div>
+                  <div class="doc-vw" onclick="openDocModal('coi')">Compare side-by-side ↗</div>
                 </div>
               </div>
             </td>
@@ -686,7 +831,7 @@
                 <div>
                   <div class="doc-nm">director_amar.jpg</div>
                   <div class="doc-sz">56 KB</div>
-                  <div class="doc-vw">View</div>
+                  <div class="doc-vw" onclick="openDocModal('photo')">Compare side-by-side ↗</div>
                 </div>
               </div>
               <div class="doc-status">✓ Match</div>
@@ -697,7 +842,34 @@
                 <div>
                   <div class="doc-nm">director_amar.jpg</div>
                   <div class="doc-sz">56 KB</div>
-                  <div class="doc-vw">View</div>
+                  <div class="doc-vw" onclick="openDocModal('photo')">Compare side-by-side ↗</div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- PAN CARD — DIFF example -->
+          <tr class="r-diff">
+            <td><input class="rcb" type="checkbox" checked /></td>
+            <td><div class="f-name">PAN Card</div><div class="f-kind">Image (JPG)</div></td>
+            <td>
+              <div class="doc-row">
+                <div class="doc-box" style="font-size:18px;">🪪</div>
+                <div>
+                  <div class="doc-nm">pan_vendor.jpg</div>
+                  <div class="doc-sz">84 KB</div>
+                  <div class="doc-vw" onclick="openDocModal('pan')">Compare side-by-side ↗</div>
+                </div>
+              </div>
+              <div class="doc-status" style="color:var(--fill2);">✗ Name on card differs</div>
+            </td>
+            <td>
+              <div class="doc-row">
+                <div class="doc-box" style="font-size:18px;">🪪</div>
+                <div>
+                  <div class="doc-nm">pan_platform.jpg</div>
+                  <div class="doc-sz">91 KB</div>
+                  <div class="doc-vw" onclick="openDocModal('pan')">Compare side-by-side ↗</div>
                 </div>
               </div>
             </td>
@@ -888,6 +1060,64 @@
 <!-- toast -->
 <div class="toast" id="toast">✓ &nbsp;Submitted to Make My CKYC. Entity marked Recon. Done.</div>
 
+<!-- ══════════════════════════════════════════
+     DOCUMENT COMPARE MODAL
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="doc-modal" onclick="closeModal(event)">
+  <div class="modal">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-field-name">PAN Card</div>
+        <div class="modal-sub">Side-by-side document comparison · Platform data is source of truth</div>
+      </div>
+      <div class="modal-close" onclick="closeDocModal()">✕</div>
+    </div>
+
+    <!-- Match status bar -->
+    <div class="modal-match-bar" id="modal-match-bar">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- Two column comparison -->
+    <div class="modal-cols">
+
+      <!-- Vendor col -->
+      <div class="modal-col">
+        <div class="col-head">
+          <div class="col-head-title">Vendor Data — Make My CKYC</div>
+          <div class="col-head-meta" id="vendor-file-meta">PAN_O2H_vendor.jpg · 84 KB</div>
+        </div>
+        <div class="col-doc-area" id="vendor-doc-area">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Platform col -->
+      <div class="modal-col">
+        <div class="col-head" style="background:#F0F0F0;">
+          <div class="col-head-title" style="color:var(--t1);">Platform Data — Source of Truth</div>
+          <div class="col-head-meta" id="plat-file-meta">PAN_O2H_platform.jpg · 91 KB</div>
+        </div>
+        <div class="col-doc-area" id="plat-doc-area">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <div class="modal-footer-note" id="modal-footer-note">If documents differ, the platform version will be submitted to vendor on reconciliation.</div>
+      <div class="modal-footer-acts">
+        <button class="btn btn-sm" onclick="closeDocModal()">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
   function show(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -923,6 +1153,162 @@
     const t = document.getElementById('toast');
     t.classList.add('show');
     setTimeout(() => { t.classList.remove('show'); goLanding(); }, 2200);
+  }
+
+  /* ── Document compare modal ───────────── */
+  const docConfigs = {
+    pan: {
+      field: 'PAN Card',
+      match: false,
+      diffNote: 'Name on vendor PAN card reads "O2O Corporation" — platform card reads "O2H Corporation". The platform version will be used.',
+      vendor: { file: 'pan_vendor.jpg', size: '84 KB', type: 'image' },
+      plat:   { file: 'pan_platform.jpg', size: '91 KB', type: 'image' },
+      vendorContent: `
+        <div class="doc-preview-img">
+          <div class="icon">🪪</div>
+          <div class="lbl" style="font-weight:700;font-size:13px;">PAN CARD</div>
+          <div style="width:80%;display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="width:52px;height:52px;background:#D0D0D0;border-radius:3px;flex-shrink:0;"></div>
+              <div style="display:flex;flex-direction:column;gap:5px;flex:1;">
+                <div style="height:8px;background:#C8C8C8;border-radius:2px;width:90%;"></div>
+                <div style="height:8px;background:#C8C8C8;border-radius:2px;width:60%;"></div>
+                <div style="height:8px;background:#C8C8C8;border-radius:2px;width:70%;"></div>
+              </div>
+            </div>
+            <div style="height:7px;background:#C8C8C8;border-radius:2px;margin-top:4px;"></div>
+            <div style="height:7px;background:#C8C8C8;border-radius:2px;width:80%;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--fill2);font-weight:700;margin-top:8px;">O2O CORPORATION PRIVATE LIMITED</div>
+          <div style="font-size:10px;color:var(--t3);">(Name on vendor card)</div>
+        </div>
+        <div class="doc-meta-row">
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Name on Card</div><div class="doc-meta-val" style="color:var(--fill2);">O2O Corporation Private Limited</div></div>
+          <div class="doc-meta-item"><div class="doc-meta-lbl">PAN No.</div><div class="doc-meta-val" style="font-family:monospace;">AABCO1234M</div></div>
+        </div>`,
+      platContent: `
+        <div class="doc-preview-img" style="background:#E0E0E0;">
+          <div class="icon">🪪</div>
+          <div class="lbl" style="font-weight:700;font-size:13px;">PAN CARD</div>
+          <div style="width:80%;display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="width:52px;height:52px;background:#C4C4C4;border-radius:3px;flex-shrink:0;"></div>
+              <div style="display:flex;flex-direction:column;gap:5px;flex:1;">
+                <div style="height:8px;background:#B8B8B8;border-radius:2px;width:90%;"></div>
+                <div style="height:8px;background:#B8B8B8;border-radius:2px;width:60%;"></div>
+                <div style="height:8px;background:#B8B8B8;border-radius:2px;width:70%;"></div>
+              </div>
+            </div>
+            <div style="height:7px;background:#B8B8B8;border-radius:2px;margin-top:4px;"></div>
+            <div style="height:7px;background:#B8B8B8;border-radius:2px;width:80%;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--t1);font-weight:700;margin-top:8px;">O2H CORPORATION PVT. LTD.</div>
+          <div style="font-size:10px;color:var(--t3);">(Name on platform card — source of truth)</div>
+        </div>
+        <div class="doc-meta-row">
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Name on Card</div><div class="doc-meta-val" style="font-weight:700;">O2H Corporation Pvt. Ltd.</div></div>
+          <div class="doc-meta-item"><div class="doc-meta-lbl">PAN No.</div><div class="doc-meta-val" style="font-family:monospace;">AABCO1234M</div></div>
+        </div>`
+    },
+    coi: {
+      field: 'Certificate of Incorporation',
+      match: true,
+      diffNote: 'File hashes match — both documents are identical.',
+      vendor: { file: 'COI_O2H_Corp.pdf', size: '348 KB', type: 'pdf' },
+      plat:   { file: 'COI_O2H_Corp.pdf', size: '348 KB', type: 'pdf' },
+      vendorContent: `
+        <div class="doc-preview-pdf">
+          <div class="pdf-page">
+            <div class="pdf-line w60"></div>
+            <div class="pdf-line w40"></div>
+            <div style="height:12px;"></div>
+            <div class="pdf-line w90"></div>
+            <div class="pdf-line w80"></div>
+            <div class="pdf-line w70"></div>
+            <div class="pdf-line w90"></div>
+            <div class="pdf-line w60"></div>
+            <div style="height:8px;"></div>
+            <div class="pdf-line w80"></div>
+            <div class="pdf-line w90"></div>
+            <div class="pdf-line w40"></div>
+            <div class="pdf-stamp">MCA<br>Certified</div>
+          </div>
+        </div>
+        <div class="doc-meta-row">
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Pages</div><div class="doc-meta-val">2</div></div>
+          <div class="doc-meta-item"><div class="doc-meta-lbl">File hash</div><div class="doc-meta-val" style="font-family:monospace;font-size:11px;">a3f9…d12c</div></div>
+        </div>`,
+      platContent: `
+        <div class="doc-preview-pdf">
+          <div class="pdf-page">
+            <div class="pdf-line w60"></div>
+            <div class="pdf-line w40"></div>
+            <div style="height:12px;"></div>
+            <div class="pdf-line w90"></div>
+            <div class="pdf-line w80"></div>
+            <div class="pdf-line w70"></div>
+            <div class="pdf-line w90"></div>
+            <div class="pdf-line w60"></div>
+            <div style="height:8px;"></div>
+            <div class="pdf-line w80"></div>
+            <div class="pdf-line w90"></div>
+            <div class="pdf-line w40"></div>
+            <div class="pdf-stamp">MCA<br>Certified</div>
+          </div>
+        </div>
+        <div class="doc-meta-row">
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Pages</div><div class="doc-meta-val">2</div></div>
+          <div class="doc-meta-item"><div class="doc-meta-lbl">File hash</div><div class="doc-meta-val" style="font-family:monospace;font-size:11px;">a3f9…d12c</div></div>
+        </div>`
+    },
+    photo: {
+      field: 'Director Photo — Amar Shah',
+      match: true,
+      diffNote: 'Image hashes match — both photos are identical.',
+      vendor: { file: 'director_amar.jpg', size: '56 KB', type: 'image' },
+      plat:   { file: 'director_amar.jpg', size: '56 KB', type: 'image' },
+      vendorContent: `
+        <div class="doc-preview-img" style="aspect-ratio:1;">
+          <div class="icon" style="font-size:64px;">👤</div>
+          <div class="lbl">Director photograph placeholder</div>
+        </div>
+        <div class="doc-meta-row">
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Format</div><div class="doc-meta-val">JPG</div></div>
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Dimensions</div><div class="doc-meta-val">480 × 480 px</div></div>
+        </div>`,
+      platContent: `
+        <div class="doc-preview-img" style="aspect-ratio:1; background:#E0E0E0;">
+          <div class="icon" style="font-size:64px;">👤</div>
+          <div class="lbl">Director photograph placeholder</div>
+        </div>
+        <div class="doc-meta-row">
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Format</div><div class="doc-meta-val">JPG</div></div>
+          <div class="doc-meta-item"><div class="doc-meta-lbl">Dimensions</div><div class="doc-meta-val">480 × 480 px</div></div>
+        </div>`
+    }
+  };
+
+  function openDocModal(type) {
+    const cfg = docConfigs[type];
+    document.getElementById('modal-field-name').textContent = cfg.field;
+    document.getElementById('vendor-file-meta').textContent = cfg.vendor.file + ' · ' + cfg.vendor.size;
+    document.getElementById('plat-file-meta').textContent   = cfg.plat.file + ' · ' + cfg.plat.size;
+    document.getElementById('vendor-doc-area').innerHTML = cfg.vendorContent;
+    document.getElementById('plat-doc-area').innerHTML   = cfg.platContent;
+    document.getElementById('modal-match-bar').innerHTML = cfg.match
+      ? `<span class="match-tag same">✓ &nbsp;Documents match — same file hash</span><span style="font-size:11px;color:var(--t3);margin-left:4px;">${cfg.diffNote}</span>`
+      : `<span class="match-tag differs">✗ &nbsp;Documents differ</span><span style="font-size:11px;color:var(--fill2);margin-left:4px;">${cfg.diffNote}</span>`;
+    document.getElementById('modal-footer-note').textContent = cfg.match
+      ? 'Both documents are identical. No update needed for this field.'
+      : 'Documents differ. If this row is checked, the platform version will be sent to vendor on submit.';
+    document.getElementById('doc-modal').classList.add('show');
+  }
+
+  function closeDocModal() {
+    document.getElementById('doc-modal').classList.remove('show');
+  }
+  function closeModal(e) {
+    if (e.target === document.getElementById('doc-modal')) closeDocModal();
   }
 
   function filt(s, btn) {
