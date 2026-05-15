@@ -3,1092 +3,868 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legal Entities — CKYC Reconciliation</title>
+  <title>Legal Entities — CKYC Reconciliation · V0 Wireframe</title>
   <style>
-    /* ─── Reset & base ─────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    /* ── Reset ──────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f4f5f7;
-      color: #1a1a2e;
-      min-height: 100vh;
+
+    :root {
+      --bg:        #EBEBEB;
+      --surface:   #FFFFFF;
+      --border:    #D8D8D8;
+      --border-md: #C4C4C4;
+      --text-1:    #1A1A1A;
+      --text-2:    #555555;
+      --text-3:    #8C8C8C;
+      --text-4:    #AFAFAF;
+      --fill-1:    #333333;
+      --fill-2:    #595959;
+      --chip-bg:   #E4E4E4;
+      --chip-dk:   #2A2A2A;
+      --row-hover: #F7F7F7;
     }
 
-    /* ─── App shell ─────────────────────────────────── */
-    .app-header {
-      background: #1a1a2e;
-      color: #fff;
-      padding: 0 32px;
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* ── App nav ─────────────────────────────────── */
+    .nav {
       height: 52px;
+      background: var(--fill-1);
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
+      padding: 0 24px;
+      gap: 24px;
+      border-bottom: 1px solid #222;
     }
-    .app-header .logo { font-size: 15px; font-weight: 800; color: #fff; margin-right: 16px; }
-    .app-header .breadcrumb { display: flex; align-items: center; gap: 6px; color: #aaa; font-weight: 400; }
-    .app-header .breadcrumb .crumb-link { color: #7eb3f5; cursor: pointer; text-decoration: underline; font-weight: 500; }
-    .app-header .breadcrumb .sep { color: #555; }
-    .app-header .crumb-current { color: #fff; }
+    .nav-logo {
+      width: 72px; height: 28px;
+      background: #555;
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      color: #aaa; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+    .nav-items { display: flex; gap: 4px; }
+    .nav-item {
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #aaa;
+      cursor: pointer;
+    }
+    .nav-item.active { background: #4a4a4a; color: #fff; }
 
-    .page { display: none; }
-    .page.active { display: block; }
-
-    .page-body { padding: 28px 32px 60px; }
-
-    /* ─── Page title row ────────────────────────────── */
-    .page-title-row {
+    /* ── Breadcrumb ──────────────────────────────── */
+    .breadcrumb {
+      padding: 10px 24px;
+      font-size: 11px;
+      color: var(--text-3);
       display: flex;
-      align-items: flex-end;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .bc-link { color: var(--text-3); cursor: pointer; }
+    .bc-link:hover { color: var(--text-1); text-decoration: underline; }
+    .bc-sep { color: var(--border-md); }
+    .bc-current { color: var(--text-1); font-weight: 500; }
+
+    /* ── Page body ───────────────────────────────── */
+    .page-body { padding: 24px; }
+
+    /* ── Page header ─────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
       justify-content: space-between;
       margin-bottom: 20px;
     }
-    .page-title { font-size: 20px; font-weight: 700; }
-    .page-subtitle { font-size: 12px; color: #888; margin-top: 3px; line-height: 1.5; }
+    .page-title  { font-size: 18px; font-weight: 700; color: var(--text-1); }
+    .page-sub    { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+    .page-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-    /* ─── Filters / toolbar ─────────────────────────── */
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-    .search-box {
-      padding: 7px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+    /* ── Buttons ─────────────────────────────────── */
+    .btn {
+      padding: 7px 14px;
       font-size: 12px;
-      width: 220px;
-      background: #fff;
-      color: #333;
-      outline: none;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1.5px solid var(--border-md);
+      background: var(--surface);
+      color: var(--text-1);
     }
-    .filter-chip {
+    .btn-dark {
+      background: var(--fill-1);
+      color: #fff;
+      border-color: var(--fill-1);
+    }
+
+    /* ── Summary cards ───────────────────────────── */
+    .summary-row { display: flex; gap: 10px; margin-bottom: 18px; }
+    .s-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 18px;
+      min-width: 110px;
+    }
+    .s-num  { font-size: 22px; font-weight: 700; color: var(--text-1); }
+    .s-lbl  { font-size: 10px; color: var(--text-3); font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* ── Toolbar ─────────────────────────────────── */
+    .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .search {
+      padding: 7px 12px;
+      border: 1.5px solid var(--border-md);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      color: var(--text-1);
+      background: var(--surface);
+      outline: none;
+      width: 220px;
+    }
+    .search::placeholder { color: var(--text-4); }
+    .chip {
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 11px;
       font-weight: 600;
-      border: 1px solid #e0e0e0;
-      background: #fff;
+      border: 1.5px solid var(--border-md);
+      background: var(--surface);
+      color: var(--text-2);
       cursor: pointer;
-      color: #555;
-      transition: all 0.15s;
     }
-    .filter-chip.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
-    .ml-auto { margin-left: auto; }
-    .btn {
-      padding: 7px 16px;
+    .chip.on { background: var(--fill-1); color: #fff; border-color: var(--fill-1); }
+
+    /* ── Table ───────────────────────────────────── */
+    .tbl-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.15s;
-    }
-    .btn-primary { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
-    .btn-primary:hover { background: #2d2d4e; }
-    .btn-outline { background: #fff; color: #1a1a2e; border-color: #c8c8d8; }
-    .btn-outline:hover { background: #f4f5f7; }
-    .btn-ghost { background: transparent; color: #1a1a2e; border-color: transparent; }
-
-    /* ─── Summary chips ─────────────────────────────── */
-    .summary-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .summary-chip {
-      background: #fff;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
-      padding: 10px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 120px;
-    }
-    .summary-chip .num { font-size: 20px; font-weight: 700; }
-    .summary-chip .lbl { font-size: 11px; color: #888; font-weight: 500; }
-    .num-pending { color: #e65100; }
-    .num-done    { color: #2e7d32; }
-    .num-total   { color: #1a1a2e; }
-
-    /* ─── Table ─────────────────────────────────────── */
-    .table-wrap {
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #e8e8e8;
       overflow: hidden;
     }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; }
     thead th {
-      background: #f9fafb;
+      background: #F2F2F2;
       font-size: 11px;
       font-weight: 600;
-      color: #555;
+      color: var(--text-2);
       text-align: left;
       padding: 10px 16px;
-      border-bottom: 1px solid #e8e8e8;
+      border-bottom: 1px solid var(--border);
       white-space: nowrap;
       user-select: none;
     }
-    thead th .sort { color: #bbb; margin-left: 3px; }
+    thead th .s { color: var(--border-md); margin-left: 2px; font-size: 10px; }
+    thead th:first-child { width: 40px; text-align: center; }
+
     tbody td {
       padding: 14px 16px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid #F0F0F0;
       vertical-align: middle;
     }
     tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover td { background: #fafafa; }
-    tbody tr.row-done td { background: #fafcfa; }
+    tbody tr:hover td { background: var(--row-hover); }
 
-    .entity-name { font-weight: 600; font-size: 13px; color: #1a1a2e; }
-    .entity-sub  { font-size: 11px; color: #888; margin-top: 1px; }
-    .entity-link {
+    /* entity name */
+    .e-name {
       font-weight: 600;
       font-size: 13px;
-      color: #1565c0;
-      text-decoration: none;
+      color: var(--fill-1);
       cursor: pointer;
+      text-decoration: none;
     }
-    .entity-link:hover { text-decoration: underline; }
+    .e-name:hover { text-decoration: underline; }
+    .e-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 
-    /* status chips */
-    .status-chip {
+    /* grey status chips */
+    .sc {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 10px;
-      border-radius: 12px;
+      padding: 3px 9px;
+      border-radius: 20px;
       font-size: 11px;
       font-weight: 600;
       white-space: nowrap;
     }
-    .status-chip .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .chip-pending { background: #fff8e1; color: #e65100; border: 1px solid #ffe0b2; }
-    .chip-pending .dot { background: #e65100; }
-    .chip-done    { background: #e6f4ea; color: #2e7d32; border: 1px solid #c8e6c9; }
-    .chip-done .dot { background: #2e7d32; }
-    .chip-changed { background: #e8eaf6; color: #3949ab; border: 1px solid #c5cae9; }
-    .chip-changed .dot { background: #3949ab; }
+    .sc .d { width: 6px; height: 6px; border-radius: 50%; }
+    .sc-pending { background: #EBEBEB; color: var(--text-1); border: 1.5px solid var(--border-md); }
+    .sc-pending .d { background: var(--text-2); }
+    .sc-done { background: var(--fill-1); color: #fff; border: 1.5px solid var(--fill-1); }
+    .sc-done .d { background: #aaa; }
 
     /* diff badge */
-    .diff-badge {
+    .db {
       display: inline-block;
-      background: #fde8e8;
-      color: #c62828;
+      background: #E4E4E4;
+      color: var(--fill-1);
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 6px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid var(--border-md);
     }
-    .diff-badge.none { background: #e6f4ea; color: #2e7d32; }
+    .db-none { background: #F0F0F0; color: var(--text-3); border-color: var(--border); }
 
-    /* action links in table */
-    .tbl-action {
+    /* row action link */
+    .ra {
       font-size: 11px;
       font-weight: 600;
-      color: #1565c0;
+      color: var(--fill-2);
       cursor: pointer;
-      text-decoration: none;
+      text-decoration: underline;
       white-space: nowrap;
+      background: none;
+      border: none;
+      font-family: inherit;
     }
-    .tbl-action:hover { text-decoration: underline; }
-    .tbl-action.disabled { color: #bbb; cursor: default; pointer-events: none; }
+    .ra.dim { color: var(--text-4); text-decoration: none; cursor: default; }
 
-    /* ─── DETAIL PAGE ───────────────────────────────── */
-    .detail-header {
-      background: #fff;
-      border-bottom: 1px solid #e8e8e8;
-      padding: 16px 32px;
+    /* ── DETAIL PANEL (right drawer) ─────────────── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.28);
+      z-index: 100;
+    }
+    .overlay.show { display: block; }
+
+    .drawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 600px;
+      background: var(--surface);
+      border-left: 1px solid var(--border-md);
+      z-index: 101;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.22s ease;
+      overflow: hidden;
+    }
+    .drawer.open { transform: translateX(0); }
+
+    /* drawer header */
+    .dh {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 16px;
+      flex-shrink: 0;
     }
-    .detail-entity-block { display: flex; flex-direction: column; gap: 4px; }
-    .detail-entity-name  { font-size: 18px; font-weight: 700; }
-    .detail-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-      color: #888;
-    }
-    .detail-meta span { display: flex; align-items: center; gap: 4px; }
-    .detail-meta .sep { color: #ddd; }
-
-    .meta-tag {
+    .dh-left { display: flex; flex-direction: column; gap: 6px; }
+    .dh-title { font-size: 16px; font-weight: 700; color: var(--text-1); }
+    .dh-meta  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .dh-tag {
       display: inline-block;
       padding: 2px 8px;
-      border-radius: 4px;
+      border-radius: 3px;
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.4px;
+      background: #E4E4E4;
+      color: var(--fill-2);
+      border: 1px solid var(--border-md);
     }
-    .meta-tag.supplier  { background: #e3f2fd; color: #0d47a1; }
-    .meta-tag.buyer     { background: #e8f5e9; color: #1b5e20; }
-    .meta-tag.financier { background: #f3e5f5; color: #4a148c; }
-    .meta-tag.pvt-ltd   { background: #fce4ec; color: #880e4f; }
-    .meta-tag.llp       { background: #fff8e1; color: #e65100; }
-    .meta-tag.partnership { background: #e8eaf6; color: #283593; }
-
-    .detail-actions { display: flex; gap: 8px; }
-
-    /* info banner */
-    .info-banner {
-      margin: 20px 0 0;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      line-height: 1.6;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .info-banner.pending { background: #fff8e1; border: 1px solid #ffe0b2; color: #7a4500; }
-    .info-banner.done    { background: #e6f4ea; border: 1px solid #c8e6c9; color: #1b5e20; }
-    .info-banner .icon   { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-
-    /* recon table */
-    .recon-table-wrap {
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #e8e8e8;
-      overflow: hidden;
-      margin-top: 20px;
-    }
-    .recon-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .recon-table thead th {
-      background: #f9fafb;
-      font-size: 11px;
-      font-weight: 600;
-      color: #555;
-      text-align: left;
-      padding: 10px 16px;
-      border-bottom: 1px solid #e8e8e8;
-    }
-    .recon-table thead th:first-child { width: 36px; text-align: center; }
-    .recon-table thead th.col-field   { width: 20%; }
-    .recon-table thead th.col-vendor  { width: 38%; }
-    .recon-table thead th.col-plat    { width: 38%; }
-
-    .recon-table tbody td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #f0f0f0;
-      vertical-align: middle;
-    }
-    .recon-table tbody tr:last-child td { border-bottom: none; }
-    .recon-table tbody tr.row-diff td  { background: #fffaf0; }
-    .recon-table tbody tr.row-diff td:first-child { background: #fff3e0; }
-
-    /* checkbox */
-    .recon-cb {
-      width: 16px; height: 16px;
-      border-radius: 4px;
-      border: 2px solid #ccc;
-      display: block;
-      margin: 0 auto;
+    .dh-close {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #EBEBEB;
+      border: 1px solid var(--border-md);
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
-      accent-color: #e65100;
-    }
-    .recon-cb:checked { border-color: #e65100; }
-
-    .field-name { font-weight: 600; font-size: 12px; color: #333; }
-    .field-section {
-      font-size: 10px;
-      color: #aaa;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
-    }
-
-    /* vendor vs platform cell */
-    .cell-value { font-size: 13px; color: #333; line-height: 1.5; }
-    .cell-value.mismatch { color: #c62828; }
-    .cell-value.match    { color: #2e7d32; }
-    .cell-value.source   { color: #1a1a2e; font-weight: 500; }
-
-    .match-icon   { font-size: 12px; color: #2e7d32; margin-left: 4px; }
-    .mismatch-icon { font-size: 12px; color: #c62828; margin-left: 4px; }
-
-    /* image/doc cell */
-    .doc-thumb {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .doc-box {
-      width: 48px; height: 36px;
-      background: #f0f0f0;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      color: #aaa;
+      font-size: 14px;
+      color: var(--text-2);
       flex-shrink: 0;
     }
-    .doc-meta { display: flex; flex-direction: column; gap: 2px; }
-    .doc-name { font-size: 11px; font-weight: 600; color: #333; }
-    .doc-size { font-size: 10px; color: #999; }
-    .doc-view  { font-size: 10px; color: #1565c0; cursor: pointer; text-decoration: underline; }
 
-    /* section divider row */
-    .recon-section-row td {
-      background: #f4f5f7 !important;
-      padding: 6px 16px !important;
+    /* info banner */
+    .banner {
+      margin: 16px 20px 0;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      line-height: 1.6;
+      background: #F2F2F2;
+      border: 1px solid var(--border-md);
+      color: var(--text-2);
+      flex-shrink: 0;
+    }
+    .banner strong { color: var(--text-1); }
+
+    /* drawer scroll body */
+    .db-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+
+    /* recon table inside drawer */
+    .rt-wrap {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .rt { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .rt thead th {
+      background: #F2F2F2;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-2);
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .rt thead th:first-child { width: 32px; text-align: center; }
+    .rt thead th.th-field  { width: 25%; }
+    .rt thead th.th-vendor { width: 35%; }
+    .rt thead th.th-plat   { width: 35%; }
+
+    .rt tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #F0F0F0;
+      vertical-align: top;
+    }
+    .rt tbody tr:last-child td { border-bottom: none; }
+    .rt tbody tr.r-diff td { background: #F7F7F7; }
+    .rt tbody tr.r-diff td:first-child { background: #EFEFEF; }
+
+    .r-section td {
+      background: #F0F0F0 !important;
       font-size: 10px !important;
       font-weight: 700 !important;
-      color: #888 !important;
+      color: var(--text-3) !important;
       text-transform: uppercase !important;
-      letter-spacing: 0.6px !important;
-      border-bottom: 1px solid #e8e8e8 !important;
+      letter-spacing: 0.5px !important;
+      padding: 5px 12px !important;
+      border-bottom: 1px solid var(--border) !important;
     }
 
-    /* submit bar */
-    .submit-bar {
-      margin-top: 24px;
-      background: #fff;
-      border: 1px solid #e8e8e8;
-      border-radius: 10px;
-      padding: 16px 20px;
+    .f-name { font-weight: 600; font-size: 11px; color: var(--text-1); }
+    .f-type { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+    .v-diff   { color: var(--fill-2); font-size: 12px; line-height: 1.5; }
+    .v-match  { color: var(--text-3); font-size: 12px; line-height: 1.5; }
+    .v-truth  { color: var(--text-1); font-weight: 600; font-size: 12px; line-height: 1.5; }
+
+    /* checkbox */
+    .rcb { width: 14px; height: 14px; accent-color: #333; display: block; margin: 0 auto; cursor: pointer; }
+
+    /* doc thumbnail */
+    .doc-row { display: flex; align-items: center; gap: 8px; }
+    .doc-icon {
+      width: 40px; height: 32px;
+      background: #E8E8E8;
+      border: 1px solid var(--border-md);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text-3);
+      flex-shrink: 0;
+    }
+    .doc-info { display: flex; flex-direction: column; gap: 1px; }
+    .doc-name { font-size: 11px; font-weight: 600; color: var(--text-1); }
+    .doc-sz   { font-size: 10px; color: var(--text-3); }
+    .doc-view { font-size: 10px; color: var(--fill-2); cursor: pointer; text-decoration: underline; }
+
+    /* submit footer */
+    .d-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: #F9F9F9;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      flex-shrink: 0;
     }
-    .submit-bar .submit-info { font-size: 12px; color: #555; line-height: 1.6; }
-    .submit-bar .submit-info strong { color: #1a1a2e; }
-    .submit-bar .submit-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .d-footer-info { font-size: 11px; color: var(--text-2); line-height: 1.5; }
+    .d-footer-info strong { color: var(--text-1); }
+    .d-footer-btns { display: flex; gap: 8px; flex-shrink: 0; }
 
-    /* done diff table */
-    .diff-row-added    td { background: #f0faf1 !important; }
-    .diff-row-unchanged td { background: #fff !important; }
-    .old-val { color: #c62828; text-decoration: line-through; font-size: 12px; }
-    .new-val { color: #2e7d32; font-size: 12px; font-weight: 600; }
-    .unchanged-val { color: #888; font-size: 12px; }
-
-    /* read-only done badge */
-    .readonly-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #e6f4ea;
-      color: #2e7d32;
-      border: 1px solid #c8e6c9;
-      border-radius: 6px;
-      padding: 5px 12px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    /* ─── Notification toast ────────────────────────── */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #1a1a2e;
+    /* ── Annotation ──────────────────────────────── */
+    .wf-label {
+      display: inline-block;
+      background: #333;
       color: #fff;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-      display: none;
-      align-items: center;
-      gap: 8px;
-      z-index: 999;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      margin-bottom: 8px;
+    }
+    .note {
+      font-size: 11px;
+      background: #fff;
+      border: 1px dashed #bbb;
+      padding: 8px 12px;
+      border-radius: 4px;
+      color: var(--text-2);
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+    .note strong { color: var(--text-1); }
+
+    /* toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--fill-1); color: #fff;
+      padding: 11px 18px; border-radius: 5px;
+      font-size: 12px; font-weight: 500;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+      display: none; align-items: center; gap: 8px; z-index: 999;
     }
     .toast.show { display: flex; }
-    .toast .tick { color: #81c995; font-size: 16px; }
-
-    /* ─── Annotation ────────────────────────────────── */
-    .wf-note {
-      font-size: 11px;
-      background: #fffde7;
-      border-left: 3px solid #f9a825;
-      padding: 8px 12px;
-      border-radius: 0 4px 4px 0;
-      color: #7a6000;
-      line-height: 1.6;
-      margin-top: 12px;
-    }
-    .wf-note strong { color: #4a3800; }
   </style>
 </head>
 <body>
 
-<!-- ── App Header ─────────────────────────────────── -->
-<div class="app-header">
-  <span class="logo">C2treds</span>
-  <div class="breadcrumb" id="breadcrumb">
-    <span>Compliance</span>
-    <span class="sep">›</span>
-    <span class="crumb-current">Legal Entities CKYC</span>
+<!-- ── Nav ─────────────────────────────────────── -->
+<div class="nav">
+  <div class="nav-logo">LOGO</div>
+  <div class="nav-items">
+    <div class="nav-item">Dashboard</div>
+    <div class="nav-item">Entities</div>
+    <div class="nav-item active">Compliance</div>
+    <div class="nav-item">Reports</div>
+    <div class="nav-item">Settings</div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════
-     PAGE 1 — LANDING (Reconciliation Table)
-═════════════════════════════════════════════════ -->
-<div class="page active" id="page-landing">
-  <div class="page-body">
-    <div class="page-title-row">
-      <div>
-        <div class="page-title">Legal Entities — CKYC Reconciliation</div>
-        <div class="page-subtitle">Vendor: Make My CKYC &nbsp;·&nbsp; Platform data is source of truth &nbsp;·&nbsp; Reconciliation checks vendor records against platform records</div>
-      </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-outline">Export</button>
-        <button class="btn btn-primary">Run Reconciliation</button>
+<!-- ── Breadcrumb ───────────────────────────────── -->
+<div class="breadcrumb">
+  <span class="bc-link">Compliance</span>
+  <span class="bc-sep">›</span>
+  <span class="bc-current">Legal Entities — CKYC</span>
+</div>
+
+<!-- ── Page body ────────────────────────────────── -->
+<div class="page-body">
+
+  <div style="margin-bottom:8px;">
+    <span class="wf-label">V0 Wireframe · Landing Page</span>
+  </div>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Legal Entities — CKYC Reconciliation</div>
+      <div class="page-sub">Vendor: Make My CKYC &nbsp;·&nbsp; Platform data is source of truth &nbsp;·&nbsp; Last sync: 12 May 2025, 9:00 AM</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn">Export</button>
+      <button class="btn btn-dark">Run Reconciliation</button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-row">
+    <div class="s-card">
+      <div class="s-num">12</div>
+      <div class="s-lbl">Total Entities</div>
+    </div>
+    <div class="s-card">
+      <div class="s-num">5</div>
+      <div class="s-lbl">Recon. Pending</div>
+    </div>
+    <div class="s-card">
+      <div class="s-num">7</div>
+      <div class="s-lbl">Recon. Done</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input class="search" type="text" placeholder="Search entity name or PAN…" />
+    <button class="chip on"  onclick="filt('all',this)">All</button>
+    <button class="chip"     onclick="filt('pending',this)">Recon. Pending</button>
+    <button class="chip"     onclick="filt('done',this)">Recon. Done</button>
+  </div>
+
+  <!-- Table -->
+  <div class="tbl-wrap">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th><input type="checkbox" /></th>
+          <th>Entity Name <span class="s">↕</span></th>
+          <th>Entity Type <span class="s">↕</span></th>
+          <th>Constitution Type <span class="s">↕</span></th>
+          <th>Differences <span class="s">↕</span></th>
+          <th>Status <span class="s">↕</span></th>
+          <th>Last Synced</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Pending rows -->
+        <tr data-s="pending">
+          <td><input type="checkbox" /></td>
+          <td>
+            <a class="e-name" onclick="open('o2h')">O2H Corporation Pvt. Ltd.</a>
+            <div class="e-sub">PAN: AABCO1234M</div>
+          </td>
+          <td>Supplier</td>
+          <td>Private Limited</td>
+          <td><span class="db">2 diff</span></td>
+          <td><span class="sc sc-pending"><span class="d"></span>Recon. Pending</span></td>
+          <td style="color:var(--text-3); font-size:12px;">12 May 2025</td>
+          <td><button class="ra" onclick="open('o2h')">Review →</button></td>
+        </tr>
+
+        <tr data-s="pending">
+          <td><input type="checkbox" /></td>
+          <td>
+            <a class="e-name" onclick="open('mehta')">Mehta Textiles LLP</a>
+            <div class="e-sub">PAN: AAHFM5678K</div>
+          </td>
+          <td>Buyer</td>
+          <td>LLP</td>
+          <td><span class="db db-none">No diff</span></td>
+          <td><span class="sc sc-pending"><span class="d"></span>Recon. Pending</span></td>
+          <td style="color:var(--text-3); font-size:12px;">12 May 2025</td>
+          <td><button class="ra" onclick="open('mehta')">Review →</button></td>
+        </tr>
+
+        <tr data-s="pending">
+          <td><input type="checkbox" /></td>
+          <td>
+            <a class="e-name" onclick="open('priya')">Priya Pharma &amp; Partners</a>
+            <div class="e-sub">PAN: AAAFP9012Q</div>
+          </td>
+          <td>Supplier</td>
+          <td>Partnership Firm</td>
+          <td><span class="db">1 diff</span></td>
+          <td><span class="sc sc-pending"><span class="d"></span>Recon. Pending</span></td>
+          <td style="color:var(--text-3); font-size:12px;">11 May 2025</td>
+          <td><button class="ra" onclick="open('priya')">Review →</button></td>
+        </tr>
+
+        <tr data-s="pending">
+          <td><input type="checkbox" /></td>
+          <td>
+            <a class="e-name" onclick="open('sunrise')">Sunrise Exports Ltd.</a>
+            <div class="e-sub">PAN: AABCS3344T</div>
+          </td>
+          <td>Buyer</td>
+          <td>Public Limited</td>
+          <td><span class="db">3 diff</span></td>
+          <td><span class="sc sc-pending"><span class="d"></span>Recon. Pending</span></td>
+          <td style="color:var(--text-3); font-size:12px;">10 May 2025</td>
+          <td><button class="ra" onclick="open('sunrise')">Review →</button></td>
+        </tr>
+
+        <tr data-s="pending">
+          <td><input type="checkbox" /></td>
+          <td>
+            <a class="e-name" onclick="open('global')">Global FinServ NBFC Ltd.</a>
+            <div class="e-sub">PAN: AABCG7788U</div>
+          </td>
+          <td>Financier</td>
+          <td>Public Limited</td>
+          <td><span class="db db-none">No diff</span></td>
+          <td><span class="sc sc-pending"><span class="d"></span>Recon. Pending</span></td>
+          <td style="color:var(--text-3); font-size:12px;">9 May 2025</td>
+          <td><button class="ra" onclick="open('global')">Review →</button></td>
+        </tr>
+
+        <!-- Done rows -->
+        <tr data-s="done" style="background:#FAFAFA;">
+          <td><input type="checkbox" disabled /></td>
+          <td>
+            <a class="e-name" onclick="openDone()">Rajesh Steels Pvt. Ltd.</a>
+            <div class="e-sub">PAN: AABCR1234M</div>
+          </td>
+          <td>Supplier</td>
+          <td>Private Limited</td>
+          <td><span class="db" style="background:#E0E0E0;">1 updated</span></td>
+          <td><span class="sc sc-done"><span class="d"></span>Recon. Done</span></td>
+          <td style="color:var(--text-3); font-size:12px;">8 May 2025</td>
+          <td><button class="ra" onclick="openDone()">View →</button></td>
+        </tr>
+
+        <tr data-s="done" style="background:#FAFAFA;">
+          <td><input type="checkbox" disabled /></td>
+          <td>
+            <span class="e-name" style="cursor:default; text-decoration:none; color:var(--text-1);">Vikram Auto Components Ltd.</span>
+            <div class="e-sub">PAN: AABCV9012P</div>
+          </td>
+          <td>Buyer</td>
+          <td>Public Limited</td>
+          <td><span class="db db-none">No diff</span></td>
+          <td><span class="sc sc-done"><span class="d"></span>Recon. Done</span></td>
+          <td style="color:var(--text-3); font-size:12px;">7 May 2025</td>
+          <td><button class="ra dim">View →</button></td>
+        </tr>
+
+        <tr data-s="done" style="background:#FAFAFA;">
+          <td><input type="checkbox" disabled /></td>
+          <td>
+            <span class="e-name" style="cursor:default; text-decoration:none; color:var(--text-1);">Anand Trading Co.</span>
+            <div class="e-sub">PAN: AAAFA3456Q</div>
+          </td>
+          <td>Supplier</td>
+          <td>Partnership Firm</td>
+          <td><span class="db db-none">No diff</span></td>
+          <td><span class="sc sc-done"><span class="d"></span>Recon. Done</span></td>
+          <td style="color:var(--text-3); font-size:12px;">6 May 2025</td>
+          <td><button class="ra dim">View →</button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>Wireframe note — Open questions for this screen:</strong><br>
+    1. Column order — is "Differences" column useful on landing, or too detailed? Should it collapse into Status?<br>
+    2. Third status: currently using "Recon. Done" for both no-diff and updated. Do we need a separate state for "Recon. Done (with changes)" vs "Recon. Done (clean)"?<br>
+    3. "Run Reconciliation" — does this run for all entities or only selected rows?<br>
+    4. Row for done entities: clickable for "view changes" only if there were diffs. No-diff done rows — should they be non-clickable?
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     DRAWER — Pending (Actionable)
+════════════════════════════════════════════ -->
+<div class="overlay" id="ov" onclick="closeDrawer()"></div>
+
+<div class="drawer" id="drawer-pending">
+  <!-- Header -->
+  <div class="dh">
+    <div class="dh-left">
+      <div class="dh-title" id="d-name">O2H Corporation Pvt. Ltd.</div>
+      <div class="dh-meta">
+        <span class="dh-tag" id="d-type">Supplier</span>
+        <span class="dh-tag" id="d-const">Pvt. Ltd.</span>
+        <span style="font-size:11px; color:var(--text-3);" id="d-pan">PAN: AABCO1234M</span>
+        <span style="font-size:11px; color:var(--text-3);" id="d-ckyc">CKYC: 10012345678901</span>
       </div>
     </div>
+    <div class="dh-close" onclick="closeDrawer()">✕</div>
+  </div>
 
-    <!-- Summary -->
-    <div class="summary-row">
-      <div class="summary-chip">
-        <span class="num num-total">12</span>
-        <span class="lbl">Total Entities</span>
-      </div>
-      <div class="summary-chip">
-        <span class="num num-pending">5</span>
-        <span class="lbl">Recon. Pending</span>
-      </div>
-      <div class="summary-chip">
-        <span class="num num-done">7</span>
-        <span class="lbl">Recon. Done</span>
-      </div>
-    </div>
+  <!-- Banner -->
+  <div class="banner" id="d-banner">
+    <strong>2 fields differ from vendor records.</strong> Platform data is source of truth.
+    Pre-selected rows below show the differences. Clicking <strong>Submit</strong> will push your platform values to Make My CKYC.
+  </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <input class="search-box" type="text" placeholder="Search entity name or PAN…" />
-      <button class="filter-chip active" onclick="filterTable('all', this)">All</button>
-      <button class="filter-chip" onclick="filterTable('pending', this)">Recon. Pending</button>
-      <button class="filter-chip" onclick="filterTable('done', this)">Recon. Done</button>
-    </div>
-
-    <!-- Table -->
-    <div class="table-wrap">
-      <table id="landing-table">
+  <!-- Scrollable body -->
+  <div class="db-body">
+    <div class="rt-wrap">
+      <table class="rt">
         <thead>
           <tr>
-            <th style="width:36px;"><input type="checkbox" /></th>
-            <th>Entity Name <span class="sort">↕</span></th>
-            <th>Entity Type <span class="sort">↕</span></th>
-            <th>Constitution Type <span class="sort">↕</span></th>
-            <th>Differences <span class="sort">↕</span></th>
-            <th>Status <span class="sort">↕</span></th>
-            <th>Last Synced</th>
-            <th></th>
+            <th title="Check = field will be sent to vendor">✓</th>
+            <th class="th-field">Field</th>
+            <th class="th-vendor">Vendor Data <span style="font-weight:400;">(Make My CKYC)</span></th>
+            <th class="th-plat">Platform Data <span style="font-weight:400; color:#2a2a2a;">(Source of Truth)</span></th>
           </tr>
         </thead>
         <tbody>
 
-          <!-- Recon. Pending rows (actionable) -->
-          <tr data-status="pending">
-            <td><input type="checkbox" /></td>
-            <td>
-              <a class="entity-link" onclick="openDetail('o2h')">O2H Corporation Pvt. Ltd.</a>
-              <div class="entity-sub">Supplier · PAN: AABCO1234M</div>
-            </td>
-            <td>Supplier</td>
-            <td>Private Limited</td>
-            <td>
-              <span class="diff-badge">2 diff</span>
-            </td>
-            <td><span class="status-chip chip-pending"><span class="dot"></span>Recon. Pending</span></td>
-            <td style="font-size:12px; color:#888;">12 May 2025</td>
-            <td><a class="tbl-action" onclick="openDetail('o2h')">Review →</a></td>
+          <tr class="r-section"><td colspan="4">Entity Identity</td></tr>
+
+          <!-- DIFF row -->
+          <tr class="r-diff">
+            <td><input class="rcb" type="checkbox" checked /></td>
+            <td><div class="f-name">Entity Name</div><div class="f-type">String</div></td>
+            <td><span class="v-diff">O2O Corporation Private Limited</span></td>
+            <td><span class="v-truth">O2H Corporation Pvt. Ltd.</span></td>
           </tr>
 
-          <tr data-status="pending">
-            <td><input type="checkbox" /></td>
-            <td>
-              <a class="entity-link" onclick="openDetail('mehta')">Mehta Textiles LLP</a>
-              <div class="entity-sub">Buyer · PAN: AAHFM5678K</div>
-            </td>
-            <td>Buyer</td>
-            <td>LLP</td>
-            <td>
-              <span class="diff-badge none">No diff</span>
-            </td>
-            <td><span class="status-chip chip-pending"><span class="dot"></span>Recon. Pending</span></td>
-            <td style="font-size:12px; color:#888;">12 May 2025</td>
-            <td><a class="tbl-action" onclick="openDetail('mehta')">Review →</a></td>
+          <!-- Match row -->
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">Constitution Type</div><div class="f-type">String</div></td>
+            <td><span class="v-match">Private Limited</span></td>
+            <td><span class="v-truth">Private Limited</span></td>
           </tr>
 
-          <tr data-status="pending">
-            <td><input type="checkbox" /></td>
-            <td>
-              <a class="entity-link" onclick="openDetail('priya')">Priya Pharma &amp; Partners</a>
-              <div class="entity-sub">Supplier · PAN: AAAFP9012Q</div>
-            </td>
-            <td>Supplier</td>
-            <td>Partnership Firm</td>
-            <td>
-              <span class="diff-badge">1 diff</span>
-            </td>
-            <td><span class="status-chip chip-pending"><span class="dot"></span>Recon. Pending</span></td>
-            <td style="font-size:12px; color:#888;">11 May 2025</td>
-            <td><a class="tbl-action" onclick="openDetail('priya')">Review →</a></td>
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">PAN</div><div class="f-type">String</div></td>
+            <td><span class="v-match" style="font-family:monospace;">AABCO1234M</span></td>
+            <td><span class="v-truth" style="font-family:monospace;">AABCO1234M</span></td>
           </tr>
 
-          <tr data-status="pending">
-            <td><input type="checkbox" /></td>
-            <td>
-              <a class="entity-link" onclick="openDetail('sunrise')">Sunrise Exports Ltd.</a>
-              <div class="entity-sub">Buyer · PAN: AABCS3344T</div>
-            </td>
-            <td>Buyer</td>
-            <td>Public Limited</td>
-            <td>
-              <span class="diff-badge">3 diff</span>
-            </td>
-            <td><span class="status-chip chip-pending"><span class="dot"></span>Recon. Pending</span></td>
-            <td style="font-size:12px; color:#888;">10 May 2025</td>
-            <td><a class="tbl-action" onclick="openDetail('sunrise')">Review →</a></td>
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">CIN</div><div class="f-type">String</div></td>
+            <td><span class="v-match" style="font-family:monospace;">U24230GJ2015PTC084321</span></td>
+            <td><span class="v-truth" style="font-family:monospace;">U24230GJ2015PTC084321</span></td>
           </tr>
 
-          <tr data-status="pending">
-            <td><input type="checkbox" /></td>
-            <td>
-              <a class="entity-link" onclick="openDetail('global')">Global FinServ NBFC Ltd.</a>
-              <div class="entity-sub">Financier · PAN: AABCG7788U</div>
-            </td>
-            <td>Financier</td>
-            <td>Public Limited</td>
-            <td>
-              <span class="diff-badge none">No diff</span>
-            </td>
-            <td><span class="status-chip chip-pending"><span class="dot"></span>Recon. Pending</span></td>
-            <td style="font-size:12px; color:#888;">9 May 2025</td>
-            <td><a class="tbl-action" onclick="openDetail('global')">Review →</a></td>
+          <tr class="r-section"><td colspan="4">Registered Address</td></tr>
+
+          <!-- DIFF row -->
+          <tr class="r-diff">
+            <td><input class="rcb" type="checkbox" checked /></td>
+            <td><div class="f-name">Registered Address</div><div class="f-type">String</div></td>
+            <td><span class="v-diff">Plot 12, GIDC, Ahmedabad – 380026</span></td>
+            <td><span class="v-truth">Plot 12, GIDC, Vatva, Ahmedabad – 382445</span></td>
           </tr>
 
-          <!-- Recon. Done rows (view only) -->
-          <tr data-status="done" class="row-done" id="rajesh-row">
-            <td><input type="checkbox" disabled /></td>
-            <td>
-              <a class="entity-link" onclick="openDetail('rajesh')">Rajesh Steels Pvt. Ltd.</a>
-              <div class="entity-sub">Supplier · PAN: AABCR1234M</div>
-            </td>
-            <td>Supplier</td>
-            <td>Private Limited</td>
-            <td>
-              <span class="diff-badge">1 updated</span>
-            </td>
-            <td><span class="status-chip chip-done"><span class="dot"></span>Recon. Done</span></td>
-            <td style="font-size:12px; color:#888;">8 May 2025</td>
-            <td><a class="tbl-action" onclick="openDetail('rajesh')">View changes</a></td>
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">City</div><div class="f-type">String</div></td>
+            <td><span class="v-match">Ahmedabad</span></td>
+            <td><span class="v-truth">Ahmedabad</span></td>
           </tr>
 
-          <tr data-status="done" class="row-done">
-            <td><input type="checkbox" disabled /></td>
+          <tr class="r-section"><td colspan="4">Documents</td></tr>
+
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">Certificate of Incorporation</div><div class="f-type">Document</div></td>
             <td>
-              <span class="entity-name">Vikram Auto Components Ltd.</span>
-              <div class="entity-sub">Buyer · PAN: AABCV9012P</div>
+              <div class="doc-row">
+                <div class="doc-icon">📄</div>
+                <div class="doc-info">
+                  <span class="doc-name">COI_O2H.pdf</span>
+                  <span class="doc-sz">348 KB · PDF</span>
+                  <span class="doc-view">View</span>
+                </div>
+              </div>
+              <div style="font-size:10px; color:var(--text-3); margin-top:4px;">Same hash — match</div>
             </td>
-            <td>Buyer</td>
-            <td>Public Limited</td>
             <td>
-              <span class="diff-badge none">No diff</span>
+              <div class="doc-row">
+                <div class="doc-icon">📄</div>
+                <div class="doc-info">
+                  <span class="doc-name">COI_O2H.pdf</span>
+                  <span class="doc-sz">348 KB · PDF</span>
+                  <span class="doc-view">View</span>
+                </div>
+              </div>
             </td>
-            <td><span class="status-chip chip-done"><span class="dot"></span>Recon. Done</span></td>
-            <td style="font-size:12px; color:#888;">7 May 2025</td>
-            <td><a class="tbl-action disabled">View changes</a></td>
+          </tr>
+
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">Director Photo</div><div class="f-type">Image</div></td>
+            <td>
+              <div class="doc-row">
+                <div class="doc-icon" style="font-size:18px;">👤</div>
+                <div class="doc-info">
+                  <span class="doc-name">director_amar.jpg</span>
+                  <span class="doc-sz">56 KB · JPG</span>
+                  <span class="doc-view">View</span>
+                </div>
+              </div>
+              <div style="font-size:10px; color:var(--text-3); margin-top:4px;">Match</div>
+            </td>
+            <td>
+              <div class="doc-row">
+                <div class="doc-icon" style="font-size:18px;">👤</div>
+                <div class="doc-info">
+                  <span class="doc-name">director_amar.jpg</span>
+                  <span class="doc-sz">56 KB · JPG</span>
+                  <span class="doc-view">View</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="r-section"><td colspan="4">Directors</td></tr>
+
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">Date of Incorporation</div><div class="f-type">Date</div></td>
+            <td><span class="v-match">15 April 2010</span></td>
+            <td><span class="v-truth">15 April 2010</span></td>
+          </tr>
+
+          <tr>
+            <td><input class="rcb" type="checkbox" disabled /></td>
+            <td><div class="f-name">Director PAN (Amar Shah)</div><div class="f-type">String</div></td>
+            <td><span class="v-match" style="font-family:monospace;">ABCPA1234K</span></td>
+            <td><span class="v-truth" style="font-family:monospace;">ABCPA1234K</span></td>
           </tr>
 
         </tbody>
       </table>
     </div>
 
-    <div class="wf-note">
-      <strong>Wireframe note — Open questions:</strong>
-      (1) Is "Entity Name" the hyperlink, or "Entity Type" column? Currently: Entity Name.
-      (2) Third status TBD — "Recon. Done (Changes)" vs "Recon. Done (No Diff)" — currently collapsed into one "Recon. Done" with a diff badge.
-      (3) Should "Run Reconciliation" trigger for all or only selected rows?
+    <div class="note" style="margin-top:12px;">
+      <strong>Note:</strong> Checkboxes on matched rows are disabled — only diff rows can be selected. TBD: can user manually force-select a matched row to re-push it?
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="d-footer">
+    <div class="d-footer-info">
+      <strong>2 fields selected.</strong><br>
+      Submit will update Make My CKYC and mark entity as <em>Recon. Done</em>.
+    </div>
+    <div class="d-footer-btns">
+      <button class="btn" onclick="closeDrawer()">Cancel</button>
+      <button class="btn btn-dark" onclick="submit()">Submit to Vendor →</button>
     </div>
   </div>
 </div>
 
-
-<!-- ════════════════════════════════════════════════
-     PAGE 2 — DETAIL (Pending — Actionable)
-═════════════════════════════════════════════════ -->
-<div class="page" id="page-detail-pending">
-  <!-- Detail Header -->
-  <div class="detail-header">
-    <div class="detail-entity-block">
-      <div class="detail-entity-name" id="detail-entity-name-pending">O2H Corporation Pvt. Ltd.</div>
-      <div class="detail-meta">
-        <span class="meta-tag supplier">Supplier</span>
-        <span class="meta-tag pvt-ltd">Pvt. Ltd.</span>
-        <span class="sep">·</span>
-        <span>PAN: AABCO1234M</span>
-        <span class="sep">·</span>
-        <span>CIN: U24230GJ2015PTC084321</span>
-        <span class="sep">·</span>
-        <span>CKYC No: <strong style="color:#1a1a2e;">10012345678901</strong></span>
-      </div>
-    </div>
-    <div class="detail-actions">
-      <span class="status-chip chip-pending" style="margin-right:4px;"><span class="dot"></span>Recon. Pending</span>
-    </div>
-  </div>
-
-  <div class="page-body">
-    <div class="info-banner pending">
-      <span class="icon">⚠</span>
-      <div>
-        <strong>Reconciliation required.</strong> Make My CKYC has returned data that differs from platform records in <strong id="diff-count">2 fields</strong>.
-        Check the pre-selected rows below. Platform data is source of truth — clicking <strong>Submit</strong> will push your platform data to the vendor and mark this entity as reconciled.
-      </div>
-    </div>
-
-    <!-- Recon Table -->
-    <div class="recon-table-wrap">
-      <table class="recon-table">
-        <thead>
-          <tr>
-            <th title="Check = send this field's platform value to vendor">✓</th>
-            <th class="col-field">Field</th>
-            <th class="col-vendor">Vendor Data <span style="font-size:10px;font-weight:400;color:#aaa;">(Make My CKYC)</span></th>
-            <th class="col-plat">Platform Data <span style="font-size:10px;font-weight:400;color:#2e7d32;">(Source of Truth)</span></th>
-          </tr>
-        </thead>
-        <tbody id="recon-body-pending">
-
-          <!-- Section: Entity Identity -->
-          <tr class="recon-section-row"><td colspan="4">Entity Identity</td></tr>
-
-          <!-- Row 1: Entity Name — MISMATCH -->
-          <tr class="row-diff">
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" checked /></td>
-            <td>
-              <div class="field-name">Entity Name</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="cell-value mismatch">O2O Corporation Private Limited</span></td>
-            <td><span class="cell-value source">O2H Corporation Pvt. Ltd.</span></td>
-          </tr>
-
-          <!-- Row 2: Constitution Type — MATCH -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">Constitution Type</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="cell-value match">Private Limited <span class="match-icon">✓</span></span></td>
-            <td><span class="cell-value source">Private Limited</span></td>
-          </tr>
-
-          <!-- Row 3: PAN — MATCH -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">PAN</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="cell-value match" style="font-family:monospace;">AABCO1234M <span class="match-icon">✓</span></span></td>
-            <td><span class="cell-value source" style="font-family:monospace;">AABCO1234M</span></td>
-          </tr>
-
-          <!-- Row 4: CIN — MATCH -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">CIN</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="cell-value match" style="font-family:monospace;">U24230GJ2015PTC084321 <span class="match-icon">✓</span></span></td>
-            <td><span class="cell-value source" style="font-family:monospace;">U24230GJ2015PTC084321</span></td>
-          </tr>
-
-          <!-- Section: Address -->
-          <tr class="recon-section-row"><td colspan="4">Registered Address</td></tr>
-
-          <!-- Row 5: Address — MISMATCH -->
-          <tr class="row-diff">
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" checked /></td>
-            <td>
-              <div class="field-name">Registered Address</div>
-              <div class="field-section">Address</div>
-            </td>
-            <td><span class="cell-value mismatch">Plot 12, GIDC, Ahmedabad – 380026, Gujarat</span></td>
-            <td><span class="cell-value source">Plot 12, GIDC, Vatva, Ahmedabad – 382445, Gujarat</span></td>
-          </tr>
-
-          <!-- Row 6: City — MATCH -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">City</div>
-              <div class="field-section">Address</div>
-            </td>
-            <td><span class="cell-value match">Ahmedabad <span class="match-icon">✓</span></span></td>
-            <td><span class="cell-value source">Ahmedabad</span></td>
-          </tr>
-
-          <!-- Section: Documents -->
-          <tr class="recon-section-row"><td colspan="4">Documents</td></tr>
-
-          <!-- Row 7: Certificate of Inc — image/doc -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">Certificate of Incorporation</div>
-              <div class="field-section">Document</div>
-            </td>
-            <td>
-              <div class="doc-thumb">
-                <div class="doc-box">📄</div>
-                <div class="doc-meta">
-                  <span class="doc-name">COI_O2H_Corp.pdf</span>
-                  <span class="doc-size">348 KB · PDF</span>
-                  <span class="doc-view">View document</span>
-                </div>
-              </div>
-              <div style="margin-top:4px; font-size:10px; color:#2e7d32;">✓ Same file hash as platform</div>
-            </td>
-            <td>
-              <div class="doc-thumb">
-                <div class="doc-box">📄</div>
-                <div class="doc-meta">
-                  <span class="doc-name">COI_O2H_Corp.pdf</span>
-                  <span class="doc-size">348 KB · PDF</span>
-                  <span class="doc-view">View document</span>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 8: Director photo — image -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">Director Photo (Amar Shah)</div>
-              <div class="field-section">Document</div>
-            </td>
-            <td>
-              <div class="doc-thumb">
-                <div class="doc-box" style="font-size:22px; background:#e8eaf6; color:#3949ab;">👤</div>
-                <div class="doc-meta">
-                  <span class="doc-name">dir_photo_amar.jpg</span>
-                  <span class="doc-size">56 KB · JPG</span>
-                  <span class="doc-view">View image</span>
-                </div>
-              </div>
-              <div style="margin-top:4px; font-size:10px; color:#2e7d32;">✓ Match</div>
-            </td>
-            <td>
-              <div class="doc-thumb">
-                <div class="doc-box" style="font-size:22px; background:#e8eaf6; color:#3949ab;">👤</div>
-                <div class="doc-meta">
-                  <span class="doc-name">dir_photo_amar.jpg</span>
-                  <span class="doc-size">56 KB · JPG</span>
-                  <span class="doc-view">View image</span>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Section: Directors -->
-          <tr class="recon-section-row"><td colspan="4">Directors / Authorised Signatories</td></tr>
-
-          <!-- Row 9: Director 1 PAN — MATCH -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">Director PAN (Amar Shah)</div>
-              <div class="field-section">Directors</div>
-            </td>
-            <td><span class="cell-value match" style="font-family:monospace;">ABCPA1234K <span class="match-icon">✓</span></span></td>
-            <td><span class="cell-value source" style="font-family:monospace;">ABCPA1234K</span></td>
-          </tr>
-
-          <!-- Row 10: Date of Incorporation — MATCH -->
-          <tr>
-            <td style="text-align:center;"><input class="recon-cb" type="checkbox" disabled /></td>
-            <td>
-              <div class="field-name">Date of Incorporation</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="cell-value match">15 April 2010 <span class="match-icon">✓</span></span></td>
-            <td><span class="cell-value source">15 April 2010</span></td>
-          </tr>
-
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Submit Bar -->
-    <div class="submit-bar" id="submit-bar">
-      <div class="submit-info">
-        <strong>2 fields selected for update.</strong><br>
-        Submitting will push platform values for the checked fields to Make My CKYC and mark this entity as <em>Recon. Done</em>.
-      </div>
-      <div class="submit-actions">
-        <button class="btn btn-outline" onclick="goLanding()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitRecon()">Submit to Vendor →</button>
-      </div>
-    </div>
-
-    <div class="wf-note">
-      <strong>Wireframe note:</strong>
-      (1) Checkboxes on matched rows are disabled — user can only select/deselect diff rows. TBD: should user be able to manually check a matched row?
-      (2) Document comparison currently shows file hash match — TBD: what if file content differs (different hash)?
-      (3) Partner/Director-level CKYC for Partnership firms will need a sub-table per partner — not shown here yet.
-      (4) Submit CTA copy: "Submit to Vendor" — will this always mean push to Make My CKYC, or are there cases where vendor pushes to us?
-    </div>
-  </div>
-</div>
-
-
-<!-- ════════════════════════════════════════════════
-     PAGE 3 — DETAIL (Done — Read Only / View Changes)
-═════════════════════════════════════════════════ -->
-<div class="page" id="page-detail-done">
-  <div class="detail-header">
-    <div class="detail-entity-block">
-      <div class="detail-entity-name">Rajesh Steels Pvt. Ltd.</div>
-      <div class="detail-meta">
-        <span class="meta-tag supplier">Supplier</span>
-        <span class="meta-tag pvt-ltd">Pvt. Ltd.</span>
-        <span class="sep">·</span>
-        <span>PAN: AABCR1234M</span>
-        <span class="sep">·</span>
-        <span>CKYC No: <strong style="color:#1a1a2e;">10087654321000</strong></span>
-      </div>
-    </div>
-    <div class="detail-actions">
-      <span class="readonly-badge">✓ Recon. Done · 8 May 2025, 11:32 AM</span>
-    </div>
-  </div>
-
-  <div class="page-body">
-    <div class="info-banner done">
-      <span class="icon">✓</span>
-      <div>
-        <strong>Reconciliation completed.</strong> 1 field was updated on Make My CKYC on 8 May 2025 at 11:32 AM by <strong>Mansi Patel (Compliance)</strong>.
-        This is a read-only view of the changes made.
-      </div>
-    </div>
-
-    <!-- Done diff table -->
-    <div class="recon-table-wrap">
-      <table class="recon-table">
-        <thead>
-          <tr>
-            <th style="width:36px;"></th>
-            <th class="col-field">Field</th>
-            <th class="col-vendor">Before (Vendor had)</th>
-            <th class="col-plat">After (Sent to Vendor)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="recon-section-row"><td colspan="4">Entity Identity</td></tr>
-
-          <!-- Updated field -->
-          <tr class="diff-row-added">
-            <td style="text-align:center; font-size:14px;">✎</td>
-            <td>
-              <div class="field-name">Entity Name</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="old-val">Rajesh Steels Private Ltd</span></td>
-            <td><span class="new-val">Rajesh Steels Pvt. Ltd.</span></td>
-          </tr>
-
-          <!-- Unchanged fields -->
-          <tr class="diff-row-unchanged">
-            <td style="text-align:center; color:#ccc; font-size:12px;">—</td>
-            <td>
-              <div class="field-name">Constitution Type</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="unchanged-val">Private Limited</span></td>
-            <td><span class="unchanged-val">Private Limited</span></td>
-          </tr>
-
-          <tr class="diff-row-unchanged">
-            <td style="text-align:center; color:#ccc; font-size:12px;">—</td>
-            <td>
-              <div class="field-name">PAN</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="unchanged-val" style="font-family:monospace;">AABCR1234M</span></td>
-            <td><span class="unchanged-val" style="font-family:monospace;">AABCR1234M</span></td>
-          </tr>
-
-          <tr class="diff-row-unchanged">
-            <td style="text-align:center; color:#ccc; font-size:12px;">—</td>
-            <td>
-              <div class="field-name">CIN</div>
-              <div class="field-section">Identity</div>
-            </td>
-            <td><span class="unchanged-val" style="font-family:monospace;">U27100MH2010PTC201234</span></td>
-            <td><span class="unchanged-val" style="font-family:monospace;">U27100MH2010PTC201234</span></td>
-          </tr>
-
-          <tr class="recon-section-row"><td colspan="4">Registered Address</td></tr>
-
-          <tr class="diff-row-unchanged">
-            <td style="text-align:center; color:#ccc; font-size:12px;">—</td>
-            <td>
-              <div class="field-name">Registered Address</div>
-              <div class="field-section">Address</div>
-            </td>
-            <td><span class="unchanged-val">Unit 5, MIDC, Pune – 411019</span></td>
-            <td><span class="unchanged-val">Unit 5, MIDC, Pune – 411019</span></td>
-          </tr>
-
-          <tr class="recon-section-row"><td colspan="4">Documents</td></tr>
-
-          <tr class="diff-row-unchanged">
-            <td style="text-align:center; color:#ccc; font-size:12px;">—</td>
-            <td>
-              <div class="field-name">Certificate of Incorporation</div>
-              <div class="field-section">Document</div>
-            </td>
-            <td>
-              <div class="doc-thumb">
-                <div class="doc-box">📄</div>
-                <div class="doc-meta">
-                  <span class="doc-name">COI_Rajesh.pdf</span>
-                  <span class="doc-size">412 KB · PDF</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="doc-thumb">
-                <div class="doc-box">📄</div>
-                <div class="doc-meta">
-                  <span class="doc-name">COI_Rajesh.pdf</span>
-                  <span class="doc-size">412 KB · PDF</span>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-        </tbody>
-      </table>
-    </div>
-
-    <div style="margin-top:16px; display:flex; justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="goLanding()">← Back to List</button>
-    </div>
-
-    <div class="wf-note">
-      <strong>Wireframe note:</strong>
-      (1) "View Changes" mode is fully read-only — no checkboxes, no submit bar.
-      (2) ✎ icon marks fields that were actually changed. — marks unchanged fields included for audit completeness.
-      (3) Submitted by + timestamp logged for compliance trail — TBD: is an audit log tab needed on this page?
-    </div>
-  </div>
-</div>
-
-<!-- ── Toast ──────────────────────────────────────── -->
-<div class="toast" id="toast">
-  <span class="tick">✓</span>
-  <span>Submitted to Make My CKYC. Entity marked Recon. Done.</span>
-</div>
+<!-- toast -->
+<div class="toast" id="toast">✓ &nbsp;Submitted. Entity marked Recon. Done.</div>
 
 <script>
-  /* ── Navigation ───────────────────────────────── */
-  function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+  function open(entity) {
+    const names = {
+      o2h: 'O2H Corporation Pvt. Ltd.', mehta: 'Mehta Textiles LLP',
+      priya: 'Priya Pharma & Partners', sunrise: 'Sunrise Exports Ltd.',
+      global: 'Global FinServ NBFC Ltd.'
+    };
+    const diffs = { o2h: 2, mehta: 0, priya: 1, sunrise: 3, global: 0 };
+    const d = diffs[entity] || 0;
+    document.getElementById('d-name').textContent = names[entity];
+    document.getElementById('d-banner').innerHTML = d > 0
+      ? `<strong>${d} field${d>1?'s':''} differ from vendor records.</strong> Platform data is source of truth. Pre-selected rows show the differences. Clicking <strong>Submit</strong> will push your platform values to Make My CKYC.`
+      : `<strong>No differences found.</strong> Vendor data matches platform data across all fields. You can still submit to confirm reconciliation.`;
+    document.getElementById('ov').classList.add('show');
+    document.getElementById('drawer-pending').classList.add('open');
   }
 
-  function goLanding() {
-    showPage('page-landing');
-    setBreadcrumb([{ label: 'Compliance' }, { label: 'Legal Entities CKYC', current: true }]);
+  function openDone() {
+    document.getElementById('d-name').textContent = 'Rajesh Steels Pvt. Ltd.';
+    document.getElementById('d-banner').innerHTML = `<strong>Recon. Done.</strong> 1 field was updated on Make My CKYC on 8 May 2025 by Mansi Patel (Compliance). Read-only view.`;
+    document.getElementById('ov').classList.add('show');
+    document.getElementById('drawer-pending').classList.add('open');
   }
 
-  function openDetail(entity) {
-    if (entity === 'rajesh') {
-      showPage('page-detail-done');
-      setBreadcrumb([
-        { label: 'Compliance' },
-        { label: 'Legal Entities CKYC', click: goLanding },
-        { label: 'Rajesh Steels Pvt. Ltd.', current: true }
-      ]);
-    } else {
-      // Map entity to a display name for the pending detail page
-      const names = {
-        o2h:    'O2H Corporation Pvt. Ltd.',
-        mehta:  'Mehta Textiles LLP',
-        priya:  'Priya Pharma & Partners',
-        sunrise:'Sunrise Exports Ltd.',
-        global: 'Global FinServ NBFC Ltd.'
-      };
-      document.getElementById('detail-entity-name-pending').textContent = names[entity] || entity;
-
-      const diffCounts = { o2h: 2, mehta: 0, priya: 1, sunrise: 3, global: 0 };
-      const dc = diffCounts[entity] || 0;
-      document.getElementById('diff-count').textContent = dc + (dc === 1 ? ' field' : ' fields');
-
-      // Show/hide submit bar
-      document.getElementById('submit-bar').style.display = dc > 0 ? 'flex' : 'none';
-
-      showPage('page-detail-pending');
-      setBreadcrumb([
-        { label: 'Compliance' },
-        { label: 'Legal Entities CKYC', click: goLanding },
-        { label: names[entity] || entity, current: true }
-      ]);
-    }
+  function closeDrawer() {
+    document.getElementById('ov').classList.remove('show');
+    document.getElementById('drawer-pending').classList.remove('open');
   }
 
-  /* ── Breadcrumb ───────────────────────────────── */
-  function setBreadcrumb(crumbs) {
-    const bc = document.getElementById('breadcrumb');
-    bc.innerHTML = crumbs.map((c, i) => {
-      const isLast = i === crumbs.length - 1;
-      let html = '';
-      if (i > 0) html += '<span class="sep">›</span>';
-      if (c.current) {
-        html += `<span class="crumb-current">${c.label}</span>`;
-      } else if (c.click) {
-        html += `<a class="crumb-link" onclick="${c.click.name}()">${c.label}</a>`;
-      } else {
-        html += `<span>${c.label}</span>`;
-      }
-      return html;
-    }).join('');
+  function submit() {
+    closeDrawer();
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
   }
 
-  /* ── Submit ───────────────────────────────────── */
-  function submitRecon() {
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-      goLanding();
-    }, 2200);
-  }
-
-  /* ── Filter chips ─────────────────────────────── */
-  function filterTable(status, btn) {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('#landing-table tbody tr').forEach(row => {
-      const s = row.getAttribute('data-status');
-      if (status === 'all' || !s || s === status) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
+  function filt(s, btn) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    btn.classList.add('on');
+    document.querySelectorAll('#tbl tbody tr[data-s]').forEach(r => {
+      r.style.display = (s === 'all' || r.dataset.s === s) ? '' : 'none';
     });
   }
 </script>
